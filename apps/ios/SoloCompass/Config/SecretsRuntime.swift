@@ -1,0 +1,238 @@
+import Foundation
+
+// MARK: - Runtime Key Resolution
+//
+// `GeneratedSecrets.swift` is gitignored and re-emitted on every build by
+// `scripts/generate_secrets.sh` from the repo-root `.env`.
+//
+// `SecretsRuntime.swift` is committed and provides computed properties that
+// prefer a UserDefaults-stored key (entered by the user in Settings) over the
+// build-time baked-in value. This lets open-source / TestFlight users supply
+// their own DeepSeek key without re-building.
+//
+// US-001: Resolution goes through an `APIKeyResolver` seam so unit tests can
+// inject an empty-key resolver and exercise the unconfigured-state branch
+// even on dev machines whose `.env` bakes in a real DeepSeek key.
+
+/// Resolves the effective DeepSeek API key for the current process.
+/// Production uses `DefaultAPIKeyResolver`; tests can swap in
+/// `EmptyAPIKeyResolver` (or a custom one) via `Secrets.apiKeyResolver`.
+protocol APIKeyResolver {
+    func resolveDeepSeekAPIKey() -> String
+}
+
+/// Production resolver: UserDefaults override → build-time baked key.
+struct DefaultAPIKeyResolver: APIKeyResolver {
+    func resolveDeepSeekAPIKey() -> String {
+        if let override = UserDefaults.standard.string(forKey: Secrets.RuntimeKeys.deepSeekApiKey),
+           !override.isEmpty {
+            return override
+        }
+        return Secrets.deepSeekApiKey
+    }
+}
+
+/// Test resolver: always returns an empty key so the unconfigured branch fires.
+struct EmptyAPIKeyResolver: APIKeyResolver {
+    func resolveDeepSeekAPIKey() -> String { "" }
+}
+
+extension Secrets {
+    enum RuntimeKeys {
+        static let deepSeekApiKey = "runtimeDeepSeekKey"
+        /// US-013: per-process UserDefaults override for the Foursquare key.
+        /// Lets devs / TestFlight users plug in a key without re-building.
+        static let foursquareApiKey = "runtimeFoursquareKey"
+        /// US-003: per-process UserDefaults override for the OpenWeather key.
+        /// Lets devs / TestFlight users plug in a key without re-building.
+        static let openWeatherApiKey = "runtimeOpenWeatherKey"
+        /// Per-process UserDefaults override for the Amap (AutoNavi) key.
+        /// Lets devs / TestFlight users plug in a key without re-building.
+        static let amapApiKey = "runtimeAmapKey"
+        // In-app AI provider settings (written by AIProviderSettingsView via UserPreferences).
+        // These shadow the build-time GeneratedSecrets values when non-empty.
+        static let aiApiKey = "runtimeAIApiKey"
+        static let aiBaseURL = "runtimeAIBaseURL"
+        static let aiModelName = "runtimeAIModelName"
+        static let aiProvider = "runtimeAIProvider"
+    }
+
+    /// Active resolver — swap in tests via `Secrets.apiKeyResolver = EmptyAPIKeyResolver()`
+    /// and restore to `DefaultAPIKeyResolver()` afterwards.
+    nonisolated(unsafe) static var apiKeyResolver: APIKeyResolver = DefaultAPIKeyResolver()
+
+    /// Effective AI API key. Resolution chain:
+    /// 1. In-app UserPreferences (set via AIProviderSettingsView)
+    /// 2. UserDefaults runtime override (dev/test injection)
+    /// 3. Build-time GeneratedSecrets (`.env` baked key)
+    static var resolvedDeepSeekApiKey: String {
+        let prefs = UserPreferences()
+        if !prefs.aiApiKey.isEmpty {
+            return prefs.aiApiKey
+        }
+        return apiKeyResolver.resolveDeepSeekAPIKey()
+    }
+
+    /// Effective base URL. Prefers in-app setting, falls back to
+    /// build-time `deepSeekBaseURL`, then the DeepSeek default.
+    static var resolvedDeepSeekBaseURL: String {
+        let prefs = UserPreferences()
+        if !prefs.aiBaseURL.isEmpty {
+            return prefs.aiBaseURL
+        }
+        return deepSeekBaseURL.isEmpty ? AIProvider.deepseek.defaultBaseURL : deepSeekBaseURL
+    }
+
+    /// Map legacy / empty DeepSeek model ids forward to the built-in default.
+    /// Deliberately not applied to explicit OpenAI/custom provider models —
+    /// callers gate on the selected provider before calling this.
+    static func normalizeDeepSeekModel(_ raw: String) -> String {
+        let model = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if model.isEmpty || AIProvider.legacyDeepSeekModels.contains(model) {
+            return AIProvider.deepseek.defaultModel
+        }
+        return model
+    }
+
+    /// Effective model name. Prefers in-app setting, falls back to
+    /// build-time `deepSeekModel`, then the DeepSeek default.
+    ///
+    /// Legacy migration: a stored `deepseek-chat` / `deepseek-reasoner` /
+    /// `deepseek-v4-pro` / `deepseek-v4-flash` selection on the built-in
+    /// DeepSeek provider resolves to `deepseek-flash`. If the user explicitly
+    /// selected OpenAI or a custom provider, their model id is preserved
+    /// verbatim.
+    static var resolvedDeepSeekModel: String {
+        let prefs = UserPreferences()
+        if !prefs.aiModelName.isEmpty {
+            return prefs.aiProvider == .deepseek
+                ? normalizeDeepSeekModel(prefs.aiModelName)
+                : prefs.aiModelName
+        }
+        let fallback = deepSeekModel.isEmpty ? AIProvider.deepseek.defaultModel : deepSeekModel
+        return normalizeDeepSeekModel(fallback)
+    }
+
+    /// Effective Foursquare API key: UserDefaults override → build-time baked.
+    /// Returns "" when neither is set; callers must gate on empty so they
+    /// never make a request with an absent key (US-013).
+    static var resolvedFoursquareKey: String {
+        if let override = UserDefaults.standard.string(forKey: RuntimeKeys.foursquareApiKey),
+           !override.isEmpty {
+            return override
+        }
+        return foursquareApiKey
+    }
+
+    /// Effective Amap (AutoNavi) API key: UserDefaults override → build-time baked.
+    /// Returns "" when neither is set; the China explore branch gates on empty
+    /// and degrades back to OverpassService so an absent key never crashes.
+    /// Sanitized to defend against `.env` quoted values (`AMAP_API_KEY="abc"`)
+    /// and UserDefaults paste with trailing whitespace — both pass the previous
+    /// `!isEmpty` check and silently produce 401 from Amap.
+    static var resolvedAmapKey: String {
+        if let override = UserDefaults.standard.string(forKey: RuntimeKeys.amapApiKey) {
+            let cleaned = sanitizeKey(override)
+            if !cleaned.isEmpty { return cleaned }
+        }
+        return sanitizeKey(amapApiKey)
+    }
+
+    /// Strip surrounding whitespace + matching quote pair. A literal `"abc"`
+    /// leaked from a quoted `.env` value would otherwise be sent verbatim to
+    /// the provider and rejected.
+    static func sanitizeKey(_ raw: String) -> String {
+        var s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if s.count >= 2 {
+            let first = s.first, last = s.last
+            if (first == "\"" && last == "\"") || (first == "'" && last == "'") {
+                s = String(s.dropFirst().dropLast())
+                s = s.trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+        }
+        return s
+    }
+
+    /// Effective OpenWeather API key (US-003). Resolution chain:
+    /// 1. UserDefaults runtime override (dev/test injection)
+    /// 2. Build-time baked key (`GeneratedSecrets.openWeatherApiKey`)
+    ///
+    /// Returns `nil` when no key is configured so `WeatherService` can throw
+    /// `WeatherError.noAPIKey` and degrade gracefully (NowScore falls back to
+    /// non-weather signals when weather is unavailable).
+    static var openWeatherAPIKey: String? {
+        if let override = UserDefaults.standard.string(forKey: RuntimeKeys.openWeatherApiKey),
+           !override.isEmpty {
+            return override
+        }
+        return openWeatherApiKey.isEmpty ? nil : openWeatherApiKey
+    }
+
+    // MARK: - Supabase config
+
+    /// Resolved Supabase config tuple (url, anonKey). Resolution chain:
+    /// 1. Env vars `SUPABASE_URL` + `SUPABASE_ANON_KEY`/`SUPABASE_KEY`
+    /// 2. Bundled `Secrets.plist` with the same keys
+    /// 3. Build-time `Secrets.supabaseURL` / `Secrets.supabaseAnonKey`
+    ///    (from `.env` via `scripts/generate_secrets.sh`)
+    ///
+    /// Returns nil when neither URL nor key resolves to non-empty values.
+    /// Collapses the five copies of `readSecretsString` / `plistValue` /
+    /// `plistRealtimeValue` / `secretsPlistValue` that used to live in
+    /// SupabaseClient, ChatService, ChatAttachmentService, FriendService,
+    /// and CompanionService.
+    static func resolvedSupabaseConfig() -> (url: URL, anonKey: String)? {
+        let envURL = ProcessInfo.processInfo.environment["SUPABASE_URL"]
+        let envKey = ProcessInfo.processInfo.environment["SUPABASE_ANON_KEY"]
+            ?? ProcessInfo.processInfo.environment["SUPABASE_KEY"]
+
+        let urlStr = envURL
+            ?? secretsPlistString("SUPABASE_URL")
+            ?? (supabaseURL.isEmpty ? nil : supabaseURL)
+        let key = envKey
+            ?? secretsPlistString("SUPABASE_ANON_KEY")
+            ?? secretsPlistString("SUPABASE_KEY")
+            ?? (supabaseAnonKey.isEmpty ? nil : supabaseAnonKey)
+
+        guard let urlStr,
+              let url = URL(string: urlStr),
+              let key,
+              !key.isEmpty else {
+            return nil
+        }
+        return (url, key)
+    }
+
+    /// Root URL for the authenticated Roamorrow web API (for example,
+    /// `https://roamorrow.com`). Resolution chain mirrors Supabase config:
+    /// process env → bundled Secrets.plist → build-time generated value.
+    /// There is intentionally no localhost or public-service fallback.
+    static func resolvedAPIBaseURL() -> URL? {
+        let raw = ProcessInfo.processInfo.environment["SOLO_API_BASE_URL"]
+            ?? secretsPlistString("SOLO_API_BASE_URL")
+            ?? (apiBaseURL.isEmpty ? nil : apiBaseURL)
+        guard let raw else { return nil }
+        let cleaned = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleaned.isEmpty else { return nil }
+        return URL(string: cleaned)
+    }
+
+    /// Separate HTTPS origin for account tools; no implicit public or localhost fallback.
+    static func resolvedHarnessBaseURL() -> URL? {
+        let raw = ProcessInfo.processInfo.environment["SOLO_HARNESS_BASE_URL"]
+            ?? secretsPlistString("SOLO_HARNESS_BASE_URL")
+            ?? (harnessBaseURL.isEmpty ? nil : harnessBaseURL)
+        return raw.flatMap(TravelerHarnessClient.validatedOrigin)
+    }
+
+    /// Single bundled-plist string reader used by `resolvedSupabaseConfig()`.
+    /// Kept private so callers always go through a typed surface like
+    /// `resolvedSupabaseConfig()` rather than reading raw keys ad-hoc.
+    private static func secretsPlistString(_ key: String) -> String? {
+        guard let url = Bundle.main.url(forResource: "Secrets", withExtension: "plist"),
+              let data = try? Data(contentsOf: url),
+              let plist = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
+        else { return nil }
+        return plist[key] as? String
+    }
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>FF_BACKEND_SYNC</key>
+    <false/>
+    <key>FF_ROUTE_AI_THROUGH_EDGE</key>
+    <false/>
+    <key>FF_FORCE_REVIEW_PROMPT</key>
+    <false/>
+    <key>FF_PRO_MULTI_RING_EXPLORE</key>
+    <false/>
+    <key>FF_DEEP_DIVE_ENRICHMENT</key>
+    <true/>
+    <key>FF_WEB_SEARCH_ENRICHMENT</key>
+    <false/>
+    <key>FF_COMPANION</key>
+    <false/>
+    <key>FF_COMPANION_LAYER_ENABLED</key>
+    <false/>
+</dict>
+</plist>

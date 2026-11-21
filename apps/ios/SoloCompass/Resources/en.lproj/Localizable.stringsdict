@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>favorites.count</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@count@</string>
+        <key>count</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>%d saved</string>
+            <key>other</key>
+            <string>%d saved</string>
+        </dict>
+    </dict>
+    <key>nowscore.sunset.before_min</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@min@</string>
+        <key>min</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>Sunset in %d min</string>
+            <key>other</key>
+            <string>Sunset in %d min</string>
+        </dict>
+    </dict>
+    <key>nowscore.sunset.blue_hour</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@min@ · blue hour</string>
+        <key>min</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>%d min after sunset</string>
+            <key>other</key>
+            <string>%d min after sunset</string>
+        </dict>
+    </dict>
+    <key>nowscore.sunset.after_min</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@min@</string>
+        <key>min</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>one</key>
+            <string>Sunset was %d min ago</string>
+            <key>other</key>
+            <string>Sunset was %d min ago</string>
+        </dict>
+    </dict>
+</dict>
+</plist>

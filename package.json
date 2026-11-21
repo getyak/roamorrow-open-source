@@ -1,0 +1,44 @@
+{
+  "name": "roamorrow",
+  "version": "0.0.1",
+  "private": true,
+  "description": "A personal companion for solo travel and life on the move",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/getyak/roamorrow-open-source.git"
+  },
+  "license": "MIT",
+  "packageManager": "pnpm@11.24.0+sha512.bd27e345e976dcb0be0b7a1228217b049a817e21b1f355c90dbe7dc46671895a8bc1e6d06c24554505ea93ea0b45f489a27ec1bfbc8de6a9659fca0f16fa0000",
+  "engines": {
+    "node": ">=22.13.0",
+    "pnpm": ">=11.24.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test && node --experimental-strip-types --test scripts/tests/city-brief-contract.test.mjs scripts/tests/compiler-compatibility.test.cjs",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\"",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @solo-compass/db db:migrate",
+    "seed:chiang-mai": "tsx scripts/seed-load.ts",
+    "seed:city-brief": "tsx scripts/seed-city-brief.ts",
+    "data:worker": "pnpm --filter @solo-compass/worker start -- --once",
+    "parity:check": "tsx scripts/check-swift-parity.ts",
+    "localization:check": "tsx scripts/check-localization.ts",
+    "security:patch-check": "node --test scripts/security/*.test.cjs"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "glob": "14.0.6",
+    "prettier": "3.10.1",
+    "ts-morph": "^28.0.0",
+    "tsx": "^4.23.15",
+    "turbo": "^2.11.11",
+    "typescript": "^7.0.2"
+  }
+}

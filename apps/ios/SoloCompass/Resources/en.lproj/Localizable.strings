@@ -1,0 +1,3758 @@
+/* Categories */
+"category.culture" = "Culture";
+"category.nature" = "Nature";
+"category.food" = "Food";
+"category.coffee" = "Coffee";
+"category.work" = "Work";
+"category.wellness" = "Wellness";
+"category.nightlife" = "Nightlife";
+"category.hidden" = "Hidden";
+
+/* Filters */
+"filter.now" = "Now";
+"filter.all" = "All";
+"filter.saved" = "Saved";
+"filter.saved.a11y" = "Saved, %d favourited experiences";
+"filter.solo.agent" = "Ask";
+"filter.solo.agent.a11y" = "Ask Roamorrow for a nearby suggestion";
+"filter.solo.agent.seed" = "What's worth doing near me right now?";
+"filter.taste.rank" = "My taste";
+"filter.taste.rank.a11y" = "Sort results by your taste profile";
+"filter.pill.clear.hint" = "Double tap to clear this filter";
+"filter.now.a11y" = "Now, %d experiences at their best";
+"filter.matches.one" = "%d match";
+"filter.matches.other" = "%d matches";
+"filter.matches.none" = "No matches";
+"filter.clear" = "Clear filter";
+"filter.now.empty.idle" = "Nothing's at its best now";
+"filter.now.empty.upcoming" = "%@ in %dm";
+"filter.now.empty.a11y" = "Nothing's at its best now. %@ starts in %d minutes. Tap to jump there.";
+"filter.now.empty.title" = "Quiet hours right now";
+"filter.now.empty.later.subtitle" = "Nothing's at its best this hour — here's the next worthwhile window.";
+"filter.now.empty.done.subtitle" = "Best times pick back up tomorrow. Until then, the map's still yours to wander.";
+"filter.now.empty.nextBest" = "Next best";
+"filter.now.empty.nextBest.a11y" = "Next best: %1$@, %2$@. Tap to view.";
+"filter.now.empty.browseAll" = "Browse all nearby";
+"filter.now.empty.opensIn.minutes" = "in %dm";
+"filter.now.empty.opensIn.hours" = "in ~%dh";
+"filter.a11y.resultsAnnounce" = "%1$@: %2$d found";
+"filter.a11y.noResultsAnnounce" = "%@: nothing matches";
+
+/* Health */
+"health.healthy" = "Fresh — multiply verified";
+"health.fading" = "Fading — fewer recent signals";
+"health.questioned" = "Questioned — treat with skepticism";
+"health.mayBeGone" = "May be gone — no recent signals";
+
+/* Confidence */
+"confidence.signals" = "signals";
+"confidence.aiEstimate" = "AI estimate · unverified";
+"confidence.aiScrape" = "AI scrape age";
+"confidence.gps" = "GPS hits (30d)";
+"confidence.reports" = "User reports (30d)";
+"confidence.trusted" = "Trusted verifications";
+"confidence.lastVerified" = "Verified %@";
+"confidence.a11y.label" = "%@, level %d, %d signals";
+"confidence.a11y.hint" = "Double tap to see trust signals";
+"confidence.strongest" = "Mainly backed by %@";
+"confidence.strength.strong" = "strong";
+"confidence.strength.medium" = "medium";
+"confidence.strength.weak" = "weak";
+
+/* Solo Score */
+"solo.label" = "Solo";
+"solo.scoreTitle" = "Solo Score";
+"solo.seating" = "Seating";
+"solo.patrons" = "Solo Patrons";
+"solo.staff" = "Staff";
+"solo.portioning" = "Portioning";
+"solo.ambiance" = "Ambiance";
+"solo.safety" = "Safety";
+"solo.seating.desc" = "Counter seats, bar stools, or small tables a solo diner can claim without awkwardness.";
+"solo.staff.desc" = "Staff leave you alone — no hovering, no 'is anyone joining you?', no rushed service.";
+"solo.patrons.desc" = "How many other people here are also solo — the higher, the more normal it feels.";
+"solo.ambiance.desc" = "The vibe works for one: not couple-only, not a group party, not a place that feels lonely to enter alone.";
+"solo.safety.desc" = "It's safe to be here by yourself at the time of day most travelers visit.";
+"solo.portioning.desc" = "You can order a full, satisfying meal without a sharing menu or a minimum spend for two.";
+"solo.axis.tap.hint" = "Tap for a plain-language explanation of this dimension";
+"solo.basedOn" = "Based on %d solo travelers";
+"solo.radar.a11y" = "Solo Score radar";
+"solo.radar.replayHint" = "Tap to replay the draw-in animation";
+"solo.radar.replay.hint" = "Tap to replay";
+"solo.radar.replay.a11y" = "Replay score animation";
+"solo.radar.weakest" = "Weakest: %@ — expect it to be a tradeoff";
+"solo.radar.weakest.a11y" = "Note: %@ is the weakest dimension — expect it to be a tradeoff.";
+"solo.radar.strongest" = "Great for solo %@";
+"solo.radar.strongest.a11y" = "Great for solo %@.";
+"solo.radar.axis.dimension" = "Dimension";
+"solo.basedOn.early" = "Based on %d early reports";
+"solo.estimate.pill" = "AI estimate";
+"solo.section.estimate" = "Solo Score (AI estimate)";
+"solo.section.early" = "Solo Score (early)";
+"solo.breakdown.toggle" = "Per-dimension scores";
+"solo.breakdown.expand.hint" = "Expands or collapses the six-dimension score breakdown";
+"solo.breakdown.expanded" = "expanded";
+"solo.breakdown.collapsed" = "collapsed";
+
+/* Best times timeline */
+"timeline.now.good" = "Right now is a great time.";
+"timeline.now.off" = "Right now is not the ideal time.";
+"timeline.a11y" = "Best between %@. %@";
+"timeline.now.tick" = "now";
+"bestTimes.now.pill" = "Good time now";
+"bestTimes.now.pill.left" = "Good now · %d min left";
+"bestTimes.now.pill.left.a11y" = "Good time now, %d minutes left in this window";
+"bestTimes.now.pill.closing" = "Suggested window ends in %d minutes";
+"bestTimes.now.pill.closing.a11y" = "Suggested visit window ends in %d minutes";
+"bestTimes.next.pill" = "Better at %@";
+"bestTimes.window.active.a11y" = "happening now";
+"bestTimes.pill.scrollHint" = "Scrolls to the time-of-day timeline";
+
+/* Inconvenience categories */
+"inconvenience.category.scam" = "Scam risk";
+"inconvenience.category.crowds" = "Crowds";
+"inconvenience.category.logistics" = "Logistics";
+"inconvenience.category.weather" = "Weather";
+"inconvenience.category.etiquette" = "Etiquette";
+"inconvenience.category.safety" = "Safety concern";
+"inconvenience.category.other" = "Note";
+/* Accessibility label for each inconvenience row: "Heads up: <category> — <text>" */
+"inconvenience.a11y.prefix" = "Heads up: %@ — %@";
+/* Inconvenience pill on floating card: visible count label */
+"inconvenience.card.count" = "%d";
+/* VoiceOver suffix appended to the card's accessibilityLabel when inconveniences exist */
+"inconvenience.card.a11y" = "Heads up: %d things to know";
+/* VoiceOver label for the inconvenience pill itself — arg 1: count, arg 2: category label */
+/* High severity (safety / scam): "Important: 2 safety concerns to know before you go" */
+"inconvenience.card.count.a11y.high" = "Important: %1$d %2$@ to know before you go";
+/* Normal severity: "1 crowds heads-up" */
+"inconvenience.card.count.a11y.normal" = "%1$d %2$@ heads-up";
+
+/* Sections */
+"section.whyItMatters" = "Why it matters";
+"section.bestTimes" = "Best times";
+"section.howTo" = "How to";
+"section.inconveniences" = "Real inconveniences";
+"section.soloScore" = "Solo Score";
+"section.sources" = "Sources";
+"section.nearby" = "Nearby experiences";
+"detail.nearby.open.a11y" = "%@, Solo Score %@";
+"detail.nearby.open.hint" = "Opens experience detail";
+"section.duration" = "Typical: %d–%d minutes";
+
+/* Celebration */
+"celebration.complete.a11y" = "Experience completed";
+"celebration.milestone.first" = "Your 1st experience!";
+"celebration.milestone.count" = "%d explored";
+
+/* Actions */
+"action.markDone" = "Mark done";
+"action.completed" = "Completed";
+
+/* Experience */
+"experience.bestNow" = "Best now";
+/* US-007: fallback reason subtitle beneath the best-now badge when NowScore has no explanation */
+"badge.now.fallback" = "Now";
+"experience.bestNow.countdown" = "Best now · %dm left";
+"experience.bestNow.countdown.a11y" = "Best now, %d minutes left";
+"experience.bestNow.closingSoon" = "Best time · %d minutes left";
+"experience.bestNow.closingSoon.a11y" = "Suggested visit window ends in %d minutes";
+"experience.viewDetails" = "View details →";
+"experience.bestTime.hint" = "Best %@";
+"experience.bestTime.hint.a11y" = "Best %@";
+"experience.bestTime.opensIn" = "opens in %dm";
+"experience.bestTime.opensIn.a11y" = "Opens in %d minutes";
+"experience.bestTime.tomorrow" = "tomorrow";
+"experience.bestTime.tomorrow.a11y" = "Next opens tomorrow";
+
+/* Bottom info */
+"info.morning" = "Good morning. %d coffee spots nearby are at their best right now.";
+"info.afternoon" = "The light shifts in the next hour. %d experiences nearby.";
+"info.evening" = "Sunset soon. %d perfect viewing spots within walking distance.";
+"info.night" = "The night is winding down. %d places still open.";
+
+/* Voice */
+"voice.processing" = "Thinking: %@";
+"voice.button" = "Voice input";
+"voice.button.hint" = "Hold to speak, release to send, slide up to cancel. Or double tap to start and stop.";
+"voice.button.value.recording" = "Recording";
+"voice.button.value.idle" = "Idle";
+"voice.a11y.toggle" = "Start/Stop voice input";
+"voice.announcement.listening" = "Listening…";
+"voice.announcement.stopped" = "Recording stopped";
+"voice.recording.timer.a11y" = "Recording — %d seconds elapsed";
+"voice.result.found" = "Found %d matching places";
+"voice.result.filtered" = "Showing %@ nearby";
+"voice.result.none" = "No matching places nearby — try a different search";
+"voice.permission.title" = "Microphone access needed";
+"voice.permission.message" = "Roamorrow needs microphone and speech permission to take voice input.";
+
+/* AI */
+"ai.explanation.loading" = "Loading insight…";
+"ai.explanation.title" = "AI Insight";
+"ai.error.missingKey" = "AI features are not configured.";
+"ai.error.request" = "Roamorrow couldn't think that through just now — give it another try in a moment.";
+"amap.error.missingKey" = "Amap key not configured; using global data source.";
+"amap.error.request" = "Couldn't reach the map just now — try again in a moment.";
+"amap.error.api" = "Amap API error %@: %@";
+"ai.fallback.explanation" = "Recommended for solo travelers based on quiet seating, low staff pressure, and a strong local signal.";
+"ai.fallback.voice" = "Showing solo-friendly experiences nearby.";
+"ai.skeleton.pill" = "Gathering details…";
+"ai.skeleton.pill.a11y" = "Roamorrow is still gathering details for this place. Full insight loads when sources arrive.";
+"card.source.verified" = "verified";
+"card.source.multi" = "multi-source";
+"card.source.single" = "1 source";
+
+/* Common */
+"common.ok" = "OK";
+"common.cancel" = "Cancel";
+"common.close" = "Close";
+
+/* Add Experience (long-press flow) */
+"addExperience.confirm.title" = "Add a place here?";
+"addExperience.confirm.message" = "Fill in a few details, or describe it with your voice.";
+"addExperience.confirm.add" = "Add";
+"addExperience.record.title" = "Tell us about this place";
+"addExperience.record.hint" = "Hold the mic and describe what makes it worth a solo visit.";
+
+/* User-created place form (long-press → form) */
+"userLocation.create.title" = "Add a place";
+"userLocation.form.save" = "Save";
+"userLocation.form.name.label" = "Name";
+"userLocation.form.name.placeholder" = "e.g. Wat Suan Dok";
+"userLocation.form.nameLocal.placeholder" = "In the local script, e.g. วัดสวนดอก";
+"userLocation.form.oneLiner.placeholder" = "e.g. Quiet garden café behind the temple";
+"userLocation.form.category.label" = "Category";
+"userLocation.form.notes.label" = "Notes";
+"userLocation.form.notes.placeholder" = "What's it like to be here alone?";
+"userLocation.form.photo.label" = "Photos";
+"userLocation.form.photo.library" = "Choose from library";
+"userLocation.form.photo.camera" = "Take a photo";
+"userLocation.form.useVoice" = "Describe with voice instead";
+"userLocation.form.unverifiedNote" = "Your place is added as unverified. It won't get a Solo Score until it's reviewed.";
+
+/* Marker accessibility */
+"marker.a11y.bestNow" = "best right now";
+"marker.a11y.closingSoon" = "Best now, suggested visit window ending";
+"marker.a11y.completed" = "completed";
+"marker.a11y.favorited" = "favorited";
+"marker.a11y.upcoming" = "starts in %d minutes";
+"marker.a11y.footprinted" = "recently visited by solo travelers";
+"marker.a11y.lowConfidence" = "AI-suggested, unverified";
+
+/* Bottom info accessibility */
+"info.nearbySolo.a11y" = "%d solo travelers passed nearby today";
+
+/* Early estimate badge — shown in breakdown popover when basedOnCount is 1–3 */
+"solo.earlyEstimate" = "Early estimate";
+"solo.earlyEstimate.a11y" = "Early estimate, based on few solo travelers — score may shift";
+
+/* Solo score accessibility */
+"solo.a11y" = "Solo Score %@ of 10";
+"solo.excellent.a11y" = "Excellent for solo travelers";
+"solo.caution.a11y" = "may feel exposed for solo travelers";
+"solo.compact.a11y.hint" = "Double tap to see score breakdown";
+
+/* Solo Score breakdown popover */
+"solo.breakdown.title" = "Solo Score";
+"solo.dim.seating" = "Seating Friendly";
+"solo.dim.ratio" = "Solo Patron Ratio";
+"solo.dim.pressure" = "Staff Pressure";
+"solo.dim.portioning" = "Solo Portioning";
+"solo.dim.ambiance" = "Ambiance Fit";
+"solo.dim.safety" = "Safety";
+"solo.weakest" = "Watch: %@";
+"solo.weakest.a11y" = "Watch out: %@ is the weakest dimension for this place.";
+"solo.strongest" = "Great for: %@";
+"solo.strongest.a11y" = "Strongest dimension: %@";
+"solo.safety.caution" = "Lower safety signal for solo visits";
+"solo.safety.caution.a11y" = "Safety caution: lower safety signal for solo visits";
+
+/* Empty filter banner (below FilterBarView) */
+"filter.empty.title" = "No matches";
+"filter.empty.message" = "Nothing matches \"%@\" in this area.";
+"filter.empty.showAll" = "Show all";
+"filter.empty.title.a11y" = "No matches for %@";
+"filter.empty.message.a11y" = "Nothing matches the active filter in this area. Double tap Show all to reset.";
+"filter.empty.showAll.a11y" = "Show all experiences";
+
+"map.recenter" = "Recenter on my location";
+"map.userLocation.label" = "Your location";
+
+/* US-007: Personal hub (MeSheet) + map avatar entry */
+"me.title" = "Me";
+"me.friends" = "Friends";
+"me.messages" = "Messages";
+"me.companion" = "Companion";
+"me.settings" = "Settings";
+"me.admin.section" = "Moderation";
+"me.moderation" = "Report queue";
+
+/* Moderation queue (admin / moderator) */
+"moderation.title" = "Moderation";
+"moderation.empty.title" = "All clear";
+"moderation.empty.message" = "No safety reports to review.";
+"moderation.section.open" = "Open";
+"moderation.section.resolved" = "Resolved";
+"moderation.action.ban" = "Ban";
+"moderation.action.resolve" = "Resolve";
+"moderation.row.target" = "Reported: %@";
+"moderation.reason.spam" = "Spam";
+"moderation.reason.harassment" = "Harassment";
+"moderation.reason.inappropriate" = "Inappropriate content";
+"moderation.reason.fakeProfile" = "Fake profile";
+"moderation.reason.other" = "Other";
+"me.profile.name" = "Solo Traveler";
+"me.profile.subtitle" = "Confidence in every solo moment";
+"me.friends.incoming" = "Friend Requests";
+"me.friends.list" = "Friends";
+"me.friends.empty" = "No friends yet";
+"me.friends.empty.title" = "No friends yet";
+"me.friends.empty.description" = "Add a fellow traveler by sharing your friend code or scanning theirs.";
+"me.friends.empty.cta" = "Add a friend";
+"me.avatar.a11y" = "Open your personal hub";
+"me.avatar.a11y.pending" = "You have pending friend requests";
+"me.stats.saved" = "Saved";
+"me.stats.explored" = "Explored";
+"me.profile.progress.a11y" = "%d of %d saved places explored";
+"me.empty.title" = "Your solo map awaits";
+"me.empty.subtitle" = "Save places that feel right for one, then see how your confidence grows.";
+"me.empty.cta" = "Explore the map";
+
+/* Map empty / loading */
+"map.empty.title" = "Quiet patch of map.";
+"map.empty.hint" = "Pan to a busier corner, or clear filters.";
+"map.empty.radius" = "Showing within %.0f km — try a wider radius.";
+"map.empty.expand" = "Expand to 25km";
+"map.empty.browse" = "Browse %@";
+"map.empty.clearFilters" = "Clear filters";
+"map.filtered.empty.title" = "Nothing matches this filter";
+"map.filtered.empty.subtitle" = "No experiences match \"%@\" in this area.";
+
+/* Map empty-state stage machine (US-012). Three distinct labels — no shared "no results" string. */
+"map.empty.stage.tryExpand" = "Expand to 25 km";
+"map.empty.stage.tryExplore" = "Explore farther";
+"map.empty.stage.browseCity" = "Browse %@";
+"map.loading" = "Loading map";
+"map.loadingPOIs" = "Finding nearby places…";
+"map.loadingPOIs.a11yAnnouncement" = "Finding nearby places";
+/* Shown after ~6 s when the Overpass fetch is still running — reassures the user the app is not stuck */
+"map.loadingPOIs.slow" = "Still searching nearby…";
+/* Shown for ~1.2 s after the Overpass fetch completes — %d = number of POIs found */
+"map.loadingPOIs.done" = "%d places nearby";
+
+/* City picker */
+"city.all" = "All Cities";
+"city.nearby" = "Nearby";
+"city.picker.title" = "Choose a city";
+"city.experienceCount" = "%d experiences";
+"city.empty.title" = "No cities yet";
+"city.empty.hint" = "Cities appear here as you explore the map.";
+"city.search.prompt" = "Search cities";
+
+/* Action bar */
+"action.favorite" = "Add to favorites";
+"action.unfavorite" = "Remove from favorites";
+"action.directions" = "Directions";
+"action.close" = "Close";
+
+/* Dismiss */
+"common.dismiss" = "Dismiss";
+
+/* AI processing indicator */
+"ai.processing" = "AI is thinking…";
+
+/* Map candidate marker accessibility */
+"map.candidate.label" = "Candidate experience: %@";
+"map.cluster.label" = "%d experiences in this area";
+
+/* Experience card accessibility */
+"experience.card.hint" = "Double tap to view details";
+"experience.card.preview.a11y" = "Show quick preview";
+
+/* Long-press context menu on a place card */
+"menu.viewDetails" = "View details";
+"menu.showOnMap" = "Show on map";
+"menu.askSolo" = "Ask";
+"menu.favorite" = "Save";
+"menu.unfavorite" = "Remove from saved";
+"menu.navigate" = "Directions";
+"card.favorite.add" = "Add to favorites";
+"card.favorite.remove" = "Remove from favorites";
+"card.favorite.added.a11y" = "Saved to favorites";
+"card.favorite.removed.a11y" = "Removed from favorites";
+"card.dismiss" = "Dismiss card";
+
+/* Experience card distance pill */
+"card.distance.walk" = "~%d min walk";
+"card.distance.walkSub1" = "<1 min walk";
+"card.distance.arrived" = "You're here";
+"card.distance.arrived.a11y" = "You're here";
+"card.distance.bearing.a11y" = "toward the %@";
+
+/* ETA pill shown while walking toward an experience (<1500 m, not yet arrived) */
+"card.eta" = "arriving ~%@";
+"card.eta.a11y" = "Estimated arrival at %@";
+
+/* Proximity cue appended to bearing arrow a11y label when user is ≤300 m away */
+"card.distance.proximity.near" = "getting close";
+
+/* VoiceOver announcement posted once when the user enters the near proximity band (≤300 m) */
+"card.proximity.closer" = "Getting closer";
+
+/* On-course cue appended to bearing arrow a11y label when user faces the experience within ±15° */
+"card.distance.onCourse.a11y" = "On course";
+
+/* Recenter hint on distance/bearing pill button */
+"card.distance.recenter.hint" = "Double tap to center the map here";
+
+/* Compass directions (8 sectors) for bearing arrow accessibility */
+"compass.N" = "north";
+"compass.NE" = "northeast";
+"compass.E" = "east";
+"compass.SE" = "southeast";
+"compass.S" = "south";
+"compass.SW" = "southwest";
+"compass.W" = "west";
+"compass.NW" = "northwest";
+
+/* Voice recording auto-stop at 60s system limit */
+"voice.recording.maxReached" = "Maximum length reached";
+"voice.recording.maxReached.a11y" = "Maximum recording length reached — transcript saved";
+/* Countdown pill shown in the final 10 s of a recording (%d = seconds remaining) */
+"voice.recording.secondsLeft" = "%ds left";
+/* Empty-release hints shown above the button when no speech was captured */
+"voice.recording.empty" = "Didn't catch that — hold to speak";
+"voice.recording.tooShort" = "Hold the mic to speak";
+"voice.recording.cancelled" = "Cancelled — slid up to discard";
+"voice.recording.slideToCancel" = "Slide up to cancel";
+"voice.recording.releaseToCancel" = "Release to cancel";
+
+/* Voice recognition error alert */
+"voice.error.title" = "Voice recognition error";
+"voice.error.permission" = "Microphone or speech recognition permission was denied. Please allow access in Settings.";
+"voice.error.unavailable" = "Speech recognition is unavailable on this device.";
+"voice.interrupted" = "Voice recording was interrupted: %@";
+
+/* Journey progress card */
+"journey.progress.title" = "Experiences completed";
+"journey.progress.count" = "%d / %d";
+"journey.caption.start" = "Every journey starts with a single step.";
+"journey.caption.rolling" = "You're on a roll — keep exploring!";
+"journey.caption.seasoned" = "A seasoned solo traveler. Impressive.";
+"journey.milestone.reached" = "Milestone reached!";
+"journey.milestone.almost" = "Almost there!";
+"journey.progress.milestone.a11y" = "Completed %d of %d experiences. Milestone reached!";
+"journey.progress.a11y" = "Completed %d of %d experiences";
+
+/* Journey category breakdown bar */
+/* Single item in the VoiceOver summary, e.g. "3 coffee" — arg 1 is count, arg 2 is category name */
+"journey.breakdown.a11y.item" = "%1$d %2$@";
+/* Full VoiceOver label for the breakdown bar, arg is a comma-joined list of items */
+"journey.breakdown.a11y.label" = "Category breakdown: %@";
+
+/* Settings */
+"settings.title" = "Preferences";
+"settings.done" = "Done";
+"settings.travelStyle" = "Travel Style";
+"settings.travelStyle.footer" = "Your style shapes which experiences float to the top.";
+"settings.preferences" = "Category Preferences";
+"settings.preferences.footer" = "Tap to love a category. Swipe left to hide it.";
+"settings.hidden" = "Hidden Categories";
+"settings.hide" = "Hide";
+"settings.maxDistance" = "Max Distance";
+"settings.distance" = "Discovery Radius";
+"settings.distance.footer" = "Only experiences within this radius appear on the map.";
+"settings.filterBar" = "Filter bar";
+"settings.filter.visible_categories" = "Visible categories";
+"settings.filter.visible_categories.footer" = "Choose which category pills appear on the map's filter bar. Hidden categories still show on the map.";
+"settings.filter.custom_tags" = "Custom tags";
+"settings.filter.custom_tags.footer" = "Free-form labels you can attach to experiences. They appear as pills on the map's filter bar.";
+"settings.filter.custom_tags.add_placeholder" = "New tag";
+"settings.filter.custom_tags.add" = "Add";
+"settings.filter.custom_tags.empty_error" = "Tag cannot be empty.";
+"settings.filter.custom_tags.duplicate_error" = "Tag already exists.";
+"settings.filter.custom_tags.empty_state" = "No custom tags yet. Add one above.";
+"settings.completed" = "Completed";
+"settings.favorites" = "Favorites";
+"settings.stats" = "Your Journey";
+
+/* Travel styles */
+"style.explorer.title" = "Explorer";
+"style.explorer.description" = "I wander and discover — surprise me";
+"style.worker.title" = "Remote Worker";
+"style.worker.description" = "I need quiet spots with good WiFi";
+"style.foodie.title" = "Foodie";
+"style.foodie.description" = "Great meals and coffee are my priority";
+"style.cultureSeeker.title" = "Culture Seeker";
+"style.cultureSeeker.description" = "History, temples, ceremonies, hidden layers";
+
+/* MicroSurvey */
+"survey.title" = "Quick check-in";
+"survey.comfort.question" = "How comfortable did you feel as a solo traveler?";
+"survey.comfort.1" = "Very uncomfortable";
+"survey.comfort.2" = "Slightly uncomfortable";
+"survey.comfort.3" = "Neutral";
+"survey.comfort.4" = "Comfortable";
+"survey.comfort.5" = "Very comfortable";
+"survey.pressure.question" = "How pushy was the staff / vendors? (more stars = less pressure)";
+"survey.pressure.1" = "Very pushy";
+"survey.pressure.2" = "Somewhat pushy";
+"survey.pressure.3" = "Neutral";
+"survey.pressure.4" = "Relaxed vibe";
+"survey.pressure.5" = "No pressure at all";
+"survey.recommend.question" = "Would you recommend this to another solo traveler?";
+"survey.recommend.yes" = "Yes";
+"survey.recommend.depends" = "Depends";
+"survey.recommend.no" = "No";
+"survey.submit" = "Send feedback";
+"survey.skip" = "Skip";
+"survey.stars" = "stars";
+
+/* ReportIssue */
+"report.title" = "Report an Issue";
+"report.cancel" = "Cancel";
+"report.submit" = "Save report";
+"report.reason.header" = "What's wrong?";
+"report.detail.header" = "Additional details (optional)";
+"report.detail.placeholder" = "Add more context… (200 chars max)";
+"report.reason.closed_permanently" = "Permanently closed";
+"report.reason.moved" = "It has moved";
+"report.reason.hours_wrong" = "Hours are wrong";
+"report.reason.vibe_different" = "Vibe is very different";
+"report.reason.factually_wrong" = "Factually incorrect";
+"report.reason.other" = "Something else";
+"report.reason.hint" = "Selects this reason and reveals an optional details field.";
+
+/* Pending check-in banner */
+"checkin.banner.title" = "Did you visit?";
+"checkin.banner.yes" = "Yes!";
+"checkin.banner.confirmed.a11y" = "Visit confirmed";
+"checkin.banner.a11y" = "Did you visit %@?";
+"checkin.banner.a11yAnnouncement" = "You just passed %@ — did you visit?";
+
+/* Experience detail overflow */
+"detail.report" = "Report an issue";
+"detail.more" = "More options";
+"detail.source.openHint" = "Opens the original source";
+
+/* US-004: Ask Solo about this experience (Pro chat) */
+"experience.askSolo.cta" = "Ask about this";
+
+/* Onboarding */
+"onboarding.welcome.title" = "Roamorrow";
+"onboarding.welcome.subtitle" = "Find your way. Feel at home.";
+"onboarding.welcome.cta" = "Find me on the map";
+"onboarding.welcome.skip" = "Browse first";
+"onboarding.style.title" = "How do you travel?";
+"onboarding.style.subtitle" = "This shapes which experiences float to the top. You can change it anytime.";
+"onboarding.concepts.title" = "Not just places.";
+"onboarding.concepts.subtitle" = "Every pin is an Experience — a specific thing worth doing, at the right time.";
+"onboarding.concepts.item1.title" = "Time-aware";
+"onboarding.concepts.item1.desc" = "Each experience has best hours — sunrise spots, lunch crowds, golden-hour cafés.";
+"onboarding.concepts.item2.title" = "Solo-first";
+"onboarding.concepts.item2.desc" = "Curated for one. Counter seats, quiet trails, places where solo feels natural.";
+"onboarding.concepts.cta" = "Got it";
+"onboarding.scoring.title" = "Smart ranking.";
+"onboarding.scoring.subtitle" = "We surface the best experiences for right now, using two signals.";
+"onboarding.scoring.item1.title" = "Solo Score";
+"onboarding.scoring.item1.desc" = "A 1–10 rating of how solo-friendly a spot is — seating, vibe, safety, all considered.";
+"onboarding.scoring.item2.title" = "Now filter";
+"onboarding.scoring.item2.desc" = "Tap \"Now\" to see only what's great at this hour — open, uncrowded, at its best.";
+"onboarding.scoring.cta" = "Makes sense";
+"onboarding.style.cta" = "Start exploring";
+"onboarding.style.skip" = "Decide later";
+
+/* Onboarding cohort step (Nomad OS B1-e) — city-change frequency */
+"onboarding.cohort.title" = "How often do you move?";
+"onboarding.cohort.subtitle" = "Roughly how many cities you settle into in a year. It tunes your visa and day-count reminders.";
+"onboarding.cohort.cta" = "That's me";
+"onboarding.cohort.skip" = "Skip for now";
+"onboarding.cohort.settled.title" = "Home base";
+"onboarding.cohort.settled.desc" = "1–2 cities a year";
+"onboarding.cohort.slow.title" = "Slow travel";
+"onboarding.cohort.slow.desc" = "3–5 cities a year";
+"onboarding.cohort.active.title" = "Active nomad";
+"onboarding.cohort.active.desc" = "6–11 cities a year";
+"onboarding.cohort.frequent.title" = "Always moving";
+"onboarding.cohort.frequent.desc" = "12+ cities a year";
+"onboarding.cohort.unset.title" = "Not set";
+
+"onboarding.skip" = "Skip";
+
+/* Favorites list */
+"favorites.title" = "Favorites";
+"favorites.empty.title" = "No favorites yet";
+"favorites.empty.hint" = "Tap the heart on any experience to save it here.";
+"favorites.empty.cta" = "Explore the map";
+"favorites.empty.tip1" = "Tap the heart on any experience to save it here.";
+"favorites.empty.tip2" = "Saved spots show a green dot when they're walkable right now.";
+"favorites.empty.tip3" = "Favorites sort by what's good to do at this hour.";
+"favorites.empty.tip4" = "Swipe left on a saved spot to remove it — tap Undo to bring it back.";
+"favorites.empty.tip.hint" = "Double tap for the next tip";
+"favorites.empty.tip.page.a11y" = "Tip %1$d of %2$d";
+"favorites.undo" = "Removed — Undo";
+"favorites.undo.named" = "Removed \"%@\"";
+/* Plural forms handled by Localizable.stringsdict */
+"favorites.count" = "%d saved";
+/* Shown in the footer when a search query is active: "<matched> of <total> matching" */
+"favorites.count.matching" = "%1$d of %2$d matching";
+"favorites.distance.km" = "%.1f km";
+"favorites.distance.m" = "%d m";
+"favorites.distance.mi" = "%.1f mi";
+"search.experiences.placeholder" = "Search experiences";
+"search.clear" = "Clear search";
+"search.empty.title" = "No results for \"%@\"";
+"search.web.cta" = "Search the map for \"%@\"";
+"favorites.search.noResults" = "No matches for \"%@\"";
+"favorites.search.noResults.hint" = "Try a different word, or clear your search.";
+/* VoiceOver announcement when favorites search returns results: "%d matching favorites" */
+"favorites.search.resultCount.a11y" = "%d matching favorites";
+/* VoiceOver announcement when favorites search returns no results: "No favorites match <query>" */
+"favorites.search.noResults.a11y" = "No favorites match %@";
+"favorites.search.clear" = "Clear search";
+"favorites.search.clear.hint" = "Clears the search field and shows all favorites";
+"favorites.search.goodNow.cta" = "%d great right now";
+"favorites.search.goodNow.cta.a11y" = "%d favorites are great to visit right now";
+"favorites.search.prompt" = "Search favorites";
+"favorites.sort.label" = "Sort";
+"favorites.sort.nearest" = "Nearest";
+"favorites.sort.recent" = "Recent";
+"favorites.swipe.hint" = "Swipe left to remove";
+"favorites.row.distance.a11y" = "%@ away";
+"favorites.proximity.near" = "walkable";
+"favorites.proximity.mid" = "short ride";
+"favorites.proximity.far" = "far";
+"favorites.row.directions" = "Directions";
+"favorites.nearby.count" = "%d nearby";
+"favorites.nearby.count.a11y" = "%d nearby favorites";
+"favorites.nearby.hint" = "Sorts favorites by distance";
+"favorites.completed.count" = "%1$d of %2$d done";
+"favorites.completed.count.a11y" = "%1$d of %2$d favorites completed";
+"favorites.completed.allDone.a11y" = "All saved experiences completed";
+"favorites.row.done.a11y" = "completed";
+"favorites.remaining.show.a11y" = "Show remaining experiences";
+"favorites.remaining.active.a11y" = "Showing remaining, tap to show all";
+"favorites.remaining.hint" = "Filters the list to not-yet-completed favorites";
+"favorites.remaining.allDone.title" = "You've done them all";
+"favorites.remaining.allDone.hint" = "Every favorite here is checked off. Nice work.";
+"favorites.remaining.allDone.cta" = "Show all favorites";
+"favorites.nearby.walkBudget" = "~%dm on foot";
+"favorites.nearby.walkBudget.a11y" = "About %d minutes of walking across nearby favorites";
+"favorites.nearby.walkBudget.start.a11y" = "Walk to nearest favorite, %@, about %d minutes";
+"favorites.nearby.go" = "Go";
+"favorites.nearby.go.a11y" = "Directions to nearest favorite, %@";
+"favorites.nearby.go.hint" = "Opens turn-by-turn directions in Maps";
+"favorites.row.goodNow" = "Good time now";
+"favorites.row.goodNow.a11y" = "good time to visit now";
+"favorites.row.closingSoon" = "Best time · %d minutes left";
+"favorites.row.closingSoon.a11y" = "Suggested visit window ends in %d minutes";
+"favorites.row.bestAt" = "Best ~%@";
+"favorites.row.bestAt.a11y" = "best around %@";
+"favorites.row.markVisited" = "Mark visited";
+"favorites.row.markNotVisited" = "Mark not visited";
+"favorites.row.markVisited.announcement" = "Marked %@ as visited";
+"favorites.row.markNotVisited.announcement" = "Marked as not visited";
+
+/* Favorites journey header — good now nudge */
+"favorites.journey.goodNow" = "%d great to do right now";
+"favorites.journey.goodNow.a11y" = "%d favorites are great to visit right now";
+"favorites.journey.goodNow.hint" = "Sorts those favorites to the top of the list";
+
+/* Favorites journey header */
+"favorites.greeting.night" = "Still up?";
+"favorites.greeting.morning" = "Good morning";
+"favorites.greeting.afternoon" = "Good afternoon";
+"favorites.greeting.evening" = "Good evening";
+"favorites.journey.allDone" = "You've explored them all";
+"favorites.journey.progress" = "%1$d of %2$d explored";
+"favorites.journey.awaiting" = "%d place(s) waiting for you";
+"favorites.journey.nearbyNow" = "%d within walking distance";
+"favorites.journey.nearbyNow.a11y" = "%d favorites within walking distance";
+"favorites.journey.nearbyNow.hint" = "Sorts favorites by distance";
+
+/* Favorites momentum line in journey header */
+"favorites.momentum.justDid" = "Nice — you just did %@";
+"favorites.momentum.closest" = "%@ is closest — go?";
+
+/* Favorites journey halfway milestone VoiceOver announcement */
+"favorites.journey.halfway" = "Halfway there — %1$d of %2$d explored";
+/* Favorites journey progress bar — milestone pulse VoiceOver announcement (%d = percent, e.g. 25) */
+"favorites.journey.milestone.a11y" = "%d%% of your favorites explored";
+
+/* Favorites journey header — closest pill (shown when nearbyCount == 0) */
+"favorites.journey.closest" = "%1$@ · %2$@";
+"favorites.journey.closest.a11y" = "Closest favorite: %1$@, %2$@ away";
+"favorites.journey.closest.hint" = "Sorts favorites by distance";
+
+/* Generic actions */
+"action.undo" = "Undo";
+"favorites.undo.swipeHint" = "Swipe down to dismiss";
+"favorites.undo.tapHint" = "Double tap to restore";
+"favorites.undo.announcement" = "Removed %@. Undo available.";
+
+/* Notifications */
+"settings.notifications" = "Notify me when I'm nearby";
+"settings.notifications.header" = "Notifications";
+"settings.notifications.footer" = "Roamorrow sends a quiet nudge when you walk past a saved experience. No marketing, ever.";
+"notification.checkin.title" = "You're nearby";
+"notification.checkin.body" = "You're standing near %@. Want to check it out?";
+
+/* US-020 — Route join notification (host invited a friend, no approval) */
+"notification.route.join.title" = "You're in!";
+"notification.route.join.body" = "%1$@ added you to “%2$@”. Tap to see the route.";
+
+/* US-026 — Live Activity (Dynamic Island) copy */
+"island.compile.title" = "Composing today's page";
+"island.compile.subtitle" = "%d signals · synthesizing";
+
+/* US-026 — Notification quick actions */
+"notification.action.departed" = "I'm on my way";
+"notification.action.viewRoute" = "View route";
+"notification.action.accept" = "Accept";
+"notification.action.viewRequest" = "View request";
+
+/* US-026 — Departure reminder (time-sensitive) */
+"notification.departure.title" = "Meet up in 30 minutes";
+"notification.departure.body" = "Heading out soon — meet at %@.";
+
+/* US-020 — Invite friends into a recruiting route (no approval) */
+"invite.friends.button" = "Add friends locally";
+"invite.friends.button.a11y" = "Add friends to this route on this device";
+"invite.friends.title" = "Add friends locally";
+"invite.friends.send" = "Add";
+"invite.friends.seats" = "%d seats left";
+"invite.friends.footer" = "Adds members to the route on this device. No invitation or message is sent to your friends.";
+"invite.friends.empty.title" = "No friends to add";
+"invite.friends.empty.description" = "Everyone you're friends with is already in this route, or you haven't added any friends yet.";
+
+/* Settings — Apple ID link */
+"settings.saveWithApple" = "Save with Apple";
+"settings.linkedToAppleID" = "Linked to Apple ID";
+"settings.appleLink.success" = "Saved with Apple ID.";
+"settings.appleLink.failure" = "Could not link Apple ID. Please try again.";
+
+/* Settings data */
+"settings.data.header" = "My Data";
+"settings.clearData" = "Clear all data";
+"settings.clearData.confirm.title" = "Clear all data?";
+"settings.clearData.confirm.action" = "Clear everything";
+"settings.clearData.confirm.message" = "This removes your completed experiences, favorites, and preferences. It cannot be undone.";
+
+/* Explore here */
+"explore.button" = "Explore here";
+/* Single-card deep cross-compile (Approach A) */
+"recompile.action" = "Deep cross-compile";
+"recompile.action.a11y" = "Deep cross-compile this place across multiple sources";
+"recompile.inProgress" = "Cross-compiling…";
+"recompile.toast.success" = "Upgraded with cross-source detail";
+"recompile.toast.noChange" = "Already as detailed as we can get this one";
+
+// Deep cross-compile live feed sheet
+"recompile.feed.title" = "Deep cross-compile";
+"recompile.feed.subtitle" = "Cross-referencing multiple sources…";
+"recompile.feed.working" = "Working…";
+"recompile.feed.upgraded" = "Upgraded with richer cross-source detail.";
+"recompile.feed.noChange" = "Nothing richer was found — the card is unchanged.";
+"recompile.feed.poiCount" = "%d places found";
+"recompile.feed.signalCount" = "%d rich signals";
+"recompile.feed.keptCount" = "Kept the top %d";
+"recompile.feed.noPOIs" = "No places found nearby";
+"recompile.feed.noKey" = "No API key — skipped";
+"recompile.feed.noAI" = "AI unavailable — used local ranking";
+"recompile.feed.noCoordinate" = "This place has no coordinate to compile around";
+"recompile.feed.pipelineError" = "Something went wrong fetching data";
+"recompile.feed.noMatch" = "No matching venue nearby";
+"recompile.feed.skeletonOnly" = "Only basic data available — not an upgrade";
+"recompile.feed.rejected" = "Closest match was a different venue or lower quality";
+// Cross-compile stage labels
+"recompile.stage.start" = "Deep cross-compile started";
+"recompile.stage.amap" = "Querying Amap (AutoNavi)";
+"recompile.stage.mapKit" = "Querying Apple Maps";
+"recompile.stage.overpass" = "Querying OpenStreetMap";
+"recompile.stage.foursquare" = "Folding in Foursquare signals";
+"recompile.stage.ranking" = "Ranking by signal richness";
+"recompile.stage.address" = "Backfilling street addresses";
+"recompile.stage.synthesis" = "Synthesizing with AI";
+"recompile.stage.webVerify" = "Verifying details on the web";
+"recompile.stage.adopt" = "Matching to this place";
+"recompile.stage.done" = "Done";
+"recompile.stage.failed" = "Finished";
+"explore.aiBadge" = "AI-generated · OpenStreetMap";
+"explore.osmBadge" = "OpenStreetMap · not enriched";
+"trustBadge.verified" = "%d sources";
+"trustBadge.amap" = "AutoNavi";
+"trustBadge.osm" = "OSM";
+"trustBadge.user" = "You added";
+"trustBadge.curated" = "Curated";
+"trustBadge.a11y" = "Data source: %@";
+"exploreMode.pill.scanning" = "Scanning";
+"exploreMode.pill.verifying" = "Verifying";
+"exploreMode.pill.synthesizing" = "Synthesizing";
+"exploreMode.pill.widening" = "Widening";
+"exploreMode.pill.here" = "here";
+"exploreMode.pill.countFragment" = "+%d places";
+"exploreMode.pill.searchingFragment" = "searching…";
+"exploreMode.pill.verifiedFragment" = "%d verified";
+"exploreMode.cancel" = "Cancel";
+"exploreMode.handoff.summary" = "%1$d places · %2$.1f km · %3$@";
+"exploreMode.handoff.summaryNoCity" = "%1$d places · %2$.1f km";
+"exploreMode.handoff.verifiedSuffix" = "%d verified across sources";
+"exploreMode.handoff.askSolo" = "Ask about these places";
+"exploreMode.handoff.saveWalk" = "Save as a walk";
+"exploreMode.handoff.expand" = "Expand radius";
+"exploreMode.handoff.clear" = "Clear these";
+"exploreMode.cancelled.kept" = "Kept %d places · Explore stopped";
+"exploreMode.cancelled.dismiss" = "OK";
+"explore.error.nothingFound" = "No public places found nearby. Try moving the map.";
+"location.error.banner" = "Can't find your location — showing a default area.";
+"location.banner.openSettings" = "Open Settings";
+"explore.skeleton.oneLiner" = "A real spot pulled from OpenStreetMap.";
+"explore.skeleton.oneLiner.amap" = "A real spot pulled from AutoNavi (Amap).";
+"explore.skeleton.oneLiner.mapkit" = "A real spot from Apple Maps, not assessed yet.";
+"explore.skeleton.why" = "We don't have a curated story for this place yet. Visit, then add what you found.";
+"explore.skeleton.why.amap" = "We don't have a curated story for this place yet. Visit, then add what you found.";
+"explore.quota.dailyLimit" = "Daily AI limit reached. Showing real places without enrichment until tomorrow.";
+"explore.toast.addedNamed" = "Now exploring %1$@ · %2$d places added";
+"explore.toast.added" = "%d places added near you";
+"explore.toast.multiRing.addedNamed" = "Now exploring %1$@ · %2$d places added across %3$.1f km";
+"explore.toast.multiRing.added" = "%1$d places added across %2$.1f km";
+"explore.toast.progressive.expandedNamed" = "Expanded to %1$@ km · found %2$lld in %3$@";
+"explore.toast.progressive.expanded" = "Expanded to %1$@ km · found %2$lld";
+"explore.progress.scanning" = "Scanning area · ring %1$d of %2$d";
+"explore.progress.synthesizing" = "Synthesizing %d places…";
+"explore.progress.progressiveScanning" = "Scanning %.1f km…";
+"explore.progress.expanding" = "Nearby sparse · expanding to %.1f km";
+"explore.offline.staleToast" = "Showing offline data from %@";
+"explore.toast.cachedFallback" = "Showing cached results";
+"explore.expand.alreadyMax" = "Already exploring the maximum radius (100 km).";
+
+/* Paywall */
+"paywall.hero.title" = "Unlock Roamorrow Pro";
+"paywall.hero.subtitle" = "AI exploration anywhere on Earth, voice intent, and per-place AI insights.";
+"paywall.feature.explore" = "Explore here — AI-enriched real places in any city";
+"paywall.feature.voice" = "Voice intent — describe what you want, get a filtered map";
+"paywall.feature.insight" = "Per-experience AI insight on demand";
+"paywall.feature.quota" = "30 fresh AI explorations + 60 insights every day";
+"paywall.bestValue" = "Best value";
+"paywall.cta.startTrial" = "View Pro plans";
+"paywall.fineprint" = "The price and billing period shown for your selected plan apply. Subscriptions renew automatically unless cancelled in Settings → Apple Account → Subscriptions. Review any introductory offer in Apple’s confirmation before subscribing. The App Store EULA and our terms apply.";
+"paywall.restore" = "Restore purchases";
+"paywall.manage" = "Manage subscription";
+"paywall.error.title" = "Purchase didn't complete";
+"paywall.error.unavailable" = "Subscriptions aren't available right now. Please check your connection and try again in a moment.";
+"paywall.close" = "Close";
+"paywall.continueFree" = "Continue for free";
+"paywall.cta.startMonthFree" = "Subscribe with offer";
+"paywall.cta.subscribe" = "Subscribe";
+"paywall.fineprint.month" = "Review your selected plan and any offer in Apple’s confirmation before subscribing. You can cancel in Settings → Apple Account → Subscriptions.";
+"paywall.trialBadge" = "Offer available";
+"paywall.trialBanner.headline" = "An introductory offer is available";
+"paywall.trialBanner.format" = "Plan price: %@ — review the billing period and offer before subscribing.";
+"paywall.trialBanner.fallback" = "Review the offer in Apple’s subscription confirmation.";
+"paywall.midTrial.headline.format" = "Trial active · %d days left";
+"paywall.midTrial.detail.format" = "Billing starts %@. Tap Manage Subscription to change.";
+"paywall.midTrial.detail.fallback" = "Manage your subscription anytime in Settings.";
+
+/* Me — Entitlement banner */
+"me.entitlement.a11y.hint" = "Opens subscription details";
+"me.entitlement.trial.headline.format" = "Trial · %d days left";
+"me.entitlement.trial.lastDay" = "Last day of trial";
+"me.entitlement.trial.detail.format" = "Billing starts %@";
+"me.entitlement.trial.detail.fallback" = "Cancel anytime before the trial ends";
+"me.entitlement.pro.title" = "Roamorrow Pro";
+"me.entitlement.pro.detail.format" = "Renews %@";
+"me.entitlement.pro.detail.fallback" = "Auto-renewing subscription";
+"me.entitlement.upsell.title" = "View Pro plans";
+"me.entitlement.upsell.detail" = "See what Roamorrow Pro includes";
+
+/* Onboarding — paywall step (step 5) */
+"onboarding.paywall.title" = "A little more help along the way";
+"onboarding.paywall.subtitle" = "Explore Pro plans for more AI help, or keep using Roamorrow for free.";
+"onboarding.paywall.bullet.explore" = "Explore here — AI-enriched real places, in any city";
+"onboarding.paywall.bullet.voice" = "Describe what you want by voice, get a filtered map";
+"onboarding.paywall.bullet.insight" = "Per-experience AI insight on demand";
+"onboarding.paywall.cta" = "View Pro plans";
+"onboarding.paywall.later" = "Continue for free";
+"onboarding.paywall.fineprint.format" = "Plan price: %@. Review billing periods and any offer on the next screen before subscribing.";
+"onboarding.paywall.fineprint.fallback" = "Review plan prices, billing periods and any available offer before subscribing.";
+
+/* Settings — Subscription */
+"settings.subscription" = "Subscription";
+"subscription.tier.pro" = "Pro";
+"subscription.tier.proTrial" = "Pro (trial)";
+"subscription.tier.expired" = "Expired";
+"subscription.tier.free" = "Free";
+"settings.restore" = "Restore purchases";
+"settings.manage" = "Manage subscription";
+"restore.success" = "Pro restored.";
+"restore.failure" = "No active subscription found on this Apple ID.";
+"settings.adminUnlock" = "Unlock with tester email";
+"settings.adminUnlock.title" = "Tester Unlock";
+"settings.adminUnlock.message" = "Enter your tester email to unlock Pro on this device.";
+"settings.adminUnlock.placeholder" = "you@example.com";
+"settings.adminUnlock.action" = "Unlock";
+"settings.adminUnlock.success" = "Pro unlocked for tester account.";
+"settings.adminUnlock.failure" = "This email is not on the tester allow-list.";
+
+/* Free-tier paywall hooks */
+"explore.button.pro" = "Explore (Pro)";
+"detail.aiInsight.gated" = "Subscribe to unlock AI Insight";
+
+/* Overpass errors */
+"overpass.error.url" = "Overpass endpoint URL is invalid.";
+"overpass.error.request" = "The map's still catching up — give it another moment.";
+
+/* Explore consent (US-034) */
+"explore.consent.title" = "Before we explore here";
+"explore.consent.subtitle" = "Here is how this exploration request uses your map position and public place information.";
+"explore.consent.bullet.location" = "The map position you choose (coordinates and search radius) goes to OpenStreetMap/Overpass to find nearby places.";
+"explore.consent.bullet.ai" = "Public place details and city context go to your configured AI provider (DeepSeek by default) to draft descriptions.";
+"explore.consent.bullet.no_pii" = "This place lookup does not attach your photos or contacts. You can cancel before it starts.";
+"explore.consent.accept" = "Got it — explore";
+"explore.consent.cancel" = "Not now";
+
+/* In-app language switcher */
+"settings.language" = "Language";
+"settings.language.footer" = "Choose the language Roamorrow speaks. The app restarts to apply your choice.";
+"settings.language.system" = "Follow system";
+"settings.language.english" = "English";
+"settings.language.zh-Hans" = "简体中文";
+"settings.language.restart.title" = "Restart required";
+"settings.language.restart.message" = "Quit and reopen Roamorrow to finish switching languages.";
+"settings.language.restart.ok" = "OK";
+
+/* Voice agent conversation sheet (US-VA-04) */
+"conversation.header.turn" = "Conversation · turn %d";
+"conversation.state.idle" = "Idle";
+"conversation.state.listening" = "Listening…";
+"conversation.state.transcribing" = "Transcribing…";
+"conversation.state.thinking" = "Thinking…";
+"conversation.state.toolExecuting" = "Running tools…";
+"conversation.state.speaking" = "Reply ready";
+"conversation.input.placeholder" = "Type a message…";
+"conversation.input.mic.a11y" = "Hold to speak";
+"conversation.input.send.a11y" = "Send message";
+
+/* Voice agent orchestrator step labels */
+"agent.step.listening" = "Listening…";
+"agent.step.thinking" = "Thinking…";
+"agent.step.exploreNearby" = "Searching nearby…";
+"agent.step.filter" = "Filtering map…";
+"agent.step.showDetails" = "Opening details…";
+"agent.step.save" = "Saving to favorites…";
+"agent.step.dismiss" = "Dismissing…";
+"agent.step.search" = "Searching places…";
+"agent.step.webSearch" = "Searching the web…";
+"agent.step.navigate" = "Opening navigation…";
+"agent.step.buildRoute" = "Stringing a route together…";
+"agent.step.compileWorkdayRoute" = "Compiling a workday route…";
+"agent.step.executing" = "Executing…";
+
+/* Reasoning trace (elegant "thinking" panel) */
+"agent.trace.foundPlaces" = "Found %d place(s) that fit";
+"agent.trace.builtRoute" = "Strung %d stops into a walk";
+"agent.trace.foundEvents" = "Found %d local event(s)";
+"agent.trace.foundSources" = "Cited %d web source(s)";
+
+/* Web-search source cards (in-chat provenance) */
+"chat.sources.title" = "Sources";
+"chat.sources.a11y" = "Source %1$d: %2$@, from %3$@";
+"chat.thinking.title" = "Thinking it through";
+"chat.thinking.a11y" = "Roamorrow is thinking";
+
+/* Collapsed reasoning summary (the one-line chip pinned under a finished turn) */
+"agent.trace.summary.steps" = "Reasoned through %d step(s)";
+"agent.trace.summary.thought" = "Thought it through";
+"chat.thinking.summary.a11y" = "Reasoning summary: %@. Tap to expand.";
+"chat.thinking.working" = "Working…";
+
+/* In-chat cards (places / proposed route) */
+"chat.card.viewOnMap" = "Tap to see on map";
+"chat.card.viewOnMap.a11y" = "Double tap to reveal this place on the map";
+"chat.card.expand.a11y" = "Show more about this place";
+"chat.card.open.a11y" = "Open %@ on the map";
+"chat.card.solo" = "Solo %@";
+"chat.card.undo.pill" = "Undo · %ds";
+"chat.card.undo.a11y" = "Undo this card, confirming in %d seconds";
+"chat.card.undo.a11y.hint" = "Double tap to pull the card back before it settles";
+"chat.route.adopt" = "Use this route";
+"chat.route.adopt.a11y" = "Double tap to save this route and open it";
+"chat.route.open" = "Open";
+"chat.route.save" = "Save";
+"chat.route.saved" = "Saved.";
+"chat.route.tag.draft" = "DRAFT ROUTE";
+"chat.route.tag.verified" = "VERIFIED ROUTE";
+"chat.route.tag.compiled" = "COMPILED WORKDAY";
+"chat.route.walked" = "%d walked";
+"chat.route.stops" = "%1$d stops · %2$@";
+"chat.route.evidence.fresh" = "Evidence fresh";
+"chat.route.evidence.partial" = "Refreshing facts";
+"chat.route.fallbacks" = "Alternatives ready: %d";
+
+/* Voice agent inline overlay (VoiceAgentOverlay) */
+"voiceAgent.orb.a11y" = "Hold to speak to Roamorrow";
+"voiceAgent.orb.hint" = "Double tap and hold to speak";
+"voiceAgent.orb.listening" = "Listening…";
+"voiceAgent.orb.release" = "Release to send";
+"voiceAgent.orb.responding" = "Responding…";
+"voiceAgent.orb.holdToSpeak" = "Hold to speak";
+"voiceAgent.permissionDenied" = "Microphone access needed — enable in Settings";
+"voiceAgent.error.streaming" = "Connection interrupted — please try again";
+"voiceAgent.tts.fallback" = "Response ready";
+
+/* "+" quick-action button — single chat entry point */
+"plus.button.a11y" = "Chat with Roamorrow";
+"plus.button.hint" = "Tap to type, hold to talk";
+"plus.button.label" = "Ask";
+
+/* Voice-first state view shown inside ChatSheet on voice entry */
+"chat.voice.title" = "Talk to Roamorrow";
+"chat.voice.tap.toType" = "Tap to type instead";
+"chat.voice.idle" = "Hold the mic to speak";
+"chat.voice.listening" = "I'm listening…";
+"chat.voice.thinking" = "Thinking…";
+"chat.voice.toolRunning" = "Working on it…";
+"chat.voice.responding" = "Responding…";
+
+/* Chat sheet — Messenger-style assistant surface */
+"chat.title" = "Roamorrow";
+"chat.empty.title" = "Ask me anything about places near you";
+"chat.empty.subtitle" = "Try 'what's good around me?' or hold the mic to talk.";
+
+/* Contextual AI·NOW banner on the empty chat — shifts with the hour */
+"chat.empty.now.dawn" = "Quiet streets · the markets are just waking up";
+"chat.empty.now.morning" = "Morning light · good hour for slow coffee";
+"chat.empty.now.midday" = "Midday heat · seek out shade and a long lunch";
+"chat.empty.now.afternoon" = "Soft afternoon · easy time to wander";
+"chat.empty.now.goldenHour" = "Golden light soon · the river bank is calling";
+"chat.empty.now.evening" = "Evening sets in · time for the night market";
+"chat.empty.now.night" = "Late and quiet · a rooftop or a last drink";
+"chat.empty.now.a11y" = "Right now: %@";
+
+/* Chat starter prompts */
+"chat.empty.prompt.nearby" = "What's good around me?";
+"chat.empty.prompt.coffee" = "Find me a quiet café";
+"chat.empty.prompt.events" = "What's on this week?";
+"chat.empty.prompt.evening" = "Plan my evening";
+
+/* Half-detent empty state — a minimal "companion is waiting" entry */
+"chat.empty.half.invite" = "Ask me where to go";
+"chat.empty.half.micHint" = "Hold to talk";
+"chat.empty.half.mic.a11y" = "Hold to talk to Roamorrow";
+"chat.empty.half.tag.nearby" = "Nearby";
+"chat.empty.half.tag.coffee" = "Coffee";
+"chat.empty.half.tag.sunset" = "Sunset";
+"chat.empty.half.tag.evening" = "Tonight";
+"chat.empty.half.prompt.sunset" = "Where can I watch the sunset nearby?";
+
+/* Place-anchored chat — opened from a place detail's "Ask Solo" */
+"chat.empty.place.title" = "Ask about %@";
+"chat.empty.place.subtitle" = "I'll answer with this place's live context.";
+"chat.empty.place.eyebrow" = "ASKING ABOUT";
+"chat.empty.place.goodNow" = "Good right now";
+"chat.empty.place.busy" = "How busy is it right now?";
+"chat.empty.place.solo" = "Is it good for solo?";
+"chat.empty.place.route" = "How do I get there?";
+"chat.empty.place.nearby" = "What's nearby?";
+"chat.context.asking" = "Asking about %@";
+"chat.context.clear.a11y" = "Clear place context";
+"chat.input.placeholder" = "Type a message…";
+"chat.input.placeholder.place" = "Ask about %@…";
+"chat.input.voiceBadge" = "VOICE · %@";
+"chat.record.releaseToSend" = "Release to send";
+"chat.record.timer.a11y" = "Recording — %@ elapsed";
+"chat.input.send.a11y" = "Send";
+"chat.input.mic.a11y" = "Voice";
+"chat.input.mic.hint" = "Tap to start or stop voice, hold to push-to-talk";
+"chat.state.listening" = "Listening — release to send";
+"chat.state.thinking" = "Thinking…";
+"chat.error.retry" = "Retry";
+"chat.bubble.user.a11y" = "You said: %@";
+"chat.bubble.assistant.a11y" = "Roamorrow said: %@";
+"chat.bubble.copy" = "Copy";
+"chat.typing.a11y" = "Roamorrow is thinking…";
+"chat.tool.exploreNearby" = "Searched nearby";
+"chat.tool.filter" = "Filtered the map";
+"chat.tool.showDetails" = "Opened a place";
+"chat.tool.save" = "Saved to favorites";
+"chat.tool.dismiss" = "Hid a place";
+"chat.tool.search" = "Searched places";
+"chat.tool.navigate" = "Opened directions";
+"chat.tool.generic" = "Ran an action";
+
+/* Skeleton loading placeholder */
+"skeleton.loading" = "Loading";
+
+/* GlassmorphismCapsule preview-only strings */
+"glassmorphism.preview.search" = "Search";
+"glassmorphism.preview.findPlace" = "Find a place…";
+"glassmorphism.preview.customPadding" = "Custom padding & shadow";
+
+/* Common */
+"common.settings" = "Settings";
+
+/* Location card + navigation picker */
+"location.openingHours" = "Posted hours";
+"location.openingHours.a11y" = "Posted hours: %@";
+"location.navigate" = "Navigate";
+"location.navigate.choose.a11y" = "Choose a maps app for walking directions";
+"location.navigate.walk.a11y" = "Open walking directions in Maps";
+"location.copyCoords" = "Copy coordinates";
+"location.copied" = "Copied!";
+"location.copied.a11y" = "Coordinates copied";
+"location.copiedAddress" = "Address copied";
+"location.copiedAddress.a11y" = "Address copied to clipboard";
+"location.copyAddress.a11y" = "Copy address to clipboard";
+"location.openIn.apple" = "Apple Maps";
+"location.openIn.google" = "Google Maps";
+"location.openIn.amap" = "Amap";
+// "action.cancel" — duplicate of the canonical entry under
+// "Shared actions" (line 1362). Removed to silence runtime
+// "Duplicate key" warnings; bundle prefers first match either way.
+
+/* US-014: Additional chat localization keys */
+"chat.error.network" = "Connection error — please check your network and try again.";
+"chat.error.apiKey" = "Invalid API key — please check your key in Settings.";
+"chat.error.permission" = "Microphone permission required — enable it in Settings.";
+"chat.error.unknown" = "Something went wrong — please try again.";
+
+/* Send-rejected hints + unconfigured banner shown above the chat input bar */
+"chat.send.hint.notReady" = "The travel assistant is starting. Tap send again in a moment.";
+"chat.send.hint.unconfigured" = "Add a DeepSeek key in Settings to start chatting.";
+"chat.send.hint.sessionEnded" = "Couldn't reconnect — check your network and try again.";
+"chat.unconfigured.title" = "Chat is not configured yet";
+"chat.unconfigured.subtitle" = "Open Settings to add a DeepSeek API key or sign in to Pro.";
+
+/* US-019: Bilingual city picker */
+"city.distanceAway" = "%.1f km away";
+"city.distanceAway.mi" = "%.1f mi away";
+"city.distanceUnknown" = "Distance unknown";
+"city.distanceAway.a11y" = "%@ away";
+
+/* City picker hero header */
+"city.header.nearest" = "Nearest: %@";
+"city.header.nearest.a11y" = "Nearest city %@, %@ away, %d experiences. Tap to select.";
+"city.header.nearest.hint" = "Selects the closest discovered city";
+
+
+/* Markdown PKM export (US-037) */
+"detail.exportNote" = "Export Note";
+"export.preview" = "Markdown preview";
+"export.copy" = "Copy Markdown";
+"export.notion" = "Open in Notion";
+"export.share" = "Share…";
+
+/* Share sheet — card modes & actions */
+"share.title" = "Share";
+"share.mode.xiaohongshu" = "Story";
+"share.mode.twitter" = "Twitter Card";
+"share.mode.square" = "Square";
+"share.mode.minimal" = "Minimal";
+"share.mode.markdown" = "Markdown";
+"share.systemShare" = "Share…";
+"share.copyImage" = "Copy image";
+"share.copied" = "Copied to clipboard";
+"share.imageCopied" = "Image copied";
+"share.renderFailed" = "Couldn't render the card. Please try again.";
+"share.saveHint" = "Tap Share, then choose Save Image to save to Photos.";
+"share.style.xiaohongshuPortrait" = "Story 9:16";
+"share.style.twitterLandscape" = "Twitter 1.91:1";
+"share.style.instagramSquare" = "Square 1:1";
+"share.style.minimalText" = "Minimal 9:16";
+/* Route share sheet (route detail → share). */
+"route.share.title" = "Share Route";
+"route.share.kicker" = "Route · Roamorrow";
+"route.share.mode.card" = "Card";
+"route.share.mode.text" = "Text";
+"route.share.style.map" = "Map";
+"route.share.style.trace" = "Trace";
+/* Shown when the real map basemap can't be fetched and we fell back to the vector line. */
+"route.share.mapFallback" = "Map basemap unavailable — showing the minimal line instead.";
+"route.share.min" = "min";
+"route.share.stops" = "stops";
+/* %d = number of travelers who have walked this route. */
+"route.share.walkedBy" = "Walked by %d travelers";
+/* Share-card image brand label (US-038) — kept as "Roamorrow" in both locales, but routed through l10n. */
+"sharecard.brand" = "Roamorrow";
+/* Share-card score suffix (US-039) — rendered after the numeric Solo Score on the share card. */
+"sharecard.score.suffix" = "/100  Solo Score";
+
+/* Offline banner (US-041) */
+"offline.banner" = "Offline mode · showing cached data";
+"offline.banner.retry" = "Tap to retry";
+"offline.banner.retry.hint" = "Double tap to retry connection";
+"offline.banner.retry.failed" = "Retry failed — still offline";
+"offline.banner.recovered" = "Back online";
+
+/* Theme picker (US-039) */
+"settings.appearance" = "Appearance";
+"settings.theme" = "Theme";
+"settings.haptics" = "Haptic Feedback";
+"settings.haptics.footer" = "When on, Roamorrow taps your device on favorites, check-ins, filter changes, and map peeks.";
+"settings.haptics.toggle" = "Haptic Feedback";
+"settings.haptics.toggle.a11y" = "Toggle haptic feedback";
+
+/* Map preview in exports (US-020) */
+"settings.exportMapPreview" = "Include map preview in exports";
+
+/* AI Provider settings */
+"settings.aiProvider" = "AI Provider";
+"settings.aiProvider.header" = "Artificial Intelligence";
+"settings.aiProvider.status.unconfigured" = "Not configured — AI features disabled";
+"settings.aiProvider.status.configured" = "%@ — configured";
+
+/* AI Provider settings screen */
+"ai.provider.settings.title" = "AI Provider";
+"ai.provider.custom" = "Custom";
+
+"ai.provider.section.provider" = "Provider";
+"ai.provider.deepseek.description" = "DeepSeek offers fast, cost-effective models. Get your key at platform.deepseek.com.";
+"ai.provider.openai.description" = "OpenAI GPT models. Get your key at platform.openai.com.";
+"ai.provider.custom.description" = "Any OpenAI-compatible API. Enter your base URL and API key below.";
+
+"ai.provider.section.apiKey" = "API Key";
+"ai.provider.apiKey.placeholder" = "Paste your API key…";
+"ai.provider.apiKey.footer" = "Stored locally on your device. Never shared with Roamorrow servers.";
+
+"ai.provider.section.baseURL" = "Base URL";
+"ai.provider.baseURL.placeholder" = "https://api.example.com/v1";
+"ai.provider.baseURL.footer" = "The OpenAI-compatible endpoint root (e.g. https://api.openai.com/v1).";
+
+"ai.provider.section.model" = "Model";
+"ai.provider.model.placeholder.custom" = "Enter model name";
+"ai.provider.model.hint" = "Default: %@. Leave blank to use the provider default.";
+"ai.provider.model.hint.custom" = "Enter the model identifier for your custom provider.";
+
+"ai.provider.status.configured" = "AI is configured with %@";
+"ai.provider.status.unconfigured" = "AI features require an API key";
+
+/* Location picker — custom cities */
+"locationPicker.cities.addCity" = "Add custom city";
+"locationPicker.cities.section.places" = "Places with Experiences";
+"locationPicker.cities.section.saved" = "Saved Locations";
+"locationPicker.cities.saved.subtitle" = "Saved location";
+
+/* Location picker — search tab save flow */
+"locationPicker.search.saveCity.title" = "Save as Custom City";
+"locationPicker.search.saveCity.message" = "This city will appear in your Saved Locations list.";
+"locationPicker.search.saveCity.namePlaceholder" = "City name";
+"locationPicker.search.saveCity.save" = "Save";
+"locationPicker.search.saveCity.swipe" = "Save City";
+"locationPicker.search.saveCity.confirmed" = "City saved!";
+
+/* Location picker — map tab save flow */
+"locationPicker.map.saveCity.title" = "Name This Location";
+"locationPicker.map.saveCity.message" = "Saved locations appear in your Cities list for quick access.";
+"locationPicker.map.saveCity.namePlaceholder" = "Location name";
+"locationPicker.map.saveCity.save" = "Save & Set";
+"locationPicker.map.saveAndSet" = "Save & Set Location";
+"locationPicker.map.saveCity.confirmed" = "Location saved!";
+
+/* Distance pill in experience detail hero */
+"detail.distance.away" = "%@ away";
+"detail.distance.a11y" = "%@ away";
+
+/* US-015: Multi-source indicator and real signals in detail view */
+"detail.multiSource.indicator" = "Verified by multiple sources";
+"detail.multiSource.indicator.a11y" = "This place was verified by multiple data sources";
+"detail.rating" = "Rating";
+"detail.rating.a11y" = "Rating: %@ out of 10";
+"detail.priceLevel" = "Price level";
+"detail.priceLevel.a11y" = "Price level %d out of 4";
+
+/* Location picker — general UI */
+"locationPicker.picker.a11y" = "Location type";
+"locationPicker.title" = "Choose Location";
+"locationPicker.tab.cities" = "Cities";
+"locationPicker.tab.search" = "Search";
+"locationPicker.tab.map" = "Map";
+"locationPicker.cities.searchPrompt" = "Search cities";
+"locationPicker.search.prompt" = "City, place, or address";
+"locationPicker.search.error.title" = "Search failed";
+"locationPicker.map.lat" = "Latitude";
+"locationPicker.map.lon" = "Longitude";
+"locationPicker.map.applyCoords" = "Move pin to these coordinates";
+"locationPicker.map.resolving" = "Resolving…";
+"locationPicker.map.resolved" = "Resolved: %@";
+"locationPicker.map.setLocation" = "Use without saving";
+"locationPicker.custom.fallbackName" = "Custom location";
+
+/* Itinerary list (US-004) */
+"itinerary.list.title" = "My Itineraries";
+"itinerary.empty.title" = "No itineraries yet";
+"itinerary.empty.hint" = "Tap + to plan your first trip.";
+"itinerary.empty.cta" = "Plan a trip";
+"itinerary.experienceCount" = "%d experiences";
+"itinerary.action.create.a11y" = "Create new itinerary";
+"itinerary.action.delete" = "Delete";
+"itinerary.undo.named" = "Removed \"%@\"";
+"itinerary.undo.named.a11y" = "Removed itinerary \"%@\". Tap Undo to restore.";
+
+/* Itinerary row status pills */
+"itinerary.status.active" = "Active now";
+"itinerary.status.today" = "Starts today";
+"itinerary.status.soon" = "In %dd";
+"itinerary.status.upcoming" = "In %d days";
+"itinerary.status.past" = "Past";
+
+/* Itinerary detail (US-004) */
+"itinerary.detail.city" = "City";
+"itinerary.detail.startDate" = "Start";
+"itinerary.detail.endDate" = "End";
+"itinerary.detail.note.header" = "Notes";
+"itinerary.detail.companion.header" = "Travel style";
+"itinerary.detail.companion.open" = "Open to companions";
+"itinerary.detail.companion.solo" = "Going solo";
+"itinerary.detail.experiences.header" = "%d experiences";
+"itinerary.detail.experiences.empty" = "No experiences pinned yet.";
+"itinerary.detail.experience.unavailable" = "Unavailable experience";
+"itinerary.detail.experiences.unknown" = "Unknown experience (%@)";
+
+/* Itinerary — Add to Itinerary sheet error alert */
+"itinerary.addTo.error.title" = "Couldn't add to itinerary";
+"itinerary.addTo.error.message" = "Couldn't add this experience. Please try again.";
+
+/* Itinerary — Add to Itinerary sheet (US-006) */
+"action.addToItinerary" = "Add to Itinerary";
+"itinerary.addTo.title" = "Add to Itinerary";
+"itinerary.addTo.createNew" = "Create New Itinerary…";
+"itinerary.addTo.createFirst" = "Create Your First Itinerary";
+"itinerary.addTo.noItineraries" = "No Itineraries Yet";
+"itinerary.addTo.noItineraries.hint" = "Create an itinerary to start pinning experiences.";
+"itinerary.addTo.alreadyAdded" = "Already in %@";
+"itinerary.addTo.addToNamed" = "Add to %@";
+
+/* Itinerary detail — Import from favorites (US-006) */
+"itinerary.detail.importFavorites" = "Import Favorites";
+"itinerary.detail.importFavorites.confirm.title" = "Import Favorites?";
+"itinerary.detail.importFavorites.confirm.action" = "Import";
+"itinerary.detail.importFavorites.confirm.message" = "Add your %d favorited experiences to this itinerary. Already pinned ones are skipped.";
+"itinerary.detail.importFavorites.toast" = "%d experiences added";
+
+/* Itinerary form (US-005) */
+"itinerary.form.create.title" = "New Itinerary";
+"itinerary.form.edit.title" = "Edit Itinerary";
+"itinerary.form.section.basics" = "Trip details";
+"itinerary.form.section.dates" = "Dates";
+"itinerary.form.section.companion" = "Companion mode";
+"itinerary.form.field.title" = "Title";
+"itinerary.form.field.title.placeholder" = "e.g. Tokyo Spring";
+"itinerary.form.field.city" = "City";
+"itinerary.form.field.startDate" = "Start date";
+"itinerary.form.field.endDate" = "End date";
+"itinerary.form.field.openToCompanions" = "Open to companions";
+"itinerary.form.field.note" = "Notes";
+"itinerary.form.field.note.placeholder" = "Optional notes for this trip…";
+"itinerary.form.validation.endBeforeStart" = "End date must be on or after the start date.";
+"itinerary.form.action.save" = "Save";
+"itinerary.form.action.cancel" = "Cancel";
+"itinerary.form.city.picker.title" = "Choose City";
+"itinerary.form.suggestedTitle" = "New Trip · %@";
+"itinerary.form.save.error.title" = "Couldn't save itinerary";
+"itinerary.form.save.error.message" = "Your changes weren't saved. Please try again.";
+
+/* My Profile edit screen (US-008) */
+"profile.edit.title" = "My Profile";
+"profile.handle.header" = "Handle";
+"profile.handle.placeholder" = "How others see you (e.g. wanderer)";
+"profile.handle.footer" = "%d–%d characters. Doesn't have to be unique.";
+"profile.handle.invalid" = "Handle must be %d–%d characters.";
+
+/* Companion profile settings (US-009) */
+"companion.profile.title" = "Companion Profile";
+"companion.profile.avatar.header" = "Your Avatar";
+"companion.profile.avatar.footer" = "Tap to pick an emoji — no real photos required.";
+"companion.profile.avatar.a11y" = "Change avatar emoji";
+"companion.profile.bio.header" = "About You";
+"companion.profile.bio.placeholder" = "A line or two about how you travel solo…";
+"companion.profile.bio.footer" = "%d / %d characters";
+"companion.profile.languages.header" = "Languages";
+"companion.profile.languages.footer" = "Other travelers see this before sending a request.";
+"companion.profile.visibility.header" = "Who Can Find You";
+"companion.profile.visibility.off.footer" = "You are hidden. Enable a visibility option above to appear in companion discovery.";
+
+/* Companion visibility options */
+"companion.visibility.off.title" = "Hidden (default)";
+"companion.visibility.off.description" = "You never appear in any companion list.";
+"companion.visibility.itinerary_only.title" = "Itinerary matches only";
+"companion.visibility.itinerary_only.description" = "Only visible to travelers whose itinerary overlaps with yours.";
+"companion.visibility.nearby_and_itinerary.title" = "Nearby & itinerary";
+"companion.visibility.nearby_and_itinerary.description" = "Visible to overlapping itineraries and travelers nearby right now.";
+
+/* Companion — open to companions toggle (US-010) */
+"companion.post.openToCompanions" = "Open to companions";
+"companion.post.openToCompanions.footer" = "Creates a discoverable post so travelers on similar dates can find you.";
+"companion.post.blurb.header" = "Your intro blurb";
+"companion.post.blurb.placeholder" = "Describe your vibe or what you're looking for…";
+"companion.post.categories.header" = "Activity interests";
+"companion.post.visibilityOff.title" = "Companion profile is hidden";
+"companion.post.visibilityOff.message" = "Turn on visibility in your companion profile before opening a trip to companions.";
+"companion.post.visibilityOff.action" = "Open Profile Settings";
+"companion.post.removed" = "Companion post removed";
+
+/* Companion — discovery list (US-011) */
+"companion.discover.title" = "Find Companions";
+"companion.discover.loading" = "Looking for travelers…";
+"companion.discover.refresh.a11y" = "Refresh companion list";
+"companion.discover.error.title" = "Could not load companions";
+"companion.discover.error.config" = "App configuration is missing. Please reinstall.";
+"companion.discover.error.auth" = "Sign in to discover companions.";
+"companion.discover.error.server" = "Server error. Try again later.";
+"companion.discover.error.retry" = "Try again";
+"companion.discover.error.retry.hint" = "Reloads the companion list";
+"companion.discover.empty.title" = "No companions found";
+"companion.discover.empty.description" = "No one is open to companions in this city right now.";
+"companion.discover.coldstart.tip" = "Be the first — open your itinerary to companions and others will find you.";
+"companion.discover.empty.cta" = "Be the first — post your trip";
+"companion.discover.empty.cta.hint" = "Opens a form to post your trip availability for this city";
+
+/* Companion — send request (US-012) */
+"companion.request.send" = "Send request";
+"companion.request.sent" = "Request sent";
+"companion.request.sent.confirm" = "Request sent — they'll be notified";
+"companion.request.send.action" = "Send";
+"companion.request.sheet.title" = "Send Companion Request";
+"companion.invite.sheet.title" = "Invite to Meetup";
+"companion.request.post.header" = "Traveling with";
+"companion.request.note.header" = "Icebreaker (optional)";
+"companion.request.note.placeholder" = "Say hi or share what you're hoping to do together…";
+"companion.request.note.footer" = "%d / %d characters";
+"companion.request.accept" = "Accept";
+"companion.request.decline" = "Decline";
+"companion.request.withdraw" = "Withdraw";
+"companion.request.send.error" = "Couldn't send request. Please try again.";
+"companion.request.accept.error" = "Couldn't accept request. Please try again.";
+
+/* Companion — inbox (US-012) */
+"companion.inbox.title" = "Requests";
+"companion.inbox.refresh.a11y" = "Refresh inbox";
+"companion.inbox.empty.title" = "No pending requests";
+"companion.inbox.empty.description" = "When someone sends you a companion request, it will appear here.";
+"companion.inbox.request.from" = "From";
+"companion.inbox.request.received" = "Received %@";
+"companion.inbox.accepted.title" = "You're connected!";
+"companion.inbox.accepted.message" = "Request accepted. You can now message each other.";
+"companion.inbox.error.load" = "Couldn't load requests. Check your connection and try again.";
+"companion.inbox.error.title" = "Could not load inbox";
+"companion.inbox.error.retry" = "Try again";
+"companion.inbox.error.retry.hint" = "Reloads the inbox";
+"companion.inbox.pending.count" = "%d pending";
+"companion.inbox.pending.count.a11y" = "%d requests awaiting your reply";
+"companion.inbox.declined.undo" = "Request declined";
+"companion.inbox.declined.announcement" = "Request declined. Undo available.";
+
+/* Companion — chat (US-013) */
+"companion.chat.title" = "Chat";
+"companion.chat.input.placeholder" = "Message…";
+"companion.chat.input.a11y" = "Type a message";
+"companion.chat.send.a11y" = "Send message";
+"companion.chat.error.title" = "Message error";
+"companion.chat.error.auth" = "Sign in to send messages.";
+"companion.chat.error.encode" = "Could not send message. Try again.";
+"companion.chat.attachment.backendNotReady" = "Attachments need the storage backend deployed — your message was sent without them.";
+"companion.chat.attachment.uploadFailed" = "Attachment upload failed (HTTP %d).";
+"companion.chat.attachment.tooLarge" = "That attachment is too large to send.";
+"companion.chat.attachment.rateLimited" = "Too many uploads right now — try again in a moment.";
+"companion.chat.attachment.notSignedIn" = "Sign in to send attachments.";
+"companion.chat.attachment.badResponse" = "The attachment service returned an unexpected response.";
+"companion.chat.bubble.me.a11y" = "You: %@, sent at %@";
+"companion.chat.bubble.them.a11y" = "Companion: %@, sent at %@";
+
+/* Companion — group chat (US-037) */
+"companion.chat.pinnedRoute.a11y" = "Pinned route";
+"companion.chat.group.unknownRoute" = "Group Chat";
+"companion.chat.group.memberCount" = "%d members";
+
+/* Companion — report & block (US-014) */
+"companion.report.title" = "Report";
+"companion.report.reason.header" = "What's the problem?";
+"companion.report.details.header" = "Additional details (optional)";
+"companion.report.details.placeholder" = "Tell us more…";
+"companion.report.submit" = "Submit Report";
+"companion.report.submitting" = "Submitting…";
+"companion.report.success.title" = "Report submitted";
+"companion.report.success.message" = "Thank you. We'll review this and take action if needed.";
+"companion.report.error.title" = "Report failed";
+"companion.report.reason.spam" = "Spam";
+"companion.report.reason.harassment" = "Harassment";
+"companion.report.reason.inappropriate_content" = "Inappropriate content";
+"companion.report.reason.fake_profile" = "Fake profile";
+"companion.report.reason.other" = "Other";
+"companion.block.title" = "Block user";
+"companion.block.confirm.title" = "Block this user?";
+"companion.block.confirm.message" = "They won't be able to contact you and will disappear from discovery. This cannot be undone.";
+"companion.block.confirm.action" = "Block";
+"companion.block.success" = "User blocked";
+"companion.block.error.title" = "Block failed";
+"companion.report.block.menu" = "Report or Block";
+"companion.report.menu.report" = "Report";
+"companion.report.menu.block" = "Block User";
+
+/* Companion — presence broadcasting (US-015) */
+"companion.presence.enable" = "Share presence";
+"companion.presence.disable" = "Stop sharing";
+"companion.presence.active" = "Sharing your area (~600m)";
+"companion.presence.stopped" = "Presence off";
+
+/* Companion — map layer toggle (US-017) */
+"companion.layer.on" = "Nearby";
+"companion.layer.off" = "Nearby";
+"companion.layer.on.a11y" = "Companion nearby layer enabled";
+"companion.layer.off.a11y" = "Companion nearby layer disabled";
+"companion.layer.hint.active" = "Toggle companion nearby view";
+"companion.layer.hint.inactive" = "Enable presence broadcasting to use the companion layer";
+"companion.nearby.label" = "~600m away";
+
+/* Companion — reporter weight (US-019) */
+"companion.discover.trust.low" = "This user has received multiple reports and may have limited visibility.";
+
+/* Shared actions */
+"action.ok" = "OK";
+"action.cancel" = "Cancel";
+"action.done" = "Done";
+"action.hide" = "Hide";
+
+/* ============================================================
+ * Companion Hub — entry point on the map
+ * ============================================================ */
+"companion.hub.title" = "Companion";
+"companion.hub.button.a11y" = "Open Companion";
+"companion.hub.button.badge.a11y" = "%d pending request(s)";
+"companion.hub.section.connect" = "Connect";
+"companion.hub.section.you" = "You";
+"companion.hub.presence.title" = "Be discoverable nearby";
+"companion.hub.presence.on" = "On — others can find you";
+"companion.hub.presence.off" = "Off — you stay invisible";
+"companion.hub.presence.footer" = "When on, your fuzzy ~600 m cell becomes visible to other travelers in the same city. No exact location, no identity is shared.";
+"companion.hub.discover.title" = "Discover companions";
+"companion.hub.discover.subtitle" = "See travelers looking for company in this city";
+"companion.hub.inbox.title" = "Requests";
+"companion.hub.inbox.subtitle" = "People who want to meet up";
+"companion.hub.itineraries.title" = "My itineraries";
+"companion.hub.itineraries.subtitle" = "Trips, dates, and saved experiences";
+"companion.hub.profile.title" = "Companion profile";
+"companion.hub.profile.subtitle" = "Avatar, bio, languages, visibility";
+
+/* ============================================================
+ * Safety consent (CompanionSafetyConsentSheet) — first-run gate
+ * ============================================================ */
+"companion.safety.title" = "Before you connect";
+"companion.safety.heading" = "Roamorrow is a travel companion app, not a dating app.";
+"companion.safety.subtitle" = "Please review and accept these basics so everyone stays safe.";
+"companion.safety.age.header" = "Age";
+"companion.safety.age.body" = "You must be 18 or older to use Companion features.";
+"companion.safety.age.confirm" = "I am 18 or older";
+"companion.safety.privacy.header" = "Privacy";
+"companion.safety.privacy.body" = "Your exact location is never shared. Only a fuzzy ~600 m cell, and only when you turn Presence on.";
+"companion.safety.rules.header" = "Ground rules";
+"companion.safety.rule.meetInPublic" = "Meet in public places only.";
+"companion.safety.rule.noPreciseLocation" = "Never share your home or precise location.";
+"companion.safety.rule.noObligation" = "You're never obligated to accept a request or keep chatting.";
+"companion.safety.rule.reportSuspicious" = "Report anyone who feels off — your reports are weighted.";
+"companion.safety.rule.emergency" = "If something feels wrong, leave and call local emergency services.";
+"companion.safety.rules.confirm" = "I understand and will follow these rules";
+"companion.safety.legal.footer" = "By tapping Accept, you agree to the Terms of Service and our community guidelines.";
+"companion.safety.accept" = "Accept and continue";
+
+/* US-012 — Companion (Experimental) settings section */
+"settings.companion.header" = "Companion (Experimental)";
+"settings.companion.toggle" = "Enable companion features";
+"settings.companion.footer" = "Experimental. Turn on to discover and chat with other solo travelers; turn off to hide everything companion-related.";
+"settings.companion.profile" = "Companion profile";
+"settings.companion.requests" = "My recruitment requests";
+"settings.companion.requests.empty" = "No recruitment requests yet.";
+"settings.companion.conversations" = "Joined group chats";
+"settings.companion.conversations.empty" = "You haven't joined any group chats yet.";
+"settings.companion.discover.routes" = "Discover recruiting routes";
+
+/* US-018 — BottomInfoSheet peek toolbar */
+"ai.now.hint" = "Good spots for right now";
+/* US-015 — BottomInfoSheet now-mode headline */
+"sheet.now.headline" = "Good spots for right now";
+"now.time.justNow" = "Just now";
+"now.time.recent" = "Updated";
+"now.time.minutesAgo" = "%d min ago";
+"sheet.sort.button" = "Sort";
+"sheet.count.now" = "Now %d";
+"sheet.count.nearby" = "Nearby %d";
+
+/* US-006 — BottomInfoSheet drag handle */
+"sheet.handle" = "Sheet handle, swipe up or down to adjust";
+
+/* US-019 — BottomInfoSheet nearby section */
+"sheet.nearby.section.title" = "NEARBY";
+"sheet.nearby.smartPick.a11y" = "AI recommended";
+"sheet.nearby.openNow" = "Open now";
+"sheet.nearby.openNow.a11y" = "Open now";
+
+/* NearbyExperienceRow card chips — walk-time, Solo score, 此刻最佳, proximity word */
+"nearby.chip.walkMin" = "~%d min";
+"nearby.chip.driveMin" = "~%d min drive";
+"nearby.chip.solo" = "Solo %.1f";
+"nearby.chip.bestNow" = "Best now";
+/* Compact closing-soon countdown chip on the peek pick + Nearby rows (≤45 min left). %d = minutes. */
+"nearby.chip.closingSoon" = "Best time · %dm left";
+"nearby.chip.closingSoon.a11y" = "Suggested visit window ends in %d minutes";
+"nearby.proximity.sparse" = "Quiet";
+"nearby.proximity.moderate" = "Moderate";
+"nearby.proximity.far" = "Far";
+
+/* US-036 — BottomInfoSheet section separation (Routes / Nearby headers) */
+"sheet.section.routes" = "Routes";
+/* Now-context (此刻適合) header for the routes section */
+"sheet.section.routes.now" = "Routes · Best Right Now";
+"sheet.section.nearby" = "Nearby";
+
+/* US-020 — Sort mode sheet */
+"sort.smart" = "Smart";
+"sort.distance" = "Distance";
+"sort.soloScore" = "Solo";
+"sort.now" = "Now";
+
+/* US-030 — Sort button VoiceOver accessibilityValue (announces current sort mode) */
+"sort.value.smart" = "Sorted by smart";
+"sort.value.distance" = "Sorted by distance";
+"sort.value.soloScore" = "Sorted by Solo score";
+"sort.value.now" = "Sorted by now";
+
+/* Sort mode subtitles in SortModeSheet */
+"sort.subtitle.smart" = "AI picks tuned to you";
+"sort.subtitle.distance" = "Closest first";
+"sort.subtitle.soloScore" = "Best for going solo";
+"sort.subtitle.now" = "Good right now";
+
+/* US-022 — VerifiedBadge */
+"verified.title.verified" = "Verified route";
+"verified.title.watching" = "Community watching";
+"verified.subtitle" = "Walked by %d travelers";
+"verified.short.verified" = "Verified";
+"verified.short.watching" = "Watching";
+"verified.inline" = "%1$@ · walked by %2$d";
+
+/* US-023 — StopsList */
+"stops.start" = "Start";
+
+/* US-025 — RouteCard / RoutesSection */
+"sheet.routes.section.title" = "ROUTES";
+"route.card.verified" = "Verified";
+"route.card.tag" = "Route · %1$d stops · %2$@";
+"route.card.now" = "Now";
+
+/* US-024 — RouteDetailView */
+"route.detail.save" = "Save to my itinerary";
+"route.detail.favorite" = "Add to favorites";
+"route.detail.bestNow.yes" = "Best right now";
+"route.detail.bestNow.no" = "Not now";
+"route.detail.aiInsight.title" = "AI Insight";
+"route.detail.aiInsight.unavailable" = "Weather, crowd and season analysis isn't available for this route yet.";
+"route.detail.tags.title" = "Route tags";
+"route.detail.start" = "Start route";
+"route.detail.cta.requestJoin" = "Request to join";
+"route.detail.cta.review" = "Review %d requests";
+"route.detail.cta.waiting" = "Waiting for host confirmation";
+"route.detail.cta.groupChat" = "Open group chat";
+"route.detail.pace.relaxed" = "Relaxed";
+"route.detail.pace.standard" = "Standard";
+"route.detail.pace.packed" = "Packed";
+"route.workday.title" = "A focused workday nearby";
+"route.workday.summary" = "%d grounded stops · %d min travel";
+"route.workday.evidence.fresh" = "Opening hours and workability evidence are current";
+"route.workday.evidence.partial" = "Usable plan; some workability facts are refreshing";
+"route.workday.schedule.title" = "Compiled schedule";
+"route.workday.evidence.badge.fresh" = "FRESH";
+"route.workday.evidence.badge.partial" = "PARTIAL";
+"route.workday.fallback" = "Fallback: %@ · +%d min travel";
+"route.workday.refresh.scheduled" = "Some facts are stale or unknown. A refresh has been queued; check again before leaving.";
+"route.workday.refresh.partial" = "Some facts are stale or unknown. Confirm the highlighted assumptions before leaving.";
+"route.workday.travel" = "%d min travel";
+"route.workday.wait" = "%d min wait";
+"route.workday.task.deep_work" = "Deep work";
+"route.workday.task.video_call" = "Video call";
+"route.workday.task.meal" = "Meal";
+"route.workday.task.explore" = "Explore";
+"route.workday.task.break" = "Break";
+"route.workday.task.custom" = "Task";
+
+/* US-026 — AddToItinerary success toast */
+"itinerary.toast.added" = "Added to 《%@》";
+"itinerary.toast.viewAction" = "View itinerary";
+
+/* US-027 — RecruitingModule */
+"recruiting.status.open" = "Recruiting";
+"recruiting.status.forming" = "Forming";
+"recruiting.status.closed" = "Closed";
+"recruiting.status.completed" = "Completed";
+"recruiting.slots.label" = "Members";
+"recruiting.slots.count" = "%d/%d";
+"recruiting.cta.viewRequests" = "View requests (%d)";
+"recruiting.cta.applied" = "Applied · waiting for confirmation";
+"recruiting.cta.viewChat" = "View group chat";
+"recruiting.cta.requestJoin" = "Request to join";
+"recruiting.cta.requestJoinForming" = "Request to join (%d spots left)";
+
+/* US-057 — RouteCard recruit-mini inline state (CompareCanvas A-002) */
+"route.card.recruit.recruiting" = "%1$@ recruiting · %2$d/%3$d confirmed · %4$@";
+"route.card.recruit.closed" = "Group formed · %d members · departing";
+"route.card.recruit.completed" = "Completed · route upgraded";
+/* Trailing affordance on a joinable recruit strip */
+"route.card.recruit.view" = "View";
+
+/* AI route generation — fallback copy when the model is unavailable */
+"route.generate.fallback.summary" = "A short solo walk linking nearby spots.";
+"route.generate.fallback.title" = "Nearby Walk";
+"route.generate.fallback.titleFormat" = "%1$@ → %2$@";
+
+/* Create-route entry card + flow */
+"route.create.entry.title" = "Create your own route";
+"route.create.entry.subtitle" = "String a few stops together · optionally invite a companion";
+
+/* Direction 3 — warm cold-start placeholder for the Now routes section */
+"routes.now.empty.title" = "Today’s walk · ask for a route";
+"routes.now.empty.cta" = "I’ll pick three nearby stops you’ll actually like — tap to start.";
+"route.duration.hours" = "%dh";
+"route.duration.hoursMinutes" = "%dh %dmin";
+"route.duration.minutes" = "%dmin";
+"route.create.title" = "Create Route";
+"route.create.ai" = "✨ Let AI string one together";
+"route.create.titleLabel" = "Route name";
+"route.create.titlePlaceholder" = "e.g. Mekong sunset walk";
+"route.create.paceLabel" = "Pace";
+"route.create.pickLabel" = "Pick stops (linked in tap order)";
+"route.create.selectedCount" = "%d selected";
+"route.create.save" = "Save";
+"route.create.empty" = "No nearby places to build from yet — try Explore first, or widen your distance in Settings.";
+"route.create.ai.error" = "Couldn't build the route this time — check your connection and try again.";
+
+/* Active route drawn on the map (start route) */
+"route.active.stops" = "%d stops · on route";
+"route.active.stop.a11y" = "Stop %d";
+"route.active.end" = "End route";
+"route.active.skip" = "Skip this stop";
+"route.active.pause" = "Pause route";
+"filter.tip.title" = "Browse by mood";
+"filter.tip.message" = "Tap a category or 'Now' to find places worth going right now — not just everything nearby.";
+"terms.title" = "Welcome to Roamorrow";
+"terms.intro" = "Before you start exploring, review this summary of how data is used. The full documents are linked below.";
+"terms.dataUse.title" = "What we collect";
+"terms.dataUse.location" = "Location supports nearby experiences and, if permitted, background visit detection. Confirmed exploration and AI requests can send selected coordinates and context to the relevant services.";
+"terms.dataUse.chat" = "AI requests can include your message, relevant conversation history, preferences and travel context. Your provider selection or the Pro proxy determines where the request is processed.";
+"terms.dataUse.noContacts" = "Photos, camera, microphone and speech are used for features you choose, with the applicable system permission or content selection.";
+"terms.dataUse.noTrackers" = "Configured services can process account sync, shared messages and diagnostics. The Privacy Policy lists recipients and the controls available to you.";
+"terms.links.title" = "Read the full documents";
+"terms.links.privacy" = "Privacy Policy";
+"terms.links.tos" = "Terms of Service";
+"terms.button.accept" = "I agree, continue";
+"terms.button.decline" = "Not now";
+"terms.declined.title" = "Consent required to continue";
+"terms.declined.body" = "Roamorrow cannot show the map, fetch nearby places, or use AI without your agreement to the Privacy Policy and Terms. Nothing has been collected. Tap below to review again.";
+"terms.declined.review" = "Review again";
+"nearby.chip.closingNow" = "Best time ending";
+
+/* US-058 — RouteCard walked-by row (CompareCanvas A-003) */
+"route.card.walkedBy" = "Walked by %d travelers";
+
+/* US-030 — Companion Profile walked routes section */
+"profile.walkedRoutes.header" = "Walked routes (%d)";
+"profile.walkedRoutes.viewAll" = "View all ->";
+
+/* Empty state for MyWalkedRoutesListView */
+"profile.walkedRoutes.empty.title" = "No routes walked yet";
+"profile.walkedRoutes.empty.hint" = "Complete a companion route to see your journeys here.";
+"profile.walkedRoutes.empty.cta" = "Discover routes";
+/* Footer count in MyWalkedRoutesListView */
+"profile.walkedRoutes.count" = "%d routes walked";
+
+/* US-032 — DiscoverRecruitingRoutesView */
+"discover.recruiting.title" = "Discover recruiting routes";
+"discover.recruiting.chip" = "%d/%d · %@";
+"discover.recruiting.chip.a11y" = "%d of %d members · %@";
+"discover.recruiting.empty.title" = "No routes recruiting right now";
+"discover.recruiting.empty.description" = "No routes open to join nearby yet.";
+"discover.recruiting.empty.create" = "Open one of your own";
+
+/* US-033 — MyRequestsListView */
+"my.requests.empty" = "You have not requested to join any routes yet.";
+"my.requests.empty.hint" = "Browse routes in Discover and tap Send Join Request.";
+"my.requests.empty.cta" = "Find a route to join";
+"my.requests.status.pending" = "Pending";
+"my.requests.status.accepted" = "Accepted";
+"my.requests.status.accepted.celebrate" = "Accepted — you're in!";
+"my.requests.status.declined" = "Declined";
+"my.requests.status.withdrawn" = "Withdrawn";
+"my.requests.withdraw" = "Withdraw";
+/* Footer: "%d requests · %d pending" */
+"my.requests.count" = "%1$d requests · %2$d pending";
+
+/* US-031 — JoinRouteRequestSheet */
+"join.sheet.title" = "Request to join";
+"join.pace.label" = "Pace match";
+"join.pace.placeholder" = "Please select";
+"join.pace.slower" = "Slower than host";
+"join.pace.matching" = "Matching";
+"join.pace.faster" = "Faster than host";
+"join.message.label" = "About you";
+"join.message.placeholder" = "Introduce yourself to the host...";
+"join.submit" = "Send request";
+"join.error.pace.missing" = "Please choose a pace match";
+"join.error.message.missing" = "Please add a short intro";
+
+/* US-034 — ApprovalQueueView */
+"approval.queue.title" = "Pending requests";
+"approval.queue.trust.line" = "Walked %d routes · %d group trips";
+/* US-032 — per-requester trust micro-stats */
+"approval.queue.signal.optin.yes" = "Opted in";
+"approval.queue.signal.optin.no" = "Not opted in";
+"approval.queue.signal.optin.a11y" = "Companion opt-in: %@";
+"approval.queue.signal.walked.a11y" = "Walked %@ routes";
+"approval.queue.signal.group.a11y" = "%@ group trips";
+"approval.queue.decline" = "Decline";
+"approval.queue.accept" = "Accept";
+"approval.queue.empty" = "No pending requests for this route.";
+
+/* US-034 — MyHostedRoutesListView */
+"my.hosted.routes.title" = "Routes I host";
+"my.hosted.routes.empty" = "You are not hosting any routes yet.";
+"my.hosted.routes.empty.title" = "No hosted routes yet";
+"my.hosted.routes.empty.hint" = "Create a route and invite companions to join you on your journey.";
+"my.hosted.routes.empty.cta" = "Create a route";
+"settings.companion.hosted.routes" = "My hosted routes";
+
+/* US-038 — CompletionMoment */
+"completion.mark.done" = "Mark done";
+"completion.stat.walked" = "Walked";
+"completion.stat.travelers" = "Travelers";
+"completion.tagline" = "This route now shines for the next traveler";
+"completion.a11y" = "Route complete — walked by %d travelers, %d companions joined";
+
+/* US-039 — OpenForCompanionsSheet */
+"openForCompanions.button" = "Open for companions ->";
+"openForCompanions.sheet.title" = "Create Recruiting Route";
+"openForCompanions.departure.header" = "Departure Window";
+"openForCompanions.departureFrom" = "From";
+"openForCompanions.departureTo" = "To";
+"openForCompanions.departureTime" = "Time";
+"openForCompanions.pace" = "Pace";
+"openForCompanions.maxMembers" = "Max Members";
+"openForCompanions.maxMembers.value" = "%d people";
+"openForCompanions.visibility" = "Visibility";
+"openForCompanions.visibility.public" = "Public";
+"openForCompanions.visibility.linkOnly" = "Link Only";
+"openForCompanions.hostMessage" = "Host Message";
+"openForCompanions.hostMessage.placeholder" = "Tell potential companions what to expect…";
+"openForCompanions.submit" = "Create Route";
+
+/* US-050: VoiceOver announcements when empty-state views appear, so VoiceOver
+   users know the list is empty rather than thinking the UI froze. */
+"a11y.empty.nearby" = "No experiences nearby";
+"a11y.empty.filterResults" = "No results for this filter";
+"a11y.empty.list" = "No experiences to show";
+
+/* Empty Nearby two-tier empty state (headline + subtitle) */
+"empty.nearby.headline" = "Quiet patch of map.";
+"empty.nearby.subtitle" = "Pan, or widen the radius to see what's around.";
+
+/* Empty Nearby CTA — nudges the traveler to recenter/zoom out */
+"empty.nearby.cta" = "Take me somewhere alive";
+
+/* Empty Nearby — city has no data, suggest switching */
+"empty.nearby.subtitle.nocity" = "This area doesn't have experiences yet. Try a city we've curated for you.";
+"empty.nearby.cta.city" = "Explore %@";
+"empty.nearby.a11y.city.hint" = "Switch to %@ which has curated experiences";
+
+/* Now filter empty — time-aware */
+"empty.now.headline" = "Nothing open right now";
+"empty.now.subtitle" = "Check back later — experiences rotate based on time of day.";
+"empty.now.latenight" = "It's late — most spots are closed";
+"empty.now.latenight.headline" = "It's late — rest up";
+"empty.now.latenight.subtitle" = "Most spots are closed for the night. Check back in the morning for fresh picks.";
+
+/* Distance replaced by city name when > 500km */
+"nearby.distance.inCity" = "In %@";
+"nearby.distance.inCity.a11y" = "Located in %@";
+
+/* Compass direction overlay in ExperienceDetailView hero */
+"compass.pointing.title" = "Pointing toward";
+"compass.direction.a11y" = "%1$@ away, pointing %2$@";
+"nearby.direction.suffix" = "to the %@";
+
+/* BottomInfoSheet peek summary card ("此刻最值得去") */
+"peek.pick.header" = "Best for right now";
+"peek.empty.hint" = "Move the map to discover nearby spots";
+"peek.card.hint" = "Double tap to see all nearby spots";
+"peek.card.aiPick" = "AI Pick";
+"peek.card.aiPick.a11y" = "AI pick for right now";
+"peek.card.almostThere" = "Almost there";
+"peek.card.almostThere.a11y" = "Almost there";
+"peek.preview.active.hint" = "Viewing your pick · pull up for all nearby";
+"peek.reason.aiPick" = "Right now I'd take you here — %@.";
+"peek.reason.warmStart" = "Strongest %@ pick in view right now · Solo %.1f";
+"peek.now.goodTime" = "%d%% good time now";
+"peek.confidence.basedOn" = "from %d solo travelers";
+"peek.confidence.aiEstimate" = "AI estimate · unverified";
+"peek.confidence.basedOn.one" = "from 1 solo traveler";
+"peek.action.go" = "Take me";
+"peek.action.shuffle" = "Next";
+"sheet.handle.hint" = "Tap to expand, drag to resize";
+
+/* NowScore weather signal (US-005) — %d is the temperature in whole °C. */
+"nowscore.weather.sunny" = "Clear · %d°C · Great for it";
+"nowscore.weather.cloudy" = "Cloudy · %d°C · Fine";
+"nowscore.weather.rain" = "Rain · %d°C · Maybe stay in";
+"nowscore.weather.storm" = "Storm warning · Not advised outdoors";
+"nowscore.weather.indoor" = "Indoor · Weather doesn't matter";
+
+/* NowScore sunset signal (US-006) — %d is whole minutes. Plural-aware variants
+   live in Localizable.stringsdict; these are the fallbacks. */
+"nowscore.sunset.before_min" = "Sunset in %d min";
+"nowscore.sunset.blue_hour" = "%d min after sunset · blue hour";
+"nowscore.sunset.after_min" = "Sunset was %d min ago";
+
+/* Chat history (saved conversations) */
+"chat.history.title" = "History";
+"chat.history.untitled" = "Untitled chat";
+"chat.history.messageCount" = "%d messages";
+"chat.history.empty.title" = "No conversations yet";
+"chat.history.empty" = "Your saved chats will appear here.";
+"chat.history.open.a11y" = "Open chat history";
+"common.done" = "Done";
+
+/* US-009 — FriendProfileView (read-only profile of another user) */
+"friend.profile.handle.placeholder" = "Traveler";
+"friend.profile.bio.header" = "ABOUT";
+"friend.profile.languages.header" = "SPEAKS";
+"friend.profile.stat.placesWalked" = "places walked";
+"friend.profile.stat.routesJoined" = "routes joined";
+"friend.profile.stat.friends" = "friends";
+"friend.profile.action.addFriend" = "Add Friend";
+"friend.profile.action.requestPending" = "Request Pending";
+"friend.profile.action.message" = "Message";
+"friend.profile.action.invite" = "Open invitation draft";
+/* Add-friend button states — companion chat / route group (US-015) */
+"friend.add.state.add" = "Add Friend";
+"friend.add.state.pending" = "Pending";
+"friend.add.state.friends" = "Friends";
+
+/* Friends list + request inbox (US-010) */
+"friends.list.title" = "Friends";
+"friends.list.refresh.a11y" = "Refresh friends and requests";
+"friends.list.pending.count" = "%d pending";
+"friends.list.pending.count.a11y" = "%d pending friend requests";
+"friends.list.requests.section" = "Friend Requests";
+"friends.list.friends.section" = "Friends";
+"friends.list.request.from" = "From";
+"friends.request.accept" = "Accept";
+"friends.request.decline" = "Decline";
+"friends.list.friend.a11y" = "Friend %@. Tap to view profile.";
+"friends.list.strip.a11y" = "Your friends";
+"friends.list.empty.friends" = "No friends yet.";
+"friends.list.empty.title" = "No friends yet";
+"friends.list.empty.description" = "When you meet fellow travelers and add them, they'll show up here.";
+"friends.list.empty.cta" = "Add a friend";
+"friends.list.error.title" = "Couldn't load friends";
+"friends.list.error.retry" = "Try Again";
+"friends.connected.label" = "Connected!";
+"friends.connected.a11y" = "You are now connected with %@";
+
+/* Inline friend-code search + my code (FriendsHubView) */
+"friends.inline.search.placeholder" = "Enter friend code SOLO-XXXX-XXXX";
+"friends.inline.scan.a11y" = "Scan a friend's QR code";
+"friends.inline.lookup.a11y" = "Look up friend";
+"friends.inline.myCode.show" = "My friend code";
+"friends.inline.myCode.hide" = "Hide my friend code";
+
+/* Add friend sheet — my shareable code + QR (US-013) */
+"friends.add.open.a11y" = "Show my friend code";
+"friends.add.title" = "Add Me";
+"friends.add.subtitle" = "Share this code or have a fellow traveler scan the QR to add you.";
+"friends.add.qr.a11y" = "QR code for your friend code";
+"friends.add.code.a11y" = "Your friend code is %@";
+"friends.add.copy" = "Copy Code";
+"friends.add.copy.hint" = "Long-press the code to copy";
+"friends.add.copied" = "Copied!";
+"friends.add.share" = "Share Code";
+"friends.add.rotate" = "Rotate Code";
+"friends.add.error.title" = "Couldn't load your code";
+"friends.add.error.description" = "Check your connection and try again.";
+
+/* US-014: add a friend by scanning / typing their code */
+"friends.add.mode.myCode" = "My Code";
+"friends.add.mode.addFriend" = "Add Friend";
+"friends.redeem.subtitle" = "Scan a traveler's QR or type their code to add them.";
+"friends.redeem.scan" = "Scan QR Code";
+"friends.redeem.scan.title" = "Scan Friend Code";
+"friends.redeem.scan.denied" = "Camera unavailable. Type the code instead.";
+"friends.redeem.enter.label" = "Or enter their code";
+"friends.redeem.lookup" = "Look Up";
+"friends.redeem.preview.title" = "Add Friend";
+"friends.redeem.sent" = "Friend request sent";
+"friends.redeem.error.format" = "That doesn't look like a valid code.";
+"friends.redeem.error.notFound" = "We couldn't find anyone with that code.";
+"friends.redeem.error.own" = "That's your own code.";
+"friends.list.row.remove" = "Remove";
+"friends.list.remove.confirm.title" = "Remove %@?";
+"friends.list.remove.confirm.action" = "Remove Friend";
+"friends.removed.a11y" = "%@ removed from friends";
+"friend.error.disabled" = "Friends aren't available right now.";
+"friend.error.encoding" = "Something went wrong. Please try again.";
+"friend.error.self" = "You can't add yourself.";
+
+/* Friends — add from Discover (US-016) */
+"companion.discover.detail.title" = "Add Friend";
+"friend.discover.note.label" = "Add a note (optional)";
+"friend.discover.note.placeholder" = "Say hello — what made you reach out?";
+"friend.discover.note.count.a11y" = "%d of %d characters";
+"friend.discover.error.lowTrust" = "This traveler can't be added right now.";
+"friend.discover.error.rateLimited" = "You've added a lot of people recently. Try again later.";
+
+/* US-017: unified conversation list (Me ▸ Messages) */
+"messages.empty" = "No conversations yet";
+"messages.preview.empty" = "No messages yet";
+"messages.preview.attachment" = "📎 Attachment";
+"messages.group.fallbackTitle" = "Route group";
+"messages.unknownUser" = "Traveler";
+"messages.unread.a11y" = "Unread";
+
+/* AvatarStack accessibility labels */
+"avatarstack.one" = "1 person";
+"avatarstack.count" = "%d people";
+
+/* AvatarStack overflow popover */
+"avatarstack.members.title" = "Members";
+"avatarstack.overflow.hint" = "Shows all members";
+
+/* ── Experience detail · warm-amber redesign ── */
+"section.location" = "Location";
+"meta.bestNow" = "Good now";
+"meta.walkMinutes" = "%d min walk";
+"solo.bestCall" = "Best for solo: %@";
+"solo.showAll" = "All %d";
+"solo.collapse" = "Collapse";
+
+/* Trust chip (mapped from confidence health) */
+"trust.verified" = "Verified";
+"trust.observing" = "Observing";
+"trust.questioned" = "Unconfirmed";
+
+/* ── Traveler co-build layer ── */
+"notes.title" = "Notes on this device";
+"notes.signals" = "signals";
+"notes.signals.aiEstimate" = "AI estimate";
+"notes.signal.plus" = "+1 signal";
+"notes.author.you" = "You";
+"notes.author.traveler" = "Traveler %@";
+"notes.empty" = "No notes of this kind. Try another filter.";
+"notes.expandAll" = "Show all %d →";
+"notes.collapse" = "Collapse";
+"notes.filter.all" = "All";
+"notes.filter.experience" = "Experience";
+"notes.filter.correction" = "Correction";
+"notes.tag.experience" = "Experience";
+"notes.tag.correction" = "Correction";
+"notes.status.adopted" = "Saved note";
+"notes.status.verified" = "Local confirmations: %d";
+"notes.status.pending" = "Local confirmations: %d";
+"notes.confirm" = "Confirm too";
+"notes.confirmed" = "Confirmed";
+"notes.addPrompt" = "Save a personal note";
+"notes.addHint" = "Saved on this device";
+"notes.input.placeholder" = "e.g. quiet on Tuesday afternoon…";
+"notes.input.placeholderWithMood" = "Add a line (optional)…";
+"notes.submit" = "Submit note";
+"notes.contributed.toast" = "Saved on this device.";
+"notes.level.up.toast" = "Saved on this device.";
+"notes.field.hours" = "Opening hours";
+"notes.correction.source.demo" = "Reported by 3 travelers in the past 2 weeks";
+
+/* Correction proposal */
+"correction.heading" = "Info may need updating";
+"correction.confirm" = "Confirm";
+"correction.dismiss" = "Inaccurate";
+"correction.confirmed.toast" = "Your decision about “%@” was saved on this device.";
+/* Mood chips (quick-add) */
+"mood.quiet" = "Quiet";
+"mood.slowWifi" = "Slow Wi-Fi";
+"mood.comfySeat" = "Comfy seats";
+"mood.friendlyStaff" = "Friendly staff";
+"mood.goodCoffee" = "Good coffee";
+"mood.soloOk" = "Solo OK";
+"mood.greatView" = "Great view";
+"mood.crowded" = "Crowded";
+"mood.needsWalk" = "Needs a walk";
+"mood.mosquitoes" = "Mosquitoes";
+"mood.goodLight" = "Good light";
+"mood.worthIt" = "Worth it";
+"mood.needsQuiet" = "Be quiet";
+"mood.photoOk" = "Photos OK";
+"mood.shoesOff" = "Shoes off";
+"mood.entryFee" = "Entry fee";
+"mood.bigPortion" = "Big portion";
+"mood.longQueue" = "Long queue";
+"mood.soloFriendly" = "Solo-friendly";
+"mood.notSpicy" = "Not spicy";
+"mood.cheap" = "Cheap";
+"mood.goodStaff" = "Good staff";
+"mood.fewPeople" = "Few people";
+"mood.comfySpace" = "Comfy space";
+"mood.pricey" = "Pricey";
+"mood.needsBooking" = "Booking needed";
+"mood.goodMusic" = "Good music";
+"mood.safe" = "Safe";
+"mood.trulyHidden" = "Truly hidden";
+"mood.worthFinding" = "Worth finding";
+"mood.hardToFind" = "Hard to find";
+"mood.veryFew" = "Very few people";
+
+/* Actions — route favorite */
+"action.favorited" = "Favorited";
+"action.notFavorited" = "Not favorited";
+
+/* Chat attachments */
+"chat.attachment.add.a11y" = "Add attachment";
+"chat.attachment.add.title" = "Add attachment";
+"chat.attachment.close.a11y" = "Close attachment";
+"chat.attachment.remove.a11y" = "Remove attachment";
+"chat.attachment.source.camera" = "Camera";
+"chat.attachment.source.cancel" = "Cancel";
+"chat.attachment.source.files" = "Files";
+"chat.attachment.source.photos" = "Photo Library";
+
+/* Foursquare errors */
+"foursquare.error.missingKey" = "Foursquare API key is missing";
+"foursquare.error.request" = "Couldn't pull in places just now — try again in a moment.";
+"foursquare.error.url" = "Invalid Foursquare URL";
+
+/* Friends list — preview */
+"friends.list.error.preview" = "Preview error";
+
+/* Location picker */
+"locationPicker.map.pin" = "Selected location";
+
+/* Preview */
+"preview.raiseScore" = "Raise Score";
+
+/* Map style picker */
+"map.style.standard" = "Standard";
+"map.style.satellite" = "Satellite";
+"map.style.hybrid" = "Hybrid";
+
+/* Travel archive (P1.1 #111) */
+"archive.title" = "Travel Archive";
+"archive.trip.days" = "days";
+"archive.trip.places" = "places";
+"archive.city.count" = "%d visits";
+"archive.codex.title" = "City Codex";
+"archive.codex.coming" = "Unlock cards as you wander. Phase 3.";
+"archive.empty.title" = "No visits yet";
+"archive.empty.subtitle" = "Wander to a place and stay 5+ min — we'll quietly remember.";
+
+/* MeSheet top-tab segmented (P1.3 #132) */
+"me.tab.archive" = "Archive";
+"me.tab.me" = "Me";
+
+/* Onboarding vibe step (P1.2 #120) */
+"onboarding.vibe.title" = "Show us your vibe";
+"onboarding.vibe.subtitle" = "Pick 3 photos that feel like your kind of afternoon — we'll quietly tune your recommendations.";
+"onboarding.vibe.field.label" = "Or describe it in a sentence";
+"onboarding.vibe.field.placeholder" = "quiet cafés, slow mornings…";
+"onboarding.vibe.continue" = "Continue";
+"onboarding.vibe.skip" = "Skip for now";
+"onboarding.vibe.skip.hint" = "Skipping makes the first two weeks of suggestions less precise — you can come back later.";
+
+/* Onboarding city step (P1.2 #121) */
+"city.cmi" = "Chiang Mai";
+"city.szx" = "Shenzhen";
+"city.vte" = "Vientiane";
+"city.sf" = "San Francisco";
+"onboarding.city.title" = "Where do you start?";
+"onboarding.city.subtitle" = "Pick a city so the map opens where you actually are.";
+"onboarding.city.label" = "City";
+"onboarding.city.afternoon.label" = "What does your kind of afternoon look like?";
+"onboarding.city.afternoon.placeholder" = "Quiet courtyard, slow coffee, no pressure…";
+"onboarding.city.continue" = "Continue";
+
+/* Settings — Forget me (P2.0 #204) */
+"settings.forgetMe" = "Forget me";
+"settings.forgetMe.confirm.title" = "Forget your taste and memory?";
+"settings.forgetMe.confirm.message" = "Clears the on-device taste profile and everything Roamorrow remembers about you. Your favorites, routes, and preferences stay intact.";
+"settings.forgetMe.confirm.action" = "Forget me";
+"settings.forgetMe.toast.success" = "Done — the agent will start fresh next time you chat.";
+"settings.forgetMe.toast.failure" = "Couldn't clear right now. Try again in a moment.";
+"settings.exportData" = "Export my data";
+"settings.exportData.toast.empty" = "Nothing to export yet — your visits, capsules, and notes will show up here once you start using the app.";
+"settings.exportData.toast.failure" = "Couldn't prepare the export. Try again in a moment.";
+
+/* Startup self-diagnostics (StartupDiagnosticsService + SoloAgentBubble) */
+"diagnostics.anthropic.missing.title" = "AI brain isn't wired up";
+"diagnostics.anthropic.missing.detail" = "No AI API key detected — Roamorrow can only rank places with the offline scorer and won't hold a real conversation.";
+"diagnostics.anthropic.missing.fix" = "Head to Settings → AI Provider and paste an Anthropic or DeepSeek key.";
+"diagnostics.amap.missing.title" = "Amap isn't wired up";
+"diagnostics.amap.missing.detail" = "In China, Roamorrow prefers Amap for nearby lookups. Without a key we fall back to Overpass public data — results may be thin.";
+"diagnostics.amap.missing.fix" = "Set AMAP_API_KEY in Settings or your env file and relaunch.";
+"diagnostics.location.denied.title" = "Location is turned off";
+"diagnostics.location.denied.detail" = "The map can't tell where you are, so nearby picks, the Now filter and Live Activities all go quiet.";
+"diagnostics.location.denied.fix" = "Open Settings → Roamorrow → Location → While Using.";
+"diagnostics.location.pending.title" = "Location isn't authorized yet";
+"diagnostics.location.pending.detail" = "Tap Ask or the locate button to request location access.";
+"diagnostics.location.pending.fix" = "Trigger a location prompt.";
+"diagnostics.mic.denied.title" = "Speech recognition is off";
+"diagnostics.mic.denied.detail" = "Voice input can't be transcribed. You can still type to Roamorrow.";
+"diagnostics.mic.denied.fix" = "Open Settings → Roamorrow → Speech Recognition.";
+"diagnostics.notification.denied.title" = "Notifications are blocked";
+"diagnostics.notification.denied.detail" = "You'll miss lonely-hour nudges, Dynamic Island capsules and monthly-insight pushes.";
+"diagnostics.notification.denied.fix" = "Open Settings → Roamorrow → Notifications.";
+"diagnostics.onboarding.incomplete.title" = "Onboarding isn't finished";
+"diagnostics.onboarding.incomplete.detail" = "Without a vibe / city / taste, recommendations fall back to a generic list.";
+"diagnostics.onboarding.incomplete.fix" = "Head back to onboarding and finish the three steps.";
+"diagnostics.seed.empty.title" = "Place data is empty";
+"diagnostics.seed.empty.detail" = "seed_experiences.json didn't load and there's nothing in the on-device store — the map will be blank.";
+"diagnostics.seed.empty.fix" = "Reinstall the app or file a bug.";
+"diagnostics.seed.header" = "At launch you ran a quick health check on my behalf and turned up the issues below. Walk me through each one — the impact and how to fix it.";
+"solo.agent.bubble.dismiss" = "Dismiss";
+"solo.agent.bubble.diagnostics.cta" = "Ask how to fix it →";
+"solo.agent.bubble.diagnostics.subtitle.multi" = "%d more to talk through — tap and I'll explain.";
+
+/* MARK: - Developer Options (tester-email unlock only) */
+"dev.header" = "Developer";
+"dev.footer" = "Tools for testers and developers. Changes here only affect this device.";
+"dev.title" = "Developer Options";
+"dev.entry.subtitle" = "APIs, feature flags, and debug tools";
+
+"dev.status.header" = "Status";
+"dev.status.footer" = "Read-only diagnostics for the current build.";
+"dev.status.build" = "Build";
+"dev.status.version" = "Version";
+"dev.status.entitlement" = "Entitlement";
+"dev.status.aiModel" = "AI model";
+"dev.status.backendSync" = "Backend sync";
+
+"dev.value.on" = "On";
+"dev.value.off" = "Off";
+"dev.value.default" = "Default";
+
+"dev.api.header" = "API Configuration";
+"dev.api.footer" = "Override a built-in key to point the app at your own account. Leave blank to use the bundled default. Applies immediately — no rebuild.";
+"dev.api.notSet" = "Not set";
+"dev.api.foursquare" = "Foursquare key";
+"dev.api.openWeather" = "OpenWeather key";
+"dev.api.amap" = "Amap key";
+"dev.api.placeholder" = "Paste key to override default";
+"dev.api.clear" = "Clear override";
+
+"dev.dataSource.header" = "Data Sources";
+"dev.dataSource.sectionFooter" = "Choose which base map providers compile in, tune how many places each pulls, and test that every API is reachable.";
+"dev.dataSource.title" = "Data sources";
+"dev.dataSource.count.short" = "%d POIs";
+"dev.dataSource.amap.name" = "AMap (AutoNavi)";
+"dev.dataSource.openMap.name" = "OpenMap (OpenStreetMap)";
+"dev.dataSource.policy.header" = "Source policy";
+"dev.dataSource.policy.label" = "Compile with";
+"dev.dataSource.policy.footer" = "\"Both\" routes by region: AMap inside mainland China, OpenMap overseas, each a fallback for the other. Single-source modes pin every explore to one provider.";
+"dev.dataSource.policy.both" = "Both";
+"dev.dataSource.policy.amapOnly" = "AMap only";
+"dev.dataSource.policy.openMapOnly" = "OpenMap only";
+"dev.dataSource.fetchCount.header" = "Nearby fetch count";
+"dev.dataSource.fetchCount.label" = "POIs per source";
+"dev.dataSource.fetchCount.footer" = "How many nearby places each base source pulls per explore. Ranking still keeps only the strongest few; a wider pool just improves that ranking.";
+"dev.dataSource.probe.header" = "Connectivity";
+"dev.dataSource.probe.footer" = "Fires one tiny real request per provider to confirm the API is reachable and its key valid.";
+"dev.dataSource.probe.test" = "Test";
+"dev.dataSource.probe.disabled" = "Disabled by current policy";
+"dev.dataSource.probe.ok" = "OK · %d places";
+"dev.dataSource.probe.httpFailed" = "HTTP error %d";
+"dev.dataSource.probe.networkFailed" = "Network error: %@";
+"dev.dataSource.probe.badRequest" = "Could not build request";
+"dev.dataSource.probe.noKey" = "No key configured";
+
+"dev.flags.header" = "Feature Flags";
+"dev.flags.footer" = "Flip experimental features on or off. \"Default\" restores the shipped value.";
+"dev.flag.backendSync.title" = "Backend sync";
+"dev.flag.backendSync.subtitle" = "Supabase auth, sync, and Edge Functions.";
+"dev.flag.routeAIThroughEdge.title" = "Route AI through Edge";
+"dev.flag.routeAIThroughEdge.subtitle" = "Call the Supabase Edge Function instead of DeepSeek directly.";
+"dev.flag.proMultiRingExplore.title" = "Multi-ring Explore (Pro)";
+"dev.flag.proMultiRingExplore.subtitle" = "4-ring radial schedule for Explore Here.";
+"dev.flag.deepDiveEnrichment.title" = "Deep-dive enrichment";
+"dev.flag.deepDiveEnrichment.subtitle" = "Cross-reference places across Overpass, MapKit, and Foursquare.";
+"dev.flag.webSearchEnrichment.title" = "Web search enrichment";
+"dev.flag.webSearchEnrichment.subtitle" = "Extra AI call to verify hours, website, and phone.";
+"dev.flag.companion.title" = "Companion mode";
+"dev.flag.companion.subtitle" = "Friends, DMs, and companion discovery.";
+"dev.flag.companionLayer.title" = "Companion map layer";
+"dev.flag.companionLayer.subtitle" = "In-map toggle for nearby presence cells.";
+"dev.flag.cityOS.title" = "City OS";
+"dev.flag.cityOS.subtitle" = "Landing kit, local events, compliance banner, and city modes.";
+"dev.flag.todayHome.title" = "Today Home";
+"dev.flag.todayHome.subtitle" = "New Today home flow with the map demoted to a pull-up layer.";
+
+/* City OS v2: visa-expiry local reminder (PRD §5.2) */
+"cityos.visa.reminder.title" = "Visa reminder";
+"cityos.visa.reminder.body" = "%d days left on your visa — time to decide: extend, or book the next leg.";
+
+/* City OS v2: landing kit (落地包) */
+"cityos.kit.title" = "Landing Kit";
+"cityos.kit.link.open" = "Open";
+"cityos.kit.link.open.a11y" = "Open %@";
+"cityos.kit.link.toast" = "Opened %@ · come back to continue";
+"cityos.kit.call.a11y" = "Call %1$@ at %2$@";
+"cityos.health.unverified" = "unverified";
+
+/* City OS v2: visa / 183-day compliance */
+"cityos.visa.daysLeft" = "days left in your confirmed stay";
+"cityos.visa.taxLine" = "days to day183 of this stay";
+"cityos.visa.reminder.toggle" = "Expiry reminder";
+"cityos.visa.entryDate" = "Entry date";
+"cityos.visa.length" = "Visa %d days";
+"cityos.compliance.prefix" = "Visa: ";
+"cityos.compliance.suffix" = " days left";
+"cityos.compliance.overstay" = "Overstayed by %d days";
+"cityos.compliance.handle" = "Handle";
+"cityos.compliance.a11y" = "Visa: %d days remaining";
+
+/* City OS v2: local events (在地 · 本周) */
+"cityos.live.title" = "Local · This Week";
+"cityos.live.solo" = "Solo %@";
+"cityos.live.showOnMap" = "Show on map";
+"cityos.live.showOnMap.a11y" = "Show %@ on the map";
+"cityos.live.empty.title" = "Nothing on this week";
+"cityos.live.empty.hint" = "Check back — the city brief refreshes twice a week.";
+"cityos.event.marker.a11y" = "Event: %1$@, %2$@";
+
+/* City OS v2: drawer tabs + modes */
+"cityos.tab.kit" = "Landing Kit";
+"cityos.tab.live" = "Local · This Week";
+"cityos.mode.thisCity" = "This city";
+"cityos.picker.mode.section" = "City mode";
+"cityos.mode.live.tag" = "Here now";
+"cityos.mode.plan.tag" = "Plan";
+"cityos.mode.plan.title" = "%@ · Planning";
+"cityos.mode.plan.body" = "Line these up before you go — the moment you land, you can just start living.";
+"cityos.mode.plan.cta" = "See the landing kit";
+"cityos.mode.plan.cta.checklist" = "Open pre-trip checklist";
+"cityos.mode.plan.progress" = "%1$d/%2$d ready";
+"cityos.mode.recall.tag" = "Recall";
+"cityos.mode.recall.title" = "%@ · Looking back";
+"cityos.mode.recall.body" = "Places you complete here will show up for a quick verify — your 30 seconds backs the next solo traveler.";
+"cityos.mode.recall.pending.body" = "You visited %1$d places and %2$d still await your verify — their freshness is decaying. Your 30 seconds is the next solo traveler's confidence.";
+"cityos.mode.recall.alldone.body" = "You visited %d places, all verified. This city is more honest for the next solo traveler because of you.";
+"cityos.mode.recall.verify.cta" = "Verify “%@”";
+"cityos.mode.recall.verify.cta.generic" = "Verify a place you visited";
+
+/* 游民基地 Base card + panel (nomad base, face-driven entry) */
+"cityos.tab.base" = "Base";
+"cityos.base.title" = "%@ · Base";
+"cityos.base.panel.title" = "Base";
+"cityos.base.cta" = "Open base";
+"cityos.base.tag.plan" = "Plan";
+"cityos.base.tag.arrive" = "Arriving";
+"cityos.base.tag.live" = "Living here";
+"cityos.base.tag.recall" = "Recall";
+"cityos.base.subtitle.plan" = "Scout it before you land";
+"cityos.base.subtitle.arrive" = "Just landed · essentials first";
+"cityos.base.subtitle.live" = "Living here · where to work today";
+"cityos.base.subtitle.recall" = "Looking back · verify what you visited";
+"cityos.base.day" = "Day %d";
+"cityos.base.ring.unit" = "d";
+"cityos.base.visa.remaining" = "%d visa days left";
+"cityos.base.visa.policy" = "%d-day visa";
+"cityos.base.visa.setEntry" = "Set entry date";
+"cityos.base.visa.setEntry.hint" = "Confirm your entry date to start the countdown";
+"cityos.base.tax" = "%d days to the 183-day tax line";
+"cityos.base.work.count" = "%d work-ready";
+"cityos.base.events.count" = "%d events";
+"cityos.base.kit.count" = "%d kit items";
+"cityos.base.kit.progress" = "Prep %1$d/%2$d";
+"cityos.base.recall.stats" = "Visited %1$d · %2$d to verify";
+"cityos.base.recall.empty" = "Look back at this stay";
+"cityos.base.section.ask" = "Still wondering";
+"cityos.base.ask.title" = "Visa, weather, is it worth it";
+"cityos.base.ask.hint" = "Ask Roamorrow for help";
+"cityos.base.ask.prompt" = "I'm planning a remote-work stay in %@. What are the visa options, what's the weather like right now, and how good is it for working remotely?";
+"cityos.base.section.visa" = "Visa";
+"cityos.base.section.weather" = "Weather";
+"cityos.base.section.work" = "Work";
+"cityos.base.section.events" = "This week";
+"cityos.base.section.kit" = "Landing kit";
+"cityos.base.section.recall" = "Recall";
+"cityos.base.events.more" = "All events";
+"cityos.base.weather.temp" = "%1$d°C · %2$@";
+"cityos.base.weather.precip" = "%d%% chance of rain";
+"weather.condition.clear" = "Clear";
+"weather.condition.partlyCloudy" = "Partly cloudy";
+"weather.condition.cloudy" = "Cloudy";
+"weather.condition.rain" = "Rain";
+"weather.condition.storm" = "Storms";
+"weather.condition.snow" = "Snow";
+"weather.condition.fog" = "Fog";
+
+/* City OS v3: lifecycle stage + city pill */
+"cityos.stage.land" = "Landing";
+"cityos.stage.settle" = "Settling";
+"cityos.stage.live" = "Living";
+"cityos.stage.leave" = "Looking back";
+"cityos.pill.plan" = "Not yet · Plan";
+"cityos.pill.recall" = "Left · Recall";
+"cityos.pill.live" = "Day %1$d · %2$@";
+
+/* City OS v3: pre-trip checklist (Plan mode kit) */
+"cityos.kit.title.plan" = "Pre-trip checklist";
+"cityos.kit.todo.done.a11y" = "Ready, tap to untick";
+"cityos.kit.todo.pending.a11y" = "Mark as ready";
+
+/* City OS v3: verify sheet (Recall 印证) */
+"cityos.verify.title" = "Record what you experienced";
+"cityos.verify.subtitle" = "%@ — your answers become a note on this device. They do not change the public confidence score.";
+"cityos.verify.q.exists" = "Is it still there, still open?";
+"cityos.verify.q.exists.yes" = "Still there ✓";
+"cityos.verify.q.exists.no" = "Changed / closed";
+"cityos.verify.q.solo" = "Comfortable going alone?";
+"cityos.verify.q.solo.yes" = "Very comfortable";
+"cityos.verify.q.solo.no" = "A bit awkward";
+"cityos.verify.q.crowd" = "How crowded was it?";
+"cityos.verify.q.crowd.few" = "Quiet";
+"cityos.verify.q.crowd.many" = "Pretty packed";
+"cityos.verify.submit" = "Submit verify";
+"cityos.verify.toast" = "Verification saved on this device.";
+"cityos.verify.note.prefix" = "Verified: ";
+"cityos.verify.note.exists" = "still open";
+"cityos.verify.note.changed" = "changed / closed";
+"cityos.verify.note.solo" = "comfortable solo";
+"cityos.verify.note.awkward" = "a bit awkward solo";
+"cityos.verify.note.few" = "quiet";
+"cityos.verify.note.crowded" = "crowded";
+
+/* City OS v2: today's city omen (今日城市签) */
+"cityos.omen.line" = "Today's city omen · %@";
+
+"dev.tools.header" = "Debug Tools";
+"dev.tools.entitlement" = "Force entitlement";
+"dev.tools.resetOnboarding" = "Reset onboarding";
+"dev.tools.resetOnboarding.done" = "Onboarding will show on next launch.";
+"dev.tools.resetOverrides" = "Reset all overrides";
+"dev.tools.resetOverrides.confirm" = "Reset every feature-flag override to its default?";
+"dev.tools.resetOverrides.done" = "All overrides cleared.";
+
+"dev.lock" = "Lock developer options";
+"dev.lock.footer" = "Hides this panel until you unlock again with a tester email. Your Pro access is kept.";
+
+// MARK: Settings consolidation (#130)
+"settings.personalize" = "Your Taste";
+"settings.personalize.footer" = "Your style and category taste shape which experiences float to the top of the map.";
+"settings.categories.value" = "%1$d loved · %2$d hidden";
+"settings.discovery" = "Discovery";
+"settings.discovery.footer" = "Only experiences within this radius appear on the map. Nearby nudges are quiet — no marketing, ever.";
+"settings.appearanceLanguage" = "Appearance & Language";
+"settings.companion.hub" = "Companion hub";
+"settings.account" = "Account";
+"settings.dataAbout" = "Data & About";
+"settings.about.version" = "Version";
+"settings.advanced" = "Advanced";
+"settings.advanced.footer" = "Power-user tools: AI provider, tester unlock, and developer options.";
+"settings.theme.system" = "System";
+"settings.theme.obsidian" = "Obsidian";
+
+/* Nomad OS B1 — Today home container (nomad-os-b1-today-home-20260719) */
+"today.scaffold.placeholder" = "Your day, your city, your ledger — coming here soon.";
+"today.map.open" = "Open map";
+"today.map.backToToday" = "Back to Today";
+
+/* B1-c — today's three things */
+"today.threeThings.empty" = "Nothing to surface here yet — open the map and explore to fill this in.";
+"today.card.work.eyebrow" = "Work today";
+"today.card.now.eyebrow" = "Worth it now";
+"today.card.tonight.eyebrow" = "Tonight";
+
+/* B1-f — one-shot "new home" banner */
+"today.newHome.title" = "Your map has a new home";
+"today.newHome.subtitle" = "Pull down any time to get back to the map.";
+"today.newHome.dismiss" = "Dismiss";
+
+/* Nomad OS B1-b — Today status header */
+"today.header.noCity" = "Pick a city";
+"today.header.dayInCity" = "Day %d in this city";
+"today.header.firstDay" = "Just arrived";
+"today.header.visaRemaining" = "%d visa days left";
+"today.header.setEntryDate" = "Set entry";
+
+/* Nomad OS B1-d — Today nearby row + seal receipt */
+"today.nearby.count" = "%d nomads nearby";
+"today.nearby.beFirst" = "No nomads here yet — be the first";
+"today.seal.yesterdayTitle" = "Yesterday you sealed a moment";
+"today.seal.type.photo" = "a photo, waiting to resurface";
+"today.seal.type.voice" = "a voice note, waiting to resurface";
+"today.seal.type.text" = "a note, waiting to resurface";
+
+/* Localization gate repairs + ritual surfaces */
+"diagnostics.seed.ask" = "Ask Roamorrow how to fix this";
+"agent.step.clarify" = "Clarifying what you need";
+"agent.step.planning" = "Planning the next steps";
+"diagnostics.card.header" = "Startup check";
+"diagnostics.card.ask" = "Ask";
+"chat.bubble.expand" = "Show full message";
+"chat.bubble.collapse" = "Collapse message";
+"archive.rituals.title" = "Rituals";
+"archive.bookManifest.title" = "Travel Book · manifest";
+"archive.bookManifest.subtitle" = "The shape of your year in print.";
+"archive.capsules.title" = "Your capsules";
+"archive.book.yearEnd.title" = "Your year, in print.";
+"archive.book.yearEnd.subtitle" = "Turn this year's archive into a printed book. Limited window.";
+"archive.codex.upsell.free" = "Free tier shows the current month.";
+"archive.codex.upsell.pro" = "Pro reveals your entire codex.";
+"blindbox.launch.title" = "Blindbox";
+"blindbox.launch.subtitle" = "Three anchor stops. We reveal each when you arrive. No rush, no preview.";
+"blindbox.launch.open" = "Open";
+"capsule.compose.prompt" = "Leave a note here for future you.";
+"capsule.compose.bury" = "Bury";
+"experience.soloScore.short" = "Solo %.1f";
+"omen.microTask" = "Micro-task";
+"omen.kept" = "Kept.";
+"omen.tomorrow" = "Tomorrow's card is being written.";
+"ost.today.title" = "Today's OST";
+"settings.notifications.proactive.header" = "Proactive nudges";
+"settings.notifications.proactive.footer" = "You'll never get more than 3 nudges in a day, regardless of type.";
+"liveActivity.brand" = "Roamorrow";
+"liveActivity.preview.allKindsTitle" = "Live Activity · 3 new kinds";
+"toolRouter.preview.title" = "Tool Router · 7 new tools";
+"toolRouter.preview.subtitle" = "Runs inside the chat agent — no standalone UI. This is the audit contract.";
+"dev.performance.header" = "UX Performance";
+"dev.performance.footer" = "Local session samples only. p95 is compared with the product budget and never uploaded.";
+"dev.performance.empty" = "No interaction samples yet. Open a map pin or drag the bottom sheet.";
+"dev.performance.clear" = "Clear performance samples";
+"dev.performance.pinToDetail" = "Pin → detail usable";
+"dev.performance.sheetSettle" = "Bottom sheet settle";
+"dev.performance.p95" = "p95 %1$d / %2$d ms";
+"dev.performance.detail" = "%1$d samples · p50 %2$d ms · %3$d%% in budget";
+
+/* Conversation workspace (map / chat / discover) */
+"workspace.dock.map" = "Map";
+"workspace.dock.ask" = "Ask";
+"workspace.dock.discover" = "Discover";
+"workspace.handle.a11y" = "Conversation panel";
+"workspace.handle.hint" = "Drag up or down to resize the conversation and map";
+"workspace.detent.collapsed" = "Map";
+"workspace.detent.conversation" = "Conversation";
+"workspace.detent.expanded" = "Expanded conversation";
+"workspace.collapseChat" = "Collapse the chat back onto the map";
+"chat.returnToLatest" = "Latest";
+"chat.returnToLatest.a11y" = "New reply. Jump to the latest message.";
+"discover.title" = "Discover";
+"discover.subtitle" = "Curated for %@";
+"discover.retry" = "Retry";
+"discover.offline.title" = "You're offline";
+"discover.offline.subtitle" = "Showing what's already on the map.";
+"discover.empty.title" = "Nothing to discover here yet";
+"discover.empty.subtitle" = "Try another area, or ask Roamorrow what's nearby.";
+"sort.a11y" = "Sort";
+
+/* Chat recommendation card — editorial evidence */
+"chat.card.evidence" = "%1$@ · %2$d sources";
+"chat.card.bestTime" = "Best %1$02d:00–%2$02d:00";
+
+/* Agent chat send restrictions */
+"chat.send.hint.attachmentsUnsupported" = "Attachments aren't supported in this chat yet — send text or remove the file.";
+
+/* Conversation workspace — choose-city affordance */
+"workspace.chooseCity" = "Choose a city";
+
+/* Detail meta — honest walk estimate (straight-line, not a routed ETA) */
+"meta.walkEstimate" = "≈ walk %d min";
+
+"chat.error.turnTimeout" = "That search took too long. Your conversation is saved. Try again or narrow the area.";
+
+/* Travel journey refinement */
+"ux.save" = "Save";
+"ux.saved" = "Saved";
+"ux.visited" = "Visited";
+"ux.favorites" = "Saved places";
+"ux.itineraries" = "My trips";
+"ux.search.found" = "Found %d places in this area. Clear your search or filters to browse the map results.";
+"ux.search.empty" = "No places found in this area. Try another name or a different city.";
+"ux.search.failed" = "Search could not connect. Check your connection and try again.";
+"ux.ritual.omen" = "Today’s inspiration";
+"ux.ritual.blindbox" = "Travel surprise";
+"ux.ritual.codex" = "City collection";
+"ux.ritual.brag" = "Share a memory";
+"ux.ritual.ost" = "Travel soundtrack";
+"ux.ritual.insight" = "Monthly reflections";
+"ux.ritual.capsule" = "Open a time capsule";
+"ux.discover.experiences" = "Experiences to try";
+
+"soloScore.unassessed" = "Not assessed";
+"explore.toast.partial" = "Some places could not be loaded. Try again shortly.";
+
+"map.coordinates.unavailable" = "Map positions could not be verified. Places remain available in the list.";
+"common.retry" = "Retry";
+
+"map.coordinates.styleUnverified" = "Positions in this map mode are unverified. Use the standard map or the places list.";
+"map.coordinates.useStandard" = "Standard map";
+
+// Interaction-quality batch — shared control semantics, honest states (EN+ZH parity)
+"ai.provider.status.saved" = "API key saved for %@. Connection not verified here.";
+"archive.capsule.empty" = "No time capsule has ripened yet. Bury one from an experience page.";
+"archive.capsule.open.title" = "A note from you";
+"archive.codex.empty" = "Your city codex fills in as you visit places — nothing recorded yet.";
+"archive.ritual.blindbox.title" = "Blindbox trip";
+"archive.ritual.bookManifest.title" = "Travel Book";
+"archive.ritual.brag.title" = "Share a memory";
+"archive.ritual.capsuleOpen.title" = "Time capsule";
+"archive.ritual.cityCodex.title" = "City Codex";
+"archive.ritual.insight.title" = "Monthly Insight";
+"archive.ritual.liveActivity.title" = "Live activity preview";
+"archive.ritual.omen.title" = "Today's Omen";
+"archive.ritual.ost.title" = "Today's OST";
+"archive.ritual.preview.badge" = "Preview";
+"archive.ritual.preview.note" = "Preview only — nothing here is saved, sent or sold.";
+"archive.ritual.toolContract.title" = "Tool contract preview";
+"blindbox.launch.duration" = "Duration";
+"blindbox.launch.notNow" = "Not now";
+"brag.metric.days" = "days";
+"brag.metric.km" = "km";
+"brag.metric.places" = "places";
+"brag.share" = "Share";
+"brag.share.a11y" = "Share this card";
+"brag.video.preview" = "Video · preview";
+"brag.video.preview.a11y" = "Video recap, preview only";
+"brag.wallpaper" = "Wallpaper";
+"brag.wallpaper.a11y" = "Save the card to use as a wallpaper";
+"capsule.buried.toast" = "Buried — it will surface in %d months";
+"capsule.compose.discard.confirm" = "Discard";
+"capsule.compose.discard.keep" = "Keep editing";
+"capsule.compose.discard.message" = "Your note has not been buried yet.";
+"capsule.compose.discard.title" = "Discard this note?";
+"capsule.compose.editor.a11y" = "Note to your future self";
+"capsule.compose.months" = "%d months";
+"capsule.compose.saveFailed" = "Couldn't bury this note — it is still here. Tap Bury to try again.";
+"capsule.compose.surfaceIn" = "Surface in";
+"capsule.compose.title" = "Time capsule";
+"capsule.open.reply" = "Reply to yourself";
+"chat.record.stop.hint" = "Stops recording and sends your voice message.";
+"chat.send.attachmentsFailed" = "Message sent, but attachments couldn't be uploaded and stay staged: %@";
+"chat.send.failed" = "Message not sent — it is still in the input field.";
+"common.selected" = "Selected";
+"companion.inbox.accepted.open" = "Open conversation";
+"friend.add.failed" = "Couldn't send the friend request: %@";
+"friend.add.state.sending" = "Sending…";
+"join.submit.failed" = "Request not sent — your draft is kept. %@";
+"join.submit.unavailable" = "Joining routes isn't available yet — your draft is kept.";
+"locationPicker.map.coords.invalid" = "Coordinates are out of range or unreadable.";
+"locationPicker.map.east" = "E";
+"locationPicker.map.north" = "N";
+"locationPicker.map.south" = "S";
+"locationPicker.map.west" = "W";
+"omen.markDone" = "Mark done";
+"paywall.period.day" = "/day";
+"paywall.period.dayN" = "/%1$dd";
+"paywall.period.week" = "/week";
+"paywall.period.weekN" = "/%1$dw";
+"paywall.period.month" = "/month";
+"paywall.period.monthN" = "/%1$dm";
+"paywall.period.year" = "/year";
+"paywall.period.yearN" = "/%1$dy";
+"paywall.plan.a11y" = "%1$@, %2$@%3$@";
+"paywall.plan.selected" = "Selected";
+"paywall.restore.a11y" = "Restore purchases";
+"paywall.restore.failed" = "Restore failed: %@";
+"paywall.restore.none" = "No previous purchases were found for this Apple ID.";
+"settings.category.state.hidden" = "Hidden";
+"settings.category.state.neutral" = "Not set";
+"settings.category.state.preferred" = "Preferred";
+"settings.hidden.remove.a11y" = "Show %@ again";
+"share.preview.failed" = "Preview could not be rendered.";
+"share.preview.retry" = "Retry preview";
+"userLocation.form.photo.remove.a11y" = "Remove photo %1$d of %2$d";
+"companion.chat.attachment.uploadFailed.generic" = "Attachments could not be uploaded";
+
+"chat.send.tooLong" = "Your message is over 1,000 characters. Shorten it and try again; your draft is still here.";
+
+"map.options" = "Map options and library";
+"map.style.title" = "Map style";
+
+"chat.send.pendingAttachments" = "Attachments not sent";
+"chat.send.retryAttachments" = "Retry attachments only";
+"archive.record.readOnly.badge" = "Read-only record";
+"archive.record.readOnly.note" = "Your saved text and dates are available to read. Sharing and replies are not available here yet. Use Close to return.";
+
+/* Interaction quality round 2 — route detail, save recovery, voice, reports. */
+"route.detail.cta.groupChat.unavailable" = "Group chat isn't available yet";
+"route.detail.completion.replay" = "Replay completion moment";
+"route.detail.save.savedIn" = "Saved in %@";
+"stops.row.hint" = "Opens this stop's details";
+"itinerary.addTo.error.retry" = "Retry";
+"route.create.save.error" = "Couldn't save this route. Your draft is unchanged — try again.";
+"route.create.save.retry" = "Retry save";
+"route.create.suggestion.stale.title" = "A suggestion arrived after your edits — use it?";
+"route.create.suggestion.adopt" = "Use suggestion";
+"route.create.suggestion.keep" = "Keep my edits";
+"route.create.localFallback" = "Planned locally — the AI service was unavailable.";
+"route.create.modelCopy" = "Title and summary drafted by AI · stops chosen deterministically";
+"route.create.ai.retry" = "Retry AI";
+"openForCompanions.save.error" = "Couldn't create the recruiting route. Nothing was saved — try again.";
+"openForCompanions.retry" = "Retry";
+"itinerary.detail.save.error" = "Couldn't save this change. The previous value is kept.";
+"itinerary.detail.save.retry" = "Retry";
+"approval.queue.error.title" = "Request not updated";
+"approval.queue.error.retry" = "Retry";
+"approval.queue.error.message" = "This request is still pending — nothing changed. Try again.";
+"friends.list.remove.error" = "Couldn't remove %@. They're still your friend.";
+"friends.list.remove.retry" = "Retry";
+"messages.load.error" = "Couldn't load your conversations.";
+"messages.load.retry" = "Retry";
+"notes.submit.error" = "Couldn't save your note. It's still here — try again.";
+"userLocation.form.photo.save.error" = "%d photos couldn't be saved";
+"userLocation.form.photo.save.error.hint" = "The failed photos are kept in the form. Retry, or save without them.";
+"userLocation.form.photo.save.retry" = "Retry save";
+"userLocation.form.photo.save.omit" = "Save without failed photos";
+"report.savedLocally" = "Saved on this device — not sent yet";
+"report.sent" = "Sent to support from your mail app";
+"report.delivery.title" = "Send your report";
+"report.delivery.email" = "Email support";
+"report.delivery.share" = "Share a copy";
+"report.delivery.share.message" = "A report about this place from Roamorrow";
+"report.delivery.notSentHint" = "Your draft stays saved on this device until you send it.";
+"report.delivery.notSent" = "Not sent — the draft is still saved on this device.";
+"report.delivery.preview" = "Report content";
+"report.email.body.experience" = "Experience: %@";
+"report.email.body.place" = "Place: %@";
+"report.email.body.city" = "City: %@";
+"report.email.body.reason" = "Reason: %@";
+"report.email.body.noDetail" = "(no additional details)";
+
+/* Interaction quality round 2 follow-up — completion flow + friend invite. */
+"completion.confirm.title" = "Mark this route done?";
+"completion.confirm.message" = "Records the walk as completed for everyone in the group. Nothing is saved until you confirm.";
+"completion.committing" = "Saving…";
+"completion.error.unavailable" = "Completion can't be recorded on the server yet — nothing was marked done.";
+"completion.error.failed" = "Couldn't mark the route done — nothing was saved.";
+"completion.error.retry" = "Retry";
+"friends.invite.draft.default" = "Hi! Want to join my next route? Let's find a time.";
+"friends.invite.composer.title" = "Invitation draft";
+"friends.invite.composer.header" = "Invitation for %@";
+"friends.invite.composer.hint" = "Review the message, then open it in your chat. Nothing is sent until you send it there.";
+"friends.invite.open" = "Open invitation draft";
+
+/* Interaction quality round 2 — consolidated review closures. */
+"discover.recruiting.empty.noCity" = "Pick a city on the map to see or create recruiting routes.";
+"discover.recruiting.empty.noCandidates" = "This city has no curated places to build a route from yet.";
+"discover.recruiting.empty.chooseCity" = "Choose a city on the map";
+"discover.recruiting.empty.backToMap" = "Choose a city on the map";
+"invite.friends.error.title" = "Members not saved";
+"invite.friends.error.message" = "Nothing was added to the route — your selection is kept. Try again.";
+"invite.friends.error.retry" = "Retry";
+"userLocation.form.photo.save.editAgain" = "Return to editing photos";
+"report.delivery.edit" = "Edit draft";
+
+"companion.post.action.retry" = "Couldn’t save. Your draft is still here. Please retry.";
+
+"companion.post.action.unavailable" = "This post is no longer available. Refresh discovery to find another companion.";
+
+"companion.post.action.edited" = "Your previous submission was saved. These edited words have not been sent. Refresh to check its status.";
+
+"companion.post.action.sending" = "Sending…";
+
+"companion.service.featureDisabled" = "Companion mode is not enabled.";
+
+"companion.service.encodingFailed" = "Couldn’t prepare this request. Please retry.";
+
+"companion.service.notSignedIn" = "Connect your account before using companion features.";
+
+"notes.save.failed" = "Couldn’t save. Your answers are still here. Please retry.";
+
+"notes.action.failed" = "Couldn’t save this change. Please retry.";
+
+"today.entry.days" = "Confirmed stay length in days";
+
+"today.entry.explanation" = "Use the stay length you have confirmed. Your arrival date counts as day 1. This personal countdown does not determine visa or tax eligibility.";
+
+"today.entry.edit" = "Edit countdown";
+
+"today.entry.personalCountdown" = "Personal stay countdown";
+
+"today.receipt.saved" = "Sealed";
+
+"today.receipt.return" = "Ready from";
+
+"today.receipt.explanation" = "Your moment stays sealed here. After the date above, return near the original place to let it resurface.";
+
+"today.receipt.title" = "Sealed receipt";
+
+"cityos.kit.link.failed" = "Couldn’t open %@. Check that its app is installed, then try again.";
+
+"action.save" = "Save";
+
+"chat.history.delete.confirm" = "Delete the selected conversations? This cannot be undone.";
+
+"chat.history.delete.failed" = "Couldn’t delete the conversation. It is still in your history. Please retry.";
+
+"itinerary.mutation.failed" = "Couldn’t save this change. Your previous state is kept. Please retry.";
+
+"notes.local.count" = "%d notes on this device";
+
+"userLocation.form.photo.loading" = "Loading selected photos…";
+
+"userLocation.form.photo.loadFailed" = "%d selected photos could not be read. Choose them again, or explicitly skip them before saving.";
+
+"userLocation.form.photo.skipUnreadable" = "Skip unreadable photos";
+
+"paywall.offer.headline" = "An introductory offer is available";
+
+"paywall.offer.details" = "Review the offer duration and renewal price in Apple’s subscription confirmation.";
+
+"paywall.offer.badge" = "Offer available";
+
+"paywall.cta.offer" = "Subscribe with offer";
+
+"today.entry.days.label" = "Stay length";
+
+"today.entry.days.example" = "e.g. 30";
+
+"today.entry.days.unit" = "days";
+
+"paywall.products.unavailable" = "Plan prices aren’t available right now. Retry to review them, or continue for free.";
+
+"paywall.products.retry" = "Retry loading plans";
+
+"paywall.products.loading" = "Loading plans…";
+
+"userLocation.form.name.fieldLabel" = "Place name (required)";
+
+"userLocation.form.nameLocal.fieldLabel" = "Local name (optional)";
+
+"userLocation.form.oneLiner.fieldLabel" = "One-line experience (optional)";
+
+"chat.thinking.status.completed" = "Done:";
+
+"chat.thinking.status.active" = "In progress:";
+
+"chat.thinking.status.waiting" = "Waiting:";
+
+"chat.route.viewRoute" = "View route";
+
+"location.copyAddress" = "Copy address";
+
+"chat.route.saveFailed" = "Could not save this route. Your proposal is still here; try again.";
+
+"chat.route.saveAndView" = "Save & view route";
+
+"paywall.products.errorTitle" = "Could not load plans";
+
+// Life Studio — local creative space
+"studio.brand" = "Xiaomu";
+// Preserve the existing artwork's English brand copy in both localizations.
+"studio.collection_stamp" = "XIAOMU / PRIVATE COLLECTION";
+"studio.collection_tagline" = "LIFE, COLLECTED.";
+"studio.headline" = "Make room for\nthe things you love.";
+"studio.subtitle" = "A coffee. A book. A view you happened upon.";
+"studio.account" = "Account and settings";
+"studio.back" = "Back to my space";
+"studio.empty.title" = "A little space for your life.";
+"studio.empty.body" = "Bring a photo. Place a little something.\nIt doesn’t have to be finished today.";
+"studio.sample.action" = "Try a sample composition";
+"studio.sample.title" = "Sample · A slower afternoon";
+"studio.sample.coffee" = "Sample coffee";
+"studio.sample.book" = "Small\nEveryday\nDiscoveries";
+"studio.sample.note" = "Keep a little\nof today\nfor yourself.";
+"studio.untitled" = "My little world";
+"studio.undo" = "Undo last change";
+"studio.share" = "Share composition";
+"studio.canvas.hint" = "Drag to arrange · Tap to edit";
+"studio.piece.hint" = "Tap to edit, or drag to arrange";
+"studio.paper.0" = "Ivory paper";
+"studio.paper.1" = "Sage paper";
+"studio.paper.2" = "Clay paper";
+"studio.collection" = "Little things collected";
+"studio.count" = "%d pieces";
+"studio.collection.empty" = "The next piece could come from your day.";
+"studio.explore" = "Step outside";
+"studio.explore.body" = "Find a place for your next little discovery.";
+"studio.collect" = "Bring a little life in";
+"studio.importing" = "Bringing it in…";
+"studio.more" = "More options";
+"studio.add.photo" = "A photo / an object";
+"studio.add.scenery" = "A view for the background";
+"studio.add.book" = "Add a book";
+"studio.add.note" = "Leave a little note";
+"studio.local" = "Only the photos you select are read. Materials stay on this device and are not automatically uploaded.";
+"studio.done" = "Done";
+"studio.cancel" = "Cancel";
+"studio.ok" = "OK";
+"studio.reset" = "Clear this space";
+"studio.reset.confirm" = "Clear every piece and the background? You can undo during this session.";
+"studio.book.default" = "A book of mine";
+"studio.note.default" = "Today, I want to keep…";
+"studio.photo.default" = "A little discovery";
+"studio.title.placeholder" = "Name this space";
+"studio.title.edit" = "Name your space";
+"studio.export.signature" = "Xiaomu · A little world, made from life";
+"studio.editor.heading" = "Make it yours";
+"studio.editor.story" = "Its story";
+"studio.editor.title" = "Name / text";
+"studio.editor.detail" = "Author, source, or a thought to remember";
+"studio.editor.arrange" = "Arrangement";
+"studio.editor.size" = "Size";
+"studio.editor.angle" = "Angle";
+"studio.editor.horizontal" = "Horizontal position";
+"studio.editor.vertical" = "Vertical position";
+"studio.editor.cover" = "Cover color";
+"studio.cover.green" = "Moss";
+"studio.cover.clay" = "Clay";
+"studio.cover.blue" = "Slate";
+"studio.editor.original" = "Restore full photo";
+"studio.editor.extract" = "Lift the subject from this photo";
+"studio.editor.extract.body" = "Processed on this iPhone. Complex backgrounds may not work. Your original is always kept.";
+"studio.editor.front" = "Bring to front";
+"studio.editor.delete" = "Remove from this space";
+"studio.editor.undo.body" = "Undo recent changes after returning to your space.";
+"studio.error.title" = "This step didn’t finish";
+"studio.error.load" = "Your saved space could not be read. Its file has been preserved. Please try again later.";
+"studio.error.save" = "The change could not be saved and was not applied. Check available storage and try again.";
+"studio.error.import" = "This photo could not be loaded. Please select it again.";
+"studio.error.export" = "The composition could not be exported. Please try again.";
+"studio.error.extract" = "The subject could not be separated. You can keep the full photo; your original is unchanged.";
+"studio.preview.map" = "Explore · full app only";
+"studio.preview.account" = "Account · full app only";
+"studio.preview.boundary" = "This offline preview runs the real Studio editor. Maps and account services are available in the full Solo Compass app.";
+"studio.welcome.title" = "A little world,\nmade from your life.";
+"studio.welcome.body" = "Collect a photo, add a book, or leave a thought.\nArrange them however you like.\nThere is no right way to begin.";
+"studio.welcome.begin" = "Make a little space";
+
+/* Continuous companion */
+"companion.place.directions" = "Walking directions";
+"companion.place.people" = "Who is coming?";
+"companion.people.solo" = "On my own this time";
+"companion.place.date" = "When to go";
+"companion.place.timeZone" = "Time zone";
+"companion.place.duration" = "Time to stay";
+"companion.place.minutes" = "min";
+"companion.place.note" = "What would you like to do together?";
+"companion.place.past" = "This time has passed. Choose a new time before saving.";
+"companion.place.saved" = "Saved · Not sent";
+"companion.place.save" = "Save invitation draft";
+"companion.place.unsent" = "Saved on this device. It has not been sent or accepted. Choosing someone does not share your location.";
+"companion.place.invite" = "Make a little plan";
+"companion.place.noSource" = "No verifiable source yet. Please check before going.";
+"companion.place.sources" = "Sources and verification";
+"companion.common.done" = "Done";
+"companion.dismiss_notice" = "Dismiss notice";
+"companion.voice.stop" = "Stop dictation";
+"companion.voice.start" = "Start dictation. Review before sending.";
+"companion.composer.placeholder" = "What is on your mind?";
+"companion.cancel_response" = "Stop response";
+"companion.send" = "Send";
+"companion.photo.pick" = "Choose a photo or screenshot to extract text into your draft";
+"companion.voice.denied" = "Voice access is off. You can still type.";
+"companion.voice.failed" = "Dictation is unavailable. Your words are still here.";
+"companion.photo.empty" = "No clear text found. You can describe the photo instead.";
+"companion.photo.heading" = "Text from your image (please check)";
+"companion.photo.review" = "The text is in your draft. Check it before sending.";
+"companion.photo.failed" = "This image could not be read. You can type instead.";
+"companion.people.intent" = "This records who you would like to join you. Nobody is notified or confirmed, and no location is shared.";
+"companion.people.local" = "Keep a name in mind";
+"companion.people.name" = "Name or nickname";
+"companion.people.add" = "Add on this device";
+"companion.people.empty" = "Nobody to choose yet. Confirmed friends appear after signing in, or you can keep a name on this device.";
+"companion.people.title" = "Who is coming this time?";
+"companion.common.cancel" = "Cancel";
+"companion.people.example" = "Example person · Not contacted";
+"companion.people.friend" = "Confirmed friend · Not invited yet";
+"companion.people.localOnly" = "On this device · Not contacted";
+"companion.people.open" = "Choose who is coming this time";
+"companion.journey.open" = "Plans and invitations";
+"companion.settings.open" = "Preferences and settings";
+"companion.more" = "More";
+"companion.now" = "Now";
+"companion.nearby" = "Nearby";
+"companion.stream.title" = "Along the way";
+"companion.working" = "Let me think this through…";
+"companion.new_reply" = "New reply";
+"companion.welcome.title" = "I am here.\nTake your time.";
+"companion.welcome.body" = "The places you want to go,\nand the things on your mind. All here.";
+"companion.example.care" = "Help me look after these days in Siem Reap";
+"companion.example.coffee" = "Find a quiet café to sit for a while";
+"companion.example.plan" = "Help me untangle a few things";
+"companion.welcome.hint" = "Tap a thought to start a draft, or say your own.";
+"companion.you" = "You";
+"companion.place.open" = "See this place";
+"companion.sources.open" = "References";
+"companion.retry" = "Pick this up again";
+"companion.invite.draft" = "Invitation draft · Not sent";
+"companion.invite.share" = "Share this draft";
+"companion.journey.pending" = "Conversations to pick up";
+"companion.journey.noPending" = "No conversations waiting to be picked up.";
+"companion.journey.invites" = "Little plans together";
+"companion.journey.noInvites" = "Choose a place nearby and someone you would like to join you.";
+"companion.sources.hint" = "These references were supplied to this response. They do not prove that opening hours or transport have been checked live. Confirm before going.";
+"companion.nearby.locate" = "Find my location";
+"companion.nearby.all" = "Nearby";
+"companion.nearby.coffee" = "Coffee";
+"companion.nearby.food" = "A bite";
+"companion.nearby.walk" = "A walk";
+"companion.nearby.empty" = "No saved experiences here yet. Move the map to explore.";
+"companion.nearby.locationDenied" = "Location is off. You can still browse the map, or change access in Settings.";
+"companion.service_unavailable" = "I cannot reply right now. Your words are saved; try again later.";
+"companion.response_failed" = "This did not finish. Your words are saved and ready to retry.";
+"companion.storage_recovery" = "Older records could not be opened. The original is preserved; new work is saved separately.";
+"companion.storage_failed" = "Unable to save on this device. Keep this screen open and try again.";
+"companion.clear_failed" = "Some local records could not be cleared. Please try again.";
+"companion.clear_partial" = "Some files could not be restored, so clearing is incomplete. Your records remain on screen. Export them before trying again.";
+"companion.clear_confirm" = "This clears local conversations, unsent text, follow-ups, companion selections, invitation drafts, completed experiences, favorites, and preferences. This cannot be undone and does not delete copies you have already shared.";
+
+"companion.photo.cancel" = "Cancel image text extraction";
+"companion.photo.draft_changed" = "Your draft changed, so your current words were kept. Choose the image again if needed.";
+"companion.onboarding.title" = "The city,\nat your pace.";
+"companion.onboarding.now" = "Now starts with a thought";
+"companion.onboarding.nowBody" = "Your words, next steps and unfinished things stay together.";
+"companion.onboarding.map" = "Nearby when you feel like exploring";
+"companion.onboarding.mapBody" = "Look around the map. Then choose a place and who might join you.";
+"companion.onboarding.privacy" = "You choose when to enable location or voice. Shared material goes into a draft first.";
+"companion.onboarding.start" = "Let us go";
+
+"companion.commitments.kept" = "Things kept in mind";
+"companion.commitments.active" = "Things to do these days";
+"companion.commitments.empty" = "No tasks saved yet. Talk it through, then keep the things to do here.";
+"companion.commitments.complete" = "Mark complete";
+"companion.commitments.discuss" = "Talk about this";
+"companion.commitments.boundary" = "These are local tasks. Saving one does not contact a business or start background monitoring.";
+"companion.commitments.finished" = "Completed";
+
+"companion.place.photoAtmosphere" = "Atmosphere image · Unsplash";
+"companion.place.photoReference" = "Reference image · Location not verified";
+
+"companion.city.choose" = "Choose a city";
+"companion.nearby.saved" = "Saved";
+"companion.nearby.savedEmpty" = "No saved places in this city yet. Return to Nearby to pick a place.";
+"companion.place.sourceAvailable" = "Source links available · check the details";
+"companion.place.sourceUnverified" = "Collected information · confirm before going";
+"companion.place.openHint" = "View information, save this place, or prepare an invitation";
+"companion.people.unnamed" = "Friend";
+"companion.place.why" = "Why visit";
+"companion.place.notLiveVerified" = "A recorded source is not a live check. Confirm hours, prices, and facilities with the venue.";
+"companion.place.recordDate" = "Date recorded by the source";
+"companion.place.original" = "View original material";
+"companion.place.unsave" = "Remove from saved";
+"companion.place.favorite" = "Save this place";
+"companion.place.addressOriginal" = "Address (original wording for navigation)";
+"companion.place.addressMissing" = "Detailed address is missing. You can view the map pin.";
+"companion.place.hours" = "Opening hours (recorded information)";
+"companion.place.hoursMissing" = "Opening hours are not recorded. Confirm before going.";
+"companion.place.price" = "Price range (recorded information)";
+"companion.place.priceMissing" = "Prices are not recorded.";
+"companion.place.website" = "Venue website";
+"companion.place.facts" = "Address and opening information";
+"companion.place.userPhoto" = "User-added photo · location unverified";
+"companion.place.originalAvailable" = "This material is not translated yet. Expand to view the original and its sources.";
+"companion.source.blog" = "Blog material";
+"companion.source.user" = "User provided";
+"companion.source.visit" = "Visit record";
+"companion.source.amap" = "Amap";
+"companion.distance.meters" = "m";
+"companion.distance.km" = "km";
+"companion.distance.gps" = "Approx. straight-line distance from you";
+"companion.distance.center" = "Approx. straight-line distance from map center";
+"companion.city.scope" = "Search collected cities. Switching moves the map and preserves your messages and invitation drafts.";
+"companion.city.search" = "Search collected cities";
+"companion.city.clear" = "Clear search";
+"companion.city.title" = "Choose a city";
+"companion.commitments.count" = "%d things to do";
+"companion.new_content" = "New activity";
+"companion.reply_context" = "Continuing your earlier request";
+"companion.invite.legacy" = "Saved earlier · creation time not recorded";
+"companion.invite.duration" = "%d min · %@";
+"companion.invite.durationOnly" = "%d min";
+
+"companion.place.noVerifiedPhoto" = "No verifiable place photo available";
+"companion.place.unsavedTitle" = "This invitation has unsaved changes";
+"companion.place.discard" = "Discard these changes";
+"companion.place.unsavedHint" = "Your changes are not saved. Save the draft, or tap Done to discard them.";
+"city.nyc" = "New York";
+"city.tyo" = "Tokyo";
+"city.sgn" = "Ho Chi Minh City";
+"city.lis" = "Lisbon";
+
+/* Map-first folding panel and durable route activity */
+"companion.filter.selected" = "Selected. Tap again to clear";
+"companion.filter.notSelected" = "Not selected";
+"companion.filter.clear" = "Clear filters";
+"companion.panel.expand" = "Expand nearby panel";
+"companion.panel.collapse" = "Collapse panel";
+"companion.panel.prompt" = "Where would you like to go…";
+"companion.panel.filters" = "Show filters";
+"companion.panel.detail" = "Place details";
+"companion.place.favorited" = "Saved";
+"companion.route.finishFirst" = "Finish the current route before starting another.";
+"companion.route.saveFailed" = "The route couldn’t be saved. Your existing information is safe; please retry.";
+"companion.route.updateFailed" = "The route update couldn’t be saved. Your current progress is retained; please retry.";
+"companion.route.timeUnknown" = "Time unavailable · mark your arrival";
+"companion.route.start" = "Start heading here";
+"companion.route.active" = "Route in progress";
+"companion.route.progress" = "Stop %d of %d";
+"companion.route.arrived" = "Mark as arrived";
+"companion.route.end" = "End this route";
+"companion.route.endQuestion" = "End this route?";
+"companion.route.islandUnavailable" = "Live Activity is unavailable. Your route is still available here.";
+"companion.panel.resumeDraft" = "Continue your draft";
+
+/* Travel IM media */
+"companion.im.cancelReply" = "Cancel reply";
+"companion.im.copy" = "Copy text";
+"companion.im.placeholder" = "Message…";
+"companion.im.replyToSelf" = "Replying to yourself";
+"companion.im.replyToName" = "Replying to %@";
+"companion.im.myReactions" = "My reactions";
+"companion.im.processing" = "Processing";
+"companion.im.quoted" = "Quoted message";
+"companion.im.reply" = "Reply";
+"companion.im.retry" = "Not completed · Retry";
+"companion.media.add" = "Add content";
+"companion.media.audioDetails" = "View original and text";
+"companion.media.audioNotTranscribed" = "The original audio is saved. No transcript is attached.";
+"companion.media.camera" = "Camera";
+"companion.media.cameraDenied" = "Camera access is off. You can still choose a photo.";
+"companion.media.cameraUnavailable" = "No camera is available. You can choose a photo instead.";
+"companion.media.cancelTranscribe" = "Cancel transcription";
+"companion.media.choosePlace" = "Choose a place";
+"companion.media.extracted" = "Read extracted text · Please review";
+"companion.media.favoritesOnly" = "Favorites only";
+"companion.media.files" = "File or audio";
+"companion.media.finishRecording" = "Finish recording";
+"companion.media.importFailed" = "Could not read this file. Your draft is safe. Try choosing it again.";
+"companion.media.importing" = "Preparing original…";
+"companion.media.limit" = "Up to 4 attachments, each under 10 MB. Export your local media if storage is full.";
+"companion.media.localHint" = "Originals stay on this device. Sending shares readable text, transcripts or selected place details. Unextracted images and file contents are not read.";
+"companion.media.micDenied" = "Microphone access is off. You can type or choose an existing audio file.";
+"companion.media.noPlaces" = "No places here yet. Change city or turn off Favorites only.";
+"companion.media.openPhoto" = "View photo";
+"companion.media.pause" = "Pause voice message";
+"companion.media.photos" = "Photos";
+"companion.media.place" = "Place";
+"companion.media.placeSearch" = "Search places in this area";
+"companion.media.play" = "Play voice message";
+"companion.media.playFailed" = "This audio cannot play right now. The original is still saved.";
+"companion.media.previewFailed" = "Preview unavailable";
+"companion.media.recordFailed" = "Recording could not start. Your draft is safe.";
+"companion.media.recordVoice" = "Record a voice message";
+"companion.media.startingRecording" = "Opening microphone…";
+"companion.media.cancelRecording" = "Cancel recording";
+"companion.media.pauseToText" = "Pause and convert to text";
+"companion.media.sendVoice" = "Send voice message";
+"companion.media.transcribing" = "Converting to text…";
+"companion.media.recordingTooShort" = "That recording was too short. Please try again.";
+"companion.media.transcriptEmpty" = "No speech was recognized. Your recording is safe; try again or send the audio.";
+"companion.media.recording" = "Recording";
+"companion.media.recordingName" = "Voice message";
+"companion.media.remove" = "Remove attachment";
+"companion.media.selectedPlace" = "Map place · View details";
+"companion.media.shareOriginal" = "Share original";
+"companion.media.transcribe" = "Transcribe";
+"companion.media.transcript" = "Transcript · Please review";
+"companion.media.transcriptFailed" = "Transcription is unavailable. The original audio is safe. You can send it or add a description.";
+"companion.media.transcriptReady" = "Transcript attached. Please review before sending.";
+"companion.media.voice" = "Voice message";
+"companion.media.recordLimit" = "Remove an attachment or export local media before recording.";
+"companion.media.editTranscript" = "Transcript, editable";
+"companion.media.playbackProgress" = "Playback progress";
+"companion.im.heart" = "Mark as liked";
+"companion.im.removeHeart" = "Remove my like";
+"companion.media.draftCount" = "%d attachments · View";
+"companion.done" = "Done";
+"companion.cancel" = "Cancel";
+"companion.character.working" = "Working on your message…";
+
+// Email account, optional Google sources and confirmed travel context.
+"account.step.0" = "01  YOUR ACCOUNT";
+"account.step.1" = "02  YOUR SOURCES";
+"account.step.2" = "03  YOUR CONTEXT";
+"account.title.0" = "A little more you.";
+"account.title.1" = "Bring your plans along.";
+"account.title.2" = "Your story,\nin your words.";
+"account.subtitle.0" = "Verify your email to keep your travel context with your account. You can also start locally.";
+"account.subtitle.1" = "Connect only what helps. Google is optional, and each source is your choice.";
+"account.subtitle.2" = "Start with what you choose to share. Nothing is inferred from your email address.";
+"account.later" = "Set up later";
+"account.email" = "Email address";
+"account.email.placeholder" = "you@example.com";
+"account.password" = "Password";
+"account.code" = "Email verification code";
+"account.code.sent" = "Check your inbox and spam folder for the verification code.";
+"account.useCode" = "Use an email code";
+"account.usePassword" = "Already have an account? Use a password";
+"account.email.disclosure" = "We use this address to verify your account. Calendar and mail access require a separate choice.";
+"account.google.connected" = "Google connected";
+"account.calendar" = "Google Calendar";
+"account.calendar.detail" = "Read upcoming events from your primary calendar.";
+"account.mail" = "Travel mail";
+"account.mail.detail" = "Read recent travel-related subjects and snippets.";
+"account.google.connect" = "Connect selected sources";
+"account.google.unavailable" = "Google connection is not available yet. You can skip it and connect later in Settings.";
+"account.google.disclosure" = "We cannot send mail or change your events. A separate permission controls whether these summaries can reach DeepSeek.";
+"account.name" = "What should we call you?";
+"account.name.placeholder" = "Your preferred name · optional";
+"account.city" = "Home city";
+"account.city.placeholder" = "A city you choose · optional";
+"account.interests" = "Things you enjoy";
+"account.interests.placeholder" = "Quiet cafés, walking, architecture…";
+"account.profile.source" = "Source: entered and confirmed by you. Blank fields stay unknown. Separate interests with commas.";
+"account.ai.consent" = "Allow DeepSeek to use my confirmed context and authorized calendar/mail summaries";
+"account.ai.disclosure" = "Off by default. Save to apply your choice. No full email bodies or attachments are shared. You can turn this off and save again in Settings.";
+"account.suggest" = "Suggest context from my authorized sources";
+"account.suggest.prompt" = "Use only confirmed profile fields and sources I have authorized. Briefly summarize useful travel context, name each source and distinguish suggestions from facts. Do not infer personality, home city or identity from an email address. Do not save anything.";
+"account.suggestion.title" = "A suggestion to review";
+"account.suggestion.disclosure" = "AI suggestion · not saved as profile facts. Edit the fields above yourself before saving.";
+"account.sources.manage" = "Manage connected sources";
+"account.google.disconnect" = "Disconnect Google";
+"account.google.disconnected" = "Google access revoked and local connection removed.";
+"account.google.disconnectedLocal" = "Local access is removed. Google could not confirm revocation; review third-party access in your Google account.";
+"account.google.cancelled" = "Connection cancelled. You can continue without Google.";
+"account.signOut" = "Sign out on this device";
+"account.settings.title" = "Account & connected sources";
+"account.guest" = "Continue on this device";
+"account.retry" = "Retry loading my profile";
+"account.signIn" = "Sign in";
+"account.sendCode" = "Send verification code";
+"account.verify" = "Verify email";
+"account.google.skip" = "Skip Google and continue";
+"account.next" = "Continue";
+"account.save" = "Save changes";
+"account.saveContinue" = "Confirm and continue";
+"account.saved" = "Your choices are saved.";
+"account.error.invalidEmail" = "Enter a valid email address.";
+"account.error.invalidCode" = "Enter the verification code from your email.";
+"account.error.unavailable" = "Email sign-in is temporarily unavailable. Try again later or continue locally.";
+"account.error.rejected" = "We could not verify those credentials. Check them and try again.";
+"account.error.unverified" = "This email has not been verified. Verify it before connecting personal sources.";
+"account.error.network" = "Cannot reach the account service. Check your connection and retry.";
+"account.error.storage" = "Your session could not be stored securely. Please try signing in again.";
+"harness.error.unconfigured" = "Account tools are not configured in this build. You can continue locally.";
+"harness.error.unavailable" = "Account tools are temporarily unavailable. Retry later; your local travel data is still available.";
+"harness.error.signInRequired" = "Please sign in again before accessing account information.";
+"harness.error.permissionRequired" = "This source has not been authorized. Review your connection and data-sharing choices.";
+"harness.error.rejected" = "The service could not complete this request. Please retry.";
+"harness.error.network" = "Cannot reach your account backend. Check that your device is connected to the authorized Tailscale network.";
+"account.changeEmail" = "Change email";
+"account.resendCode" = "Resend code";
+"account.resendIn" = "Resend in %d s";
+"account.signInTitle" = "Sign in to Roamorrow";
+"account.signInSubtitle" = "Continue with an email verification code.";
+"account.passwordSubtitle" = "Use the password for your Roamorrow account.";
+"account.codeTitle" = "Enter your code";
+"account.codeRecipient" = "We sent a code to %@.";
+"account.footprintDisclosure" = "Footprints on this iPhone sync to this account when you sign in.";
+
+"companion.tab.conversation" = "Conversation";
+
+"companion.tab.map" = "Map";
+
+"companion.tab.itinerary" = "Itinerary";
+
+"companion.tab.me" = "Me";
+
+"companion.scope.next" = "For this question: %@";
+
+"companion.scope.clear" = "Clear this question’s scope";
+
+"companion.map.sourceUnavailable" = "The original message is no longer on this device. Your current conversation and draft are kept.";
+
+"companion.map.sourceKept" = "Original conversation and draft kept";
+
+"companion.map.area" = "This map area";
+
+"companion.map.askArea" = "Ask about this area";
+
+"companion.map.showResult" = "View on the map";
+
+"companion.map.search" = "Search places";
+
+"companion.map.searchPlaceholder" = "Place, café, bookstore…";
+
+"map.workspace.nearby" = "Nearby";
+
+"map.workspace.saved" = "Saved";
+
+"map.workspace.saved.currentCity" = "This area";
+
+"map.workspace.saved.all" = "All saved";
+
+"map.workspace.saved.list" = "Open saved places list";
+
+"map.workspace.source.return" = "Return to conversation";
+
+"map.workspace.searchArea" = "Update this area";
+
+"map.workspace.askSelected" = "Talk about this place";
+
+"map.workspace.empty.saved" = "No saved places in this area yet. Browse nearby to choose a place.";
+
+"map.workspace.empty.results" = "No matching places in the current view.";
+
+"companion.progress.thinking" = "Preparing your reply…";
+
+"companion.progress.search" = "Searching for places…";
+
+"companion.progress.sources" = "Checking sources…";
+
+"companion.progress.followup" = "Saving your follow-up…";
+
+"companion.map.retrySearch" = "Retry this search";
+
+"companion.map.editSearch" = "Edit the search";
+
+"companion.map.browseNearby" = "Browse nearby";
+
+"companion.map.sourceMissing" = "The places from this reply are unavailable on this device. Return to the conversation to check.";
+
+/* Personal hub */
+"companion.scroll.latest" = "Back to latest";
+"me.profile.edit" = "Edit profile";
+"me.pending.count" = "%d pending requests";
+"me.section.people" = "People";
+"me.section.account" = "Account & preferences";
+"me.settings.detail" = "Account, privacy and app preferences";
+"me.archive.title" = "Travel archive";
+"me.archive.detail" = "Cities and experiences along the way";
+"me.empty.note" = "Save an experience you like for another day.";
+"me.empty.explore" = "Explore nearby";
+
+// Companion identity
+"companion.identity.save" = "Save";
+"companion.identity.defaultName" = "RAM";
+"companion.identity.edit" = "Your companion";
+"companion.identity.name" = "Name";
+"companion.identity.nameHint" = "Keep it short. Up to 16 characters.";
+"companion.identity.appearance" = "Portrait style";
+"companion.identity.style.moss" = "Moss companion";
+"companion.identity.style.pixel" = "Sunny pixels";
+"companion.identity.style.moon" = "Moonlight";
+"companion.identity.style.landscape" = "Paper hills";
+"companion.keyboard.hide" = "Dismiss keyboard";
+
+"travel.research" = "Travel research";
+"travel.ready" = "View research and itinerary draft";
+"travel.paused" = "Research paused · Saved work is still available";
+"travel.empty" = "Send a travel link in chat to start research and keep an editable draft.";
+"travel.formalPlans" = "Adopted research itineraries";
+"travel.scopeUnavailable" = "Sign in to the account that owns this research to view it.";
+"travel.library" = "Research and drafts";
+"travel.undated" = "Dates not set";
+"travel.editDraft" = "Edit the linked draft and preview an update";
+"travel.formalPlan" = "Saved itinerary";
+"travel.offlinePlans" = "Could not refresh saved itineraries. Showing this account’s retained research. You can edit drafts; preview again when online before adopting.";
+"travel.startDate" = "First day";
+"travel.timezone" = "Time zone, such as Asia/Tokyo";
+"travel.dateWarning" = "Days are assigned in order. Changing dates clears unlocked fixed times. Unlock existing activities first.";
+"travel.setDates" = "Set dates and time zone";
+"travel.cancel" = "Cancel";
+"travel.save" = "Save";
+"travel.invalidDate" = "Check the time zone and unlock existing activities first.";
+"travel.stopTitle" = "Activity name";
+"travel.lock" = "Lock this activity and keep my changes";
+"travel.chooseTime" = "Choose a fixed time and duration";
+"travel.startTime" = "Start time";
+"travel.duration" = "Duration: %d minutes";
+"travel.timeNeedsDates" = "Set itinerary dates before choosing activity times.";
+"travel.editStop" = "Edit or lock";
+"travel.invalidStop" = "Check the name and select a time within this itinerary day. Some changes may remain unsaved; check before retrying.";
+"travel.calendarConfirm" = "Confirmation will change your primary Google calendar. Review each event.";
+"travel.planConfirm" = "Confirmation will save this as an itinerary. Review the details below.";
+"travel.expires" = "Preview valid until";
+"travel.before" = "Before";
+"travel.after" = "After";
+"travel.stale" = "The draft, account or context has changed. Generate a new preview.";
+"travel.operation" = "Operation status";
+"travel.readback" = "Verification status";
+"travel.confirmFailed" = "The outcome is not confirmed. Keep this preview and check the original operation; do not create duplicate events.";
+"travel.confirm" = "Confirm these changes";
+"travel.reject" = "Keep draft without applying";
+"travel.preview" = "Review changes";
+"travel.done" = "Done";
+"travel.none" = "None";
+"travel.reminders" = "Reminders (minutes before)";
+"travel.newPlan" = "New itinerary";
+"travel.noBody" = "No readable body is available yet. Retry or provide the content in chat.";
+"travel.draft" = "Itinerary draft";
+"travel.locked" = "Locked";
+"travel.timeUnknown" = "Time not set";
+"travel.unlocated" = "Location unresolved · Nearby travel is unverified";
+"travel.adopt" = "Preview saving as an itinerary";
+"travel.apple" = "Edit in system calendar";
+"travel.googlePreview" = "Preview adding to primary Google calendar";
+"travel.calendarNeedsTime" = "Choose dates, times and durations before previewing calendar events.";
+"travel.connected" = "Connected. You can generate a new calendar preview.";
+"travel.googleConnect" = "Connect Google calendar write access";
+"travel.next" = "Save and calendar";
+"travel.reconcile" = "Check the original operation";
+"travel.receipts" = "Operation receipts";
+"travel.resumeHint" = "Add requirements in chat to continue this research. Research runs only in the foreground; saved work survives a pause.";
+"travel.delete" = "Delete this research and draft";
+"travel.working" = "Working";
+"travel.deleteConfirm" = "Delete research and draft? Existing external calendar events will remain.";
+"travel.saveFailed" = "Could not save this change. Your content is retained. Please retry.";
+"travel.blocked" = "No body was read. This source cannot support activity arrangements yet.";
+"travel.sourceOpen" = "Open source website";
+"travel.source" = "Source";
+"travel.sources" = "Sources and reading coverage";
+"travel.recommendations" = "Suggested candidates";
+"travel.evidence" = "Facts and information to verify";
+"travel.questions" = "Missing information";
+"travel.actionFailed" = "The action did not finish. Research is retained. Reconnect or create a new preview if permissions or versions changed.";
+"travel.map" = "Draft locations map. Every location can be accessed from the list below.";
+"travel.open" = "Open and edit";
+"travel.appleExplanation" = "The system editor lets you choose a calendar and save. You can change the event there; this app cannot read back or automatically update it.";
+"travel.appleOpen" = "Open system calendar editor";
+"travel.appleSaved" = "The system reported a save. Final details have not been read back or verified.";
+"travel.appleCancelled" = "System editing cancelled.";
+"travel.chat.retained" = "Research progress is retained. Open the card to view and edit your itinerary draft.";
+
+"travel.status.ok" = "Read";
+"travel.status.empty" = "No results";
+"travel.status.complete" = "Reading complete";
+"travel.status.partial" = "Partially available";
+"travel.status.metadata_only" = "Metadata only";
+"travel.status.unknown" = "Unverified";
+"travel.status.blocked" = "Access restricted";
+"travel.status.unavailable" = "Unavailable";
+"travel.status.supported" = "Source supported";
+"travel.status.imported" = "Imported, unverified";
+"travel.status.disputed" = "Conflicting sources";
+"travel.status.uncertain" = "Outcome uncertain";
+"travel.status.executing" = "Executing";
+"travel.status.pending" = "Pending";
+"travel.status.failed" = "Failed";
+"travel.status.succeeded" = "Completed";
+"travel.status.cancelled" = "Cancelled";
+"travel.status.verified" = "Readback verified";
+"travel.status.mismatch" = "Content mismatch";
+"travel.status.system_reported_saved" = "System reported a save";
+"travel.status.read" = "Read";
+
+"travel.appleDuplicate" = "The earlier system save is unverified. Reopening may create a duplicate event.";
+"travel.appleReopen" = "Open system editor anyway";
+"travel.appleUnknown" = "The editor closed without a confirmed outcome. Reopening may create a duplicate event.";
+
+"travel.calendarBinding" = "Preview removal of linked calendar event";
+"travel.calendarBindings" = "Calendar links, including deleted drafts";
+"travel.calendarRemovalWarning" = "Confirmation removes only the external calendar event below. Other research stays. Check for manual changes before confirming.";
+"travel.calendarRemoveConfirm" = "Confirm removing this calendar event";
+
+"travel.running" = "Reading sources and preparing a draft";
+"travel.restoring" = "Restoring research. You can retry if it is temporarily unavailable.";
+"travel.retryRestore" = "Reload saved research";
+"travel.deleted" = "This research was deleted.";
+
+"travel.pendingOperations" = "Account operations to reconcile";
+"travel.refreshPreview" = "Read latest itinerary and review a new difference";
+"travel.continueChat" = "Continue this research / add material";
+"travel.field.note" = "Source note";
+"travel.field.hours" = "Opening hours";
+"travel.field.address" = "Address";
+"travel.field.booking" = "Booking";
+"travel.field.price" = "Price";
+"travel.field.accessibility" = "Accessibility";
+"travel.field.route" = "Travel";
+"travel.field.safety" = "Safety information";
+"travel.field.dates" = "Dates";
+"travel.field.identity" = "Place identity";
+"travel.sourceObserved" = "Read at";
+// Recent photos in the attachment menu
+"companion.media.recent" = "Recent photos";
+"companion.media.allPhotos" = "All photos";
+"companion.media.recentEmpty" = "No photos to show here yet. You can choose from All photos.";
+"companion.media.recentPhoto" = "Recent photo %d";
+"companion.media.recentLimited" = "Only photos you allow are shown here.";
+"companion.media.showRecent" = "Show recent photos";
+"companion.media.recentDenied" = "You can still choose an image from All photos.";
+
+"map.workspace.results" = "Results";
+"map.workspace.results.clearHint" = "Show nearby places in this map area";
+
+// GET-415 message reactions and inline voice transcripts
+"companion.im.moreReactions" = "More reactions";
+"companion.im.addReaction" = "Add %@ reaction";
+"companion.im.removeReaction" = "Remove my %@ reaction";
+"companion.audio.converting" = "Transcribing…";
+"companion.audio.retryTranscript" = "Retry transcription";
+"companion.audio.originalKept" = "Transcription is unavailable. Your recording is saved.";
+
+/* Footprint journal */
+"footprints.title" = "Footprints";
+"footprints.done" = "Done";
+"footprints.setupTitle" = "Keep a journal of your day";
+"footprints.setupDetail" = "Roamorrow records routes and estimated stops when you enable location access. You can pause anytime.";
+"footprints.favorites" = "Add favorite photos";
+"footprints.cloud" = "Sync footprints to Roamorrow";
+"footprints.cloudDetail" = "Sync sends recorded locations and favorite photo thumbnails to your private Roamorrow account. Agent access is granted separately.";
+"footprints.signIn" = "Sign in or create an account";
+"footprints.enable" = "Start recording";
+"footprints.later" = "Later";
+"footprints.background" = "Background recording enabled";
+"footprints.foreground" = "Recording while using the app";
+"footprints.awaiting" = "Waiting for location permission";
+"footprints.always" = "Enable background location";
+"footprints.allowPhotos" = "Allow favorite photo access";
+"footprints.settings" = "Open system settings";
+"footprints.storageError" = "Footprint storage is temporarily unavailable.";
+"footprints.previous" = "Previous day";
+"footprints.next" = "Next day";
+"footprints.day" = "Date";
+"footprints.empty" = "No footprints for this day";
+"footprints.emptyDetail" = "Recorded routes, stops and favorite photos will appear here.";
+"footprints.photo" = "Favorite photo";
+"footprints.visit" = "Recorded stop";
+"footprints.noPhotoLocation" = "Location to confirm";
+"footprints.locate" = "Show on map";
+"footprints.syncing" = "Syncing footprints";
+"footprints.syncError" = "Upload failed. Your footprints are still on this device.";
+"footprints.lastSync" = "Latest cloud upload";
+"footprints.pause" = "Pause recording";
+"footprints.agent" = "Connected apps";
+"footprints.agentDetail" = "Connect an Agent with a read-only credential that stays active until you revoke or replace it. Share it only with the Agent you choose.";
+"footprints.raw" = "Allow exact recorded track points";
+"footprints.previews" = "Allow photo thumbnails";
+"footprints.issueGrant" = "Create read-only credential";
+"footprints.tokenDetail" = "Use the copied credential as a Bearer token in the Agent connection.";
+"footprints.copyToken" = "Copy credential";
+"footprints.revoke" = "Revoke credential";
+"footprints.revoked" = "Agent access revoked";
+"footprints.connectionError" = "The footprint service is unavailable. Check your account and try again.";
+"footprints.paused" = "Recording paused";
+"footprints.nameStop" = "Name this stop";
+"footprints.suggestedPlaces" = "Possible places";
+"footprints.placeName" = "Place name";
+"footprints.save" = "Save";
+"footprints.cancel" = "Cancel";
+"footprints.recordSettings" = "Recording settings";
+"footprints.recording" = "Recording";
+"footprints.today" = "Today";
+"footprints.segmentCount" = "Segments · %d";
+"footprints.visitCount" = "Stops · %d";
+"footprints.photoCount" = "Photos · %d";
+"footprints.emptyPast" = "Choose another day to see the routes and stops recorded then.";
+"footprints.pointsOnly" = "The route is recording. Stops will appear here as they’re detected.";
+"footprints.showFullDay" = "Fit the day’s route";
+"footprints.showInJournal" = "Shows this stop in the journal";
+"footprints.openPhoto" = "Open photo preview";
+"footprints.entryActions" = "More actions";
+"footprints.timeRange" = "%@–%@";
+"footprints.estimatedDuration" = "About %@";
+"footprints.photosSection" = "Photos";
+"footprints.photosDetail" = "Footprints imports only photos you’ve favorited in Apple Photos.";
+"footprints.syncSection" = "Sync and Agent access";
+"footprints.deviceOnly" = "Stored on this iPhone";
+"footprints.endpoint" = "MCP server address";
+"footprints.copyEndpoint" = "Copy server address";
+"footprints.endpointCopied" = "Server address copied";
+"footprints.missingEndpoint" = "MCP server address is unavailable.";
+"footprints.agentScope" = "What the new credential can read";
+"footprints.includedScope" = "Stops and favorite photo locations";
+"footprints.rotateDetail" = "A new credential replaces any existing credential for this account.";
+"footprints.revokeDetail" = "The current credential will stop working immediately.";
+"footprints.grantReady" = "Credential is ready to copy.";
+"footprints.tokenCopied" = "Credential copied";
+"footprints.locationOff" = "Location access is off";
+"footprints.backToMap" = "Back to map";
+"footprints.mapJournal" = "Footprint journal";
+"footprints.pointCount" = "Location points: %d";
+"footprints.showOnMap" = "Shows the details below the map";
+
+/* Footprint history filters */
+"footprints.filterTitle" = "Filter footprints";
+"footprints.filterAll" = "All time";
+"footprints.filterWeek" = "Last 7 days";
+"footprints.filterMonth" = "Last 30 days";
+"footprints.filterCustom" = "Custom dates";
+"footprints.filterTime" = "Time";
+"footprints.filterCity" = "City";
+"footprints.filterAllCities" = "All cities";
+"footprints.filterUnassigned" = "Unidentified city";
+"footprints.filterFrom" = "Start";
+"footprints.filterTo" = "End";
+"footprints.filterReset" = "Clear filters";
+"footprints.filterShowMap" = "Show on map";
+"footprints.filterDays" = "Days with activity: %d";
+"footprints.filterNoMatches" = "No matching footprints";
+"footprints.filterEmpty" = "No footprints yet";
+"footprints.filterFit" = "Fit visible results";
+"footprints.filterLoading" = "Loading footprints";
+"footprints.filterRetry" = "Reload footprints";
+"footprints.filterTrackRecorded" = "Track recorded";
+
+// Multi-city trips
+"trip.agent.open" = "Plan with Roamorrow";
+"trip.agent.name" = "Roamorrow Agent";
+"trip.agent.emptyHint" = "Sketch a day out with places from our catalog.";
+"trip.agent.scenarios" = "Ideas to start with";
+"trip.agent.nearby" = "A few hours nearby";
+"trip.agent.nearby.hint" = "A short outing in one area";
+"trip.agent.weekend" = "A weekend in town";
+"trip.agent.weekend.hint" = "Two days with room to wander";
+"trip.agent.indoor" = "An indoor afternoon";
+"trip.agent.indoor.hint" = "Museums, galleries and café breaks";
+"trip.agent.manual" = "Create manually";
+"trip.agent.intro" = "Choose a city and dates. Roamorrow will draft a schedule from experiences in its catalog.";
+"trip.agent.scenario" = "Trip style";
+"trip.agent.city" = "City";
+"trip.agent.chooseCity" = "Choose a city";
+"trip.agent.start" = "Start date";
+"trip.agent.length" = "Number of days";
+"trip.agent.firstLength" = "Days in first city";
+"trip.agent.addSecondCity" = "Add a second city";
+"trip.agent.secondCity" = "Second city";
+"trip.agent.secondLength" = "Days in second city";
+"trip.agent.transferDraft" = "Time before 3 PM on arrival day is left open for travel between cities.";
+"trip.agent.interest" = "Focus";
+"trip.agent.anyInterest" = "Any";
+"trip.agent.generate" = "Draft my trip";
+"trip.agent.drafting" = "Drafting your trip…";
+"trip.agent.preview" = "Review your draft";
+"trip.agent.draftTitle" = "%1$@ · %2$@";
+"trip.agent.catalogDraft" = "Drafted from the Roamorrow catalog on this device. Times are suggestions. Check hours and travel between stops.";
+"trip.agent.groundedDraft" = "Roamorrow Agent chose from our experience catalog. Times are suggestions. Check hours and travel between stops.";
+"trip.agent.noExperiences" = "No matching catalog experiences in %@. Try another city or trip style.";
+"trip.agent.noTimes" = "No catalog experiences fit this time window. Try a different date or trip style.";
+"trip.agent.noTimeZone" = "Couldn’t find the local time zone. Try again online or choose another city.";
+"trip.agent.failed" = "Couldn’t prepare the draft. Try again.";
+"trip.example.open" = "Explore a sample itinerary";
+"trip.example.route" = "Osaka, Kyoto and Kobe";
+"trip.example.readOnly" = "Sample itinerary · view only";
+"trip.example.japan" = "December in Japan";
+"trip.example.osaka" = "Osaka";
+"trip.example.kyoto" = "Kyoto";
+"trip.example.kobe" = "Kobe";
+"trip.example.arrive" = "Arrive at Kansai Airport";
+"trip.example.nakanoshima" = "A walk around Nakanoshima";
+"trip.example.east" = "A walk through Higashiyama";
+"trip.example.river" = "Walk along the Kamo River";
+"trip.example.dinner" = "Dinner in Gion";
+"trip.example.dinner.note" = "Sample reservation for a family dinner";
+"trip.example.market" = "Lunch at Nishiki Market";
+"trip.example.port" = "A walk by Kobe Port";
+"trip.example.tea" = "Tea break in Gion";
+"trip.example.tea.note" = "Sample idea for a quiet break";
+"trip.example.museum" = "Kyoto International Manga Museum";
+"trip.example.museum.note" = "Indoor option. Check hours before visiting.";
+"trip.example.coffee" = "Coffee in Kitahama";
+"trip.example.coffee.note" = "Leave some time to sit and unwind";
+"trip.example.maritime" = "Kobe Maritime Museum";
+"trip.example.maritime.note" = "Indoor option near the harbor";
+"trip.back" = "Back";
+"trip.close" = "Close";
+"trip.confirm" = "Apply changes";
+"trip.create.manual" = "New single-city itinerary";
+"trip.day.empty" = "Room for something good. Add a place from your handbook.";
+"trip.done" = "Done";
+"trip.error.retry" = "Open the latest plan and try again.";
+"trip.error.save" = "Couldn’t save";
+"trip.events.empty" = "Roamorrow has no sourced listings within 3 km for this date.";
+"trip.events.loading" = "Checking local events";
+"trip.events.query" = "events";
+"trip.events.search" = "Search this date and area";
+"trip.events.title" = "Nearby that day";
+"trip.example" = "Sample";
+"trip.examples" = "Load sample trips";
+"trip.examples.error" = "Couldn’t load sample trips";
+"trip.guide.add" = "Add to this day · %@";
+"trip.guide.added" = "Added %@";
+"trip.guide.empty" = "No saved places for this city yet.";
+"trip.guide.noSlot" = "There isn’t enough free time on this day. Choose another date.";
+"trip.guide.scheduled" = "On the schedule";
+"trip.handbook" = "Handbook";
+"trip.locked" = "Locked";
+"trip.minutes" = "%d min";
+"trip.muse.adjust" = "Plan with Muse";
+"trip.muse.badDraft" = "Paste the full draft as returned by Muse. For edits, use a request copied from the latest version of this trip. Locked plans must stay in place.";
+"trip.muse.copied" = "Copied";
+"trip.muse.copy" = "Copy request";
+"trip.muse.edit.heading" = "What would you change?";
+"trip.muse.edit.hint" = "The request includes this trip’s dates, itinerary and handbook so Muse can propose a change.";
+"trip.muse.edit.placeholder" = "Example: Keep dinner, swap the afternoon walk for somewhere indoors";
+"trip.muse.new.heading" = "Where are you going?";
+"trip.muse.new.hint" = "Copy a request to Muse, then bring back the draft to review it here.";
+"trip.muse.new.placeholder" = "Example: 4 days in Bangkok and Chiang Mai in January";
+"trip.muse.open" = "Open Muse";
+"trip.muse.paste.title" = "Muse’s draft";
+"trip.muse.reviewError" = "Couldn’t open a preview";
+"trip.muse.title" = "Plan with Muse";
+"trip.options" = "Trip options";
+"trip.photo" = "Cover photo";
+"trip.place.noCoordinates" = "Add a verified location to check weather and nearby events.";
+"trip.place.source" = "Open source";
+"trip.place.title" = "Place details";
+"trip.rain.demo" = "Practice a rain adjustment";
+"trip.rain.demo.note" = "Simulated forecast · see what would move";
+"trip.rain.demo.summary" = "Rain practice: move the walk and use a saved indoor stop.";
+"trip.review" = "Review changes";
+"trip.review.freeDay" = "Free day";
+"trip.review.preserved" = "Locked plans stay in place";
+"trip.review.titleChanged" = "Trip name";
+"trip.save" = "Save trip";
+"trip.schedule" = "Schedule";
+"trip.unavailable" = "Trip unavailable";
+"trip.undo" = "Undo";
+"trip.undone" = "Previous plan restored";
+"trip.weather.adjust" = "Use a nearby indoor option and check the weather before the rescheduled walk.";
+"trip.weather.back" = "Return to planned date";
+"trip.weather.checkToday" = "Check local weather today";
+"trip.weather.loading" = "Checking forecast";
+"trip.weather.outdoor" = "The forecast indicates a low rain risk for this window.";
+"trip.weather.outside" = "There’s no forecast for this date yet. Check within five days of the visit.";
+"trip.weather.rain" = "%d%% chance of rain";
+"trip.weather.risk" = "Rain or snow may affect this outdoor stop.";
+"trip.weather.scheduled" = "Weather for this stop";
+"trip.weather.today" = "Local weather today";
+"trip.weather.unavailable" = "Weather is unavailable right now.";
+"trip.events.leads" = "Web results · check the date and venue with the organizer";
+"trip.events.webEmpty" = "No web results for that search.";
+"trip.events.webUnavailable" = "In-app web search is temporarily unavailable.";
+"trip.events.browser" = "Search in browser";
+"trip.delete" = "Delete trip";
+"trip.delete.confirm" = "Delete this trip?";
+"trip.delete.failed" = "Couldn’t delete the trip";
+
+"footprints.loadingPhotos" = "Loading photos…";
+
+"footprints.recentTrail" = "Most recent trail";
+
+"companion.nearby.currentPosition" = "Current location";
+
+"companion.location.finding" = "Finding your location…";
+"companion.location.approximate" = "Approximate location";
+"companion.location.unavailable" = "Your current location is unavailable. Try again.";
+"footprints.mapUnavailable" = "Map positions unavailable. You can still view the list.";
+"footprints.syncNow" = "Sync now";
+"footprints.cloudHistory" = "Footprints in your account";
+"footprints.cloudTrackPoints" = "Track points";
+"footprints.cloudVisits" = "Stops";
+"footprints.cloudPhotos" = "Favorite photos";
+"footprints.grantActive" = "Agent access is enabled";
+"footprints.retryCloudStatus" = "Retry cloud status";
+"footprints.syncTitle" = "Footprint sync";
+"footprints.syncingDetail" = "You can keep using Roamorrow while this iPhone uploads.";
+"footprints.syncComplete" = "Synced";
+"footprints.syncCompleteDetail" = "This iPhone has no footprints waiting to upload.";
+"footprints.syncOffline" = "Waiting for a connection";
+"footprints.syncOfflineDetail" = "Sync resumes automatically when this iPhone reconnects.";
+"footprints.syncRetrying" = "Waiting to retry";
+"footprints.syncRetryingDetail" = "Your footprints are on this iPhone. Roamorrow will retry automatically.";
+"footprints.syncPaused" = "Sync paused";
+"footprints.syncPausedDetail" = "Footprints stay on this iPhone while sync is off. Manage sync in Recording settings.";
+"footprints.syncNeedsLogin" = "Sign in to resume sync";
+"footprints.syncNeedsLoginDetail" = "Your footprints are on this iPhone. Sign in to this account again to continue.";
+"footprints.syncPartial" = "Sync incomplete";
+"footprints.syncPartialDetail" = "Some footprints from this iPhone have not synced.";
+"footprints.syncDevice" = "Device";
+"footprints.thisiPhone" = "This iPhone";
+"footprints.syncAccount" = "Account";
+"footprints.syncSignInAgain" = "Sign in again";
+"footprints.codex" = "Codex";
+"footprints.codexScope" = "Read-only access to dates, stop times, and the cities and districts in your footprint summaries.";
+"footprints.codexSetup" = "Connect once from Codex";
+"footprints.codexAddTitle" = "Add Roamorrow in Codex";
+"footprints.codexAddDetail" = "Open MCP Servers in Codex settings and add this server address.";
+"footprints.codexSignInTitle" = "Sign in and authorize";
+"footprints.codexSignInDetail" = "Choose Connect in Codex. In the browser, sign in to the same Roamorrow account and allow read access. New synced footprints will appear automatically.";
+"footprints.codexConnected" = "Connected · Read-only";
+"footprints.codexAnotherClient" = "Connect another Codex client";
+"footprints.codexDisconnect" = "Revoke all Codex access";
+"footprints.codexDisconnectDetail" = "All current Codex connections for this account will lose access to footprint summaries.";
+"footprints.codexDisconnected" = "Codex access revoked.";
+"footprints.codexUnavailable" = "Codex sign-in is unavailable on this server.";
+"footprints.codexLoading" = "Checking the Codex connection";
+"footprints.agentLegacy" = "Set up with a credential";

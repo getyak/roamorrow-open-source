@@ -1,0 +1,125 @@
+/// Conversation — a messaging thread opened after a CompanionRequest is accepted,
+/// or a group chat formed around a Route companion slot.
+///
+/// Mirrors `packages/core/src/companion.ts`. Keep field names in sync.
+
+// MARK: - ConversationId
+
+/// Strongly-typed identifier for a Conversation, preventing raw-string ID mix-ups.
+public struct ConversationId: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
+    public init(rawValue: String) { self.rawValue = rawValue }
+}
+
+// MARK: - ConversationType
+
+/// Discriminates between a one-on-one companion thread and a route-anchored group chat.
+public enum ConversationType: String, Codable, Sendable, CaseIterable {
+    /// A private thread between two users following an accepted CompanionRequest.
+    case oneOnOne
+    /// A group chat anchored to a specific Route companion slot.
+    case groupRoute
+    /// A persistent 1:1 friend DM, created from a Friendship rather than a CompanionRequest.
+    case friendDirect
+}
+
+// MARK: - Conversation
+
+/// A messaging thread between accepted companions, either one-on-one or anchored to a route group.
+public struct Conversation: Identifiable, Codable, Sendable, Hashable {
+    // Identity-based equality/hashing so `Conversation` can drive a SwiftUI
+    // `navigationDestination(item:)` (US-012). Two values for the same thread id
+    // are the same destination regardless of mutable fields like `updatedAt`.
+    /// Identity-based equality: two conversations match when their ids match.
+    public static func == (lhs: Conversation, rhs: Conversation) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    /// Hashes only the stable conversation id so it can key navigation destinations.
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    public let id: ConversationId
+    /// The CompanionRequest this thread was opened from. Nil for `friendDirect`
+    /// conversations, which are created from a Friendship rather than a request.
+    public let requestId: CompanionRequestId?
+    public let participantIds: [String]
+    /// Discriminates one-on-one vs. route group chat. Defaults to `.oneOnOne`.
+    public let type: ConversationType
+    /// Non-nil when `type == .groupRoute`; the Route this group chat is anchored to.
+    public let routeId: String?
+    /// ISO 8601 UTC timestamp of the most recent message.
+    public let lastMessageAt: String?
+    /// ISO 8601 UTC timestamp.
+    public let createdAt: String
+    /// ISO 8601 UTC timestamp.
+    public let updatedAt: String
+    /// When true, the chat is frozen — no new messages can be sent (route completed).
+    public let isReadOnly: Bool
+
+    public init(
+        id: ConversationId,
+        requestId: CompanionRequestId? = nil,
+        participantIds: [String],
+        type: ConversationType = .oneOnOne,
+        routeId: String? = nil,
+        lastMessageAt: String? = nil,
+        createdAt: String,
+        updatedAt: String,
+        isReadOnly: Bool = false
+    ) {
+        self.id = id
+        self.requestId = requestId
+        self.participantIds = participantIds
+        self.type = type
+        self.routeId = routeId
+        self.lastMessageAt = lastMessageAt
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        // Friend DMs never freeze — a friendship has no route to complete.
+        self.isReadOnly = type == .friendDirect ? false : isReadOnly
+    }
+
+    // Custom decoder: `requestId` is optional (friendDirect threads have none),
+    // `type` defaults to `.oneOnOne`, and `isReadOnly` defaults to `false` when absent (legacy payloads).
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(ConversationId.self, forKey: .id)
+        requestId = try c.decodeIfPresent(CompanionRequestId.self, forKey: .requestId)
+        participantIds = try c.decode([String].self, forKey: .participantIds)
+        let decodedType = try c.decodeIfPresent(ConversationType.self, forKey: .type) ?? .oneOnOne
+        type = decodedType
+        routeId = try c.decodeIfPresent(String.self, forKey: .routeId)
+        lastMessageAt = try c.decodeIfPresent(String.self, forKey: .lastMessageAt)
+        createdAt = try c.decode(String.self, forKey: .createdAt)
+        updatedAt = try c.decode(String.self, forKey: .updatedAt)
+        let decodedReadOnly = try c.decodeIfPresent(Bool.self, forKey: .isReadOnly) ?? false
+        // Friend DMs are never read-only regardless of any persisted flag.
+        isReadOnly = decodedType == .friendDirect ? false : decodedReadOnly
+    }
+}
+
+// MARK: - Preview samples
+
+extension Conversation {
+    static let sample = Conversation(
+        id: ConversationId(rawValue: "conv_preview"),
+        requestId: CompanionRequestId(rawValue: "creq_preview"),
+        participantIds: ["user_preview", "user_preview_b"],
+        lastMessageAt: "2026-02-05T14:30:00Z",
+        createdAt: "2026-02-02T09:00:00Z",
+        updatedAt: "2026-02-05T14:30:00Z"
+    )
+
+    static let groupRouteSample = Conversation(
+        id: ConversationId(rawValue: "conv_group_preview"),
+        requestId: CompanionRequestId(rawValue: "creq_group_preview"),
+        participantIds: ["user_preview", "user_preview_b", "user_preview_c"],
+        type: .groupRoute,
+        routeId: "route_preview",
+        lastMessageAt: "2026-02-06T10:00:00Z",
+        createdAt: "2026-02-06T09:00:00Z",
+        updatedAt: "2026-02-06T10:00:00Z"
+    )
+}

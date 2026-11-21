@@ -1,0 +1,166 @@
+import SwiftUI
+import UIKit
+
+/// First-run consent sheet shown the very first time a user taps the
+/// Explore-Here button (or triggers a voice-driven explore intent).
+///
+/// We tell them — in plain language — what data leaves the device:
+///   1. selected coordinates and radius → OpenStreetMap/Overpass
+///   2. public place details + city → configured AI text provider
+///   3. this place lookup does not attach photos or contacts
+///
+/// The sheet is one-time. Tapping "Got it" persists
+/// `UserPreferences.hasAcceptedExploreConsent = true` and the user
+/// never sees it again. Cancel just dismisses without recording — the
+/// next tap will show the sheet again.
+struct ExploreConsentSheet: View {
+
+    let onAccept: () -> Void
+    let onCancel: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Scrollable body: at large Dynamic Type the bullets and both
+            // actions must stay reachable (I22). The action row is pinned
+            // below the scroll area.
+            ScrollView {
+            VStack(spacing: 12) {
+                // Hero icon — sized + framed to render fully inside the sheet's
+                // safe area. The previous 44pt glyph + 32pt top padding caused
+                // the icon to be clipped by the sheet's rounded top corners
+                // on `.medium` detent (the user reported "half-icon" rendering).
+                // 36pt glyph in a 56pt frame + 28pt top padding keeps the full
+                // optical bounds below the grabber on every device class.
+                Image(systemName: "sparkle.magnifyingglass")
+                    .font(.system(size: 36, weight: .light))
+                    .foregroundStyle(CT.sunGold)
+                    .frame(width: 56, height: 56)
+                    .padding(.top, 28)
+                    .accessibilityHidden(true)
+
+                Text(NSLocalizedString("explore.consent.title", comment: "Title for explore consent sheet"))
+                    .font(.title2.bold())
+                    .multilineTextAlignment(.center)
+
+                Text(NSLocalizedString("explore.consent.subtitle", comment: "Subtitle"))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 24)
+            }
+
+            VStack(alignment: .leading, spacing: 16) {
+                bullet(
+                    icon: "location.fill",
+                    text: NSLocalizedString("explore.consent.bullet.location", comment: "Current coordinates to OpenStreetMap")
+                )
+                bullet(
+                    icon: "sparkles",
+                    text: NSLocalizedString("explore.consent.bullet.ai", comment: "Place tags + city to the AI text provider")
+                )
+                bullet(
+                    icon: "lock.shield.fill",
+                    text: NSLocalizedString("explore.consent.bullet.no_pii", comment: "No PII never tracked")
+                )
+            }
+            .padding(.horizontal, 28)
+            .padding(.vertical, 28)
+            }
+
+            VStack(spacing: 10) {
+                Button(action: onAccept) {
+                    Text(NSLocalizedString("explore.consent.accept", comment: "Got it, continue"))
+                        .font(.headline)
+                        // Dark accent on the warm gold fill — the same
+                        // WCAG-AA pairing the Paywall CTA uses (I22).
+                        .foregroundStyle(CT.accent)
+                        .frame(maxWidth: .infinity)
+                        .frame(minHeight: 52)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(CT.sunGold)
+                        )
+                }
+                .buttonStyle(.plain)
+
+                Button(action: onCancel) {
+                    Text(NSLocalizedString("explore.consent.cancel", comment: "Cancel"))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                        // 44pt minimum target (I22).
+                        .frame(minHeight: HitTargetMetrics.minimum)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+        }
+        .background(Color(UIColor.systemBackground))
+        .presentationDetents([.medium, .large])
+    }
+
+    @ViewBuilder
+    private func bullet(icon: String, text: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundStyle(CT.sunGoldDeep)
+                .frame(width: 24, alignment: .center)
+            Text(text)
+                .font(.callout)
+                .foregroundStyle(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+    }
+}
+
+/// Lifts the Explore-consent sheet binding off CompassMapView.body so
+/// the SwiftUI type-checker does not blow its budget on the long
+/// modifier chain there.
+struct ExploreConsentSheetModifier: ViewModifier {
+    // US-021: `MapViewModel` is now built eagerly and is never nil, so this is
+    // a plain (non-optional) reference used directly.
+    var viewModel: MapViewModel
+    var preferences: UserPreferences
+
+    func body(content: Content) -> some View {
+        content.sheet(isPresented: Binding(
+            get: { viewModel.isShowingExploreConsent },
+            set: { newValue in
+                if !newValue { viewModel.isShowingExploreConsent = false }
+            }
+        )) {
+            ExploreConsentSheet(
+                onAccept: {
+                    preferences.acceptExploreConsent()
+                    viewModel.isShowingExploreConsent = false
+                    let resume = viewModel.onExploreConsentAccepted
+                    viewModel.onExploreConsentAccepted = nil
+                    resume?()
+                },
+                onCancel: {
+                    viewModel.onExploreConsentAccepted = nil
+                    viewModel.isShowingExploreConsent = false
+                }
+            )
+        }
+    }
+}
+
+#Preview("ExploreConsentSheet") {
+    ExploreConsentSheet(
+        onAccept: {
+            #if DEBUG
+            print("ExploreConsentSheet preview: accepted")
+            #endif
+        },
+        onCancel: {
+            #if DEBUG
+            print("ExploreConsentSheet preview: cancelled")
+            #endif
+        }
+    )
+}

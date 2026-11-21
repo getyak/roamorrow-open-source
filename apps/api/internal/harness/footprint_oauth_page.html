@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="{{if .Chinese}}zh-Hans{{else}}en{{end}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>{{if .Chinese}}连接足迹{{else}}Connect footprints{{end}} · Roamorrow</title>
+<style>
+  :root{color-scheme:light dark;--paper:light-dark(#faf7ef,#18211a);--ink:light-dark(#24382c,#e4ecde);
+    --muted:light-dark(#526053,#b8c5b7);--line:light-dark(#d7ded1,#48564b);--accent:light-dark(#365443,#c5d9b8);
+    --on-accent:light-dark(#fffdf7,#1c3024);--surface:light-dark(#e8eee3,#2a3c31);--error:light-dark(#92382a,#ffb6aa)}
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;margin:0}
+  main{max-inline-size:490px;margin-inline:auto;padding:40px 24px 56px}
+  p,h1{margin:0}
+  .brand{font:500 25px/1.2 ui-serif,Georgia,serif;letter-spacing:-.04em;padding-block:0 15px;border-bottom:1px solid var(--line)}
+  h1{font:600 clamp(31px,7vw,44px)/1.15 ui-serif,"New York","Songti SC",Georgia,serif;letter-spacing:-.045em;margin-top:35px;text-wrap:balance}
+  h1+p{margin-top:10px}
+  .quiet{color:var(--muted)}
+  .scope{margin:24px 0;padding:16px;border-radius:14px;background:var(--surface)}
+  .account{overflow-wrap:anywhere;margin-top:22px;border-block:1px solid var(--line);padding-block:12px}
+  .account p:first-child,.scope p+p,label{font-size:.875rem}
+  .field{display:grid;gap:8px;margin:22px 0}
+  input:not([type=hidden]),button{font:inherit;border-radius:12px;min-block-size:48px}
+  input:not([type=hidden]){padding-inline:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);inline-size:100%}
+  input#code{font-variant-numeric:tabular-nums;letter-spacing:.18em}
+  button{border:1px solid transparent;cursor:pointer;padding:8px 14px;color:var(--ink);background:transparent}
+  button.primary{background:var(--accent);color:var(--on-accent);font-weight:600;inline-size:100%}
+  button.secondary{color:var(--muted);padding-inline:0}
+  .actions{display:flex;justify-content:space-between;gap:4px 12px;flex-wrap:wrap;margin-top:6px}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .notice,.error{margin-top:16px;font-size:.875rem}
+  .error{color:var(--error)}
+</style>
+</head>
+<body>
+<main>
+  <p class="brand">Roamorrow</p>
+  {{if eq .Stage "expired"}}
+    <h1>{{if .Chinese}}连接已结束{{else}}Connection ended{{end}}</h1>
+    <p class="quiet">{{if .Chinese}}请回到 Codex，重新连接 Roamorrow。{{else}}Return to Codex and reconnect Roamorrow.{{end}}</p>
+  {{else}}
+    <h1>{{if eq .Stage "consent"}}{{if .Chinese}}连接足迹{{else}}Connect footprints{{end}}{{else if eq .Stage "code"}}{{if .Chinese}}输入验证码{{else}}Enter the code{{end}}{{else}}{{if .Chinese}}登录 Roamorrow{{else}}Sign in to Roamorrow{{end}}{{end}}</h1>
+    {{if eq .Stage "consent"}}
+      <div class="account">
+        <p class="quiet">{{if .Chinese}}授权账号{{else}}Signed in as{{end}}</p>
+        <p>{{.Email}}</p>
+      </div>
+      <div class="scope">
+        <p><strong>{{if .Chinese}}读取足迹摘要{{else}}Read footprint summaries{{end}}</strong></p>
+        <p class="quiet">{{if .Chinese}}此设备上的应用可按日期读取停留时间、城市和区县。你可以在 Roamorrow 撤销连接。{{else}}The requesting app on this device can read visit times, cities, and districts by date. You can revoke access in Roamorrow.{{end}}</p>
+      </div>
+    {{else if eq .Stage "code"}}
+      <p class="quiet">{{if .Chinese}}查看发送到 {{.Email}} 的邮件。{{else}}Check the email sent to {{.Email}}.{{end}}</p>
+    {{else}}
+      <p class="quiet">{{if .Chinese}}使用 iPhone 上的 Roamorrow 账号继续。{{else}}Continue with the Roamorrow account you use on iPhone.{{end}}</p>
+    {{end}}
+    {{if .Resent}}<p class="notice" role="status">{{if .Chinese}}请查收新的验证码。{{else}}Check for a new code.{{end}}</p>{{end}}
+    {{if .Error}}
+      <p class="error" role="alert">{{if eq .Stage "code"}}{{if .Chinese}}验证码有误或已过期，请重试。{{else}}The code could not be verified. Try again or request another code.{{end}}{{else if eq .Stage "password"}}{{if .Chinese}}暂时无法登录，请检查邮箱和密码。{{else}}Sign-in failed. Check your email and password.{{end}}{{else}}{{if .Chinese}}暂时无法继续，请重试。{{else}}We could not continue. Try again.{{end}}{{end}}</p>
+    {{end}}
+    {{if eq .Stage "consent"}}
+      <form method="post" action="/oauth/footprints/authorize">
+        <input type="hidden" name="attempt" value="{{.Attempt}}">
+        <button class="primary" name="action" value="allow">{{if .Chinese}}授权并返回应用{{else}}Authorize and return{{end}}</button>
+        <div class="actions">
+          <button class="secondary" name="action" value="reset">{{if .Chinese}}切换账号{{else}}Switch account{{end}}</button>
+          <button class="secondary" name="action" value="deny">{{if .Chinese}}取消{{else}}Cancel{{end}}</button>
+        </div>
+      </form>
+    {{else if eq .Stage "code"}}
+      <form method="post" action="/oauth/footprints/authorize">
+        <input type="hidden" name="attempt" value="{{.Attempt}}">
+        <div class="field">
+          <label for="code">{{if .Chinese}}验证码{{else}}Email code{{end}}</label>
+          <input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" maxlength="10" required>
+        </div>
+        <button class="primary" name="action" value="verify">{{if .Chinese}}继续{{else}}Continue{{end}}</button>
+        <div class="actions">
+          <button class="secondary" name="action" value="reset" formnovalidate>{{if .Chinese}}更换邮箱{{else}}Change email{{end}}</button>
+          <button class="secondary" name="action" value="resend" formnovalidate>{{if .Chinese}}重新发送{{else}}Send again{{end}}</button>
+        </div>
+      </form>
+    {{else if eq .Stage "password"}}
+      <form method="post" action="/oauth/footprints/authorize">
+        <input type="hidden" name="attempt" value="{{.Attempt}}">
+        <div class="field">
+          <label for="email">{{if .Chinese}}邮箱{{else}}Email{{end}}</label>
+          <input id="email" name="email" type="email" value="{{.Email}}" inputmode="email" autocomplete="username" required>
+          <label for="password">{{if .Chinese}}密码{{else}}Password{{end}}</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="primary" name="action" value="password">{{if .Chinese}}继续{{else}}Continue{{end}}</button>
+        <div class="actions">
+          <button class="secondary" name="action" value="reset" formnovalidate>{{if .Chinese}}使用邮箱验证码{{else}}Use an email code{{end}}</button>
+          <button class="secondary" name="action" value="deny" formnovalidate>{{if .Chinese}}取消{{else}}Cancel{{end}}</button>
+        </div>
+      </form>
+    {{else}}
+      <form method="post" action="/oauth/footprints/authorize">
+        <input type="hidden" name="attempt" value="{{.Attempt}}">
+        <div class="field">
+          <label for="email">{{if .Chinese}}邮箱{{else}}Email{{end}}</label>
+          <input id="email" name="email" type="email" value="{{.Email}}" inputmode="email" autocomplete="username" maxlength="254" required>
+        </div>
+        <button class="primary" name="action" value="send">{{if .Chinese}}发送验证码{{else}}Send code{{end}}</button>
+        <div class="actions">
+          <button class="secondary" name="action" value="password_page" formnovalidate>{{if .Chinese}}使用密码{{else}}Use a password{{end}}</button>
+          <button class="secondary" name="action" value="deny" formnovalidate>{{if .Chinese}}取消{{else}}Cancel{{end}}</button>
+        </div>
+      </form>
+    {{end}}
+  {{end}}
+</main>
+</body>
+</html>

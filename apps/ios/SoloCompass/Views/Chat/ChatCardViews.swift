@@ -1,0 +1,591 @@
+import SwiftUI
+
+/// Lightweight, tap-only place card rendered inside the chat stream. Unlike the
+/// heavyweight `ExperienceCardView` (drag gestures, live distance/bearing, map
+/// environment deps), this is a flat, self-contained card: it needs no
+/// `LocationService` / `BestNowClock` and never moves the map on its own. The
+/// single `onTap` is the user's explicit "show me this on the map" action — the
+/// agent never jumps there for them.
+@MainActor
+struct ChatExperienceCard: View {
+    let experience: Experience
+    let onTap: () -> Void
+
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// A quiet two-step reveal: the result reads as a tight search row first
+    /// (disc · name · meta · arrow), and the arrow expands a single line of
+    /// context + Solo score in place. Only the *whole row* then jumps to the
+    /// map — so a curious glance never costs you your scroll position.
+    @State private var expanded = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            row
+            if expanded {
+                expandedDetail
+                    .padding(.top, 2)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .padding(.horizontal, 13)
+        .padding(.vertical, 11)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
+                .fill(cardFill)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
+                .strokeBorder(CT.borderSubtle, lineWidth: 0.5)
+        )
+        .shadow(color: .black.opacity(0.04), radius: 2, y: 1)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text("\(experience.title). \(experience.oneLiner)"))
+        .accessibilityHint(Text(NSLocalizedString("chat.card.viewOnMap.a11y", comment: "Double tap to reveal this place on the map")))
+    }
+
+    /// The always-visible compact row.
+    private var row: some View {
+        HStack(spacing: 11) {
+            Button(action: onTap) {
+                HStack(spacing: 11) {
+                    disc
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(experience.title)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                        Text(metaLine)
+                            .font(.system(size: 10.5, design: .monospaced))
+                            .tracking(0.2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(PressableButtonStyle(pressedScale: 0.98))
+            .accessibilityLabel(Text(String(
+                format: NSLocalizedString("chat.card.open.a11y", comment: "Open %@ on the map"),
+                experience.title
+            )))
+
+            expandToggle
+        }
+    }
+
+    private var disc: some View {
+        Image(systemName: experience.category.symbol)
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 36, height: 36)
+            .background(
+                RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
+                    .fill(experience.category.color)
+            )
+    }
+
+    /// Right-edge arrow pill. Tapping it flips `expanded` rather than navigating
+    /// — the two affordances (peek vs. go) stay distinct.
+    private var expandToggle: some View {
+        Button {
+            withAnimation(reduceMotion ? nil : .spring(response: 0.32, dampingFraction: 0.82)) {
+                expanded.toggle()
+            }
+            Haptics.impact(.light)
+        } label: {
+            Image(systemName: expanded ? "chevron.up" : "arrow.up.right")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(CT.fgMuted)
+                .frame(width: 28, height: 28)
+                .background(Circle().fill(CT.surfaceSunken))
+        }
+        .buttonStyle(PressableButtonStyle())
+        .accessibilityLabel(Text(NSLocalizedString("chat.card.expand.a11y", comment: "Show more about this place")))
+    }
+
+    /// One line of prose + a Solo-score chip, revealed under the row. A1's
+    /// editorial hierarchy: what you'd do, why it fits, and the real evidence
+    /// behind it (confidence level + source count + best-time window) — all
+    /// from fields the Experience already carries. Place results are never
+    /// numbered, because a numbered list would imply a route order that does
+    /// not exist here; only a real route proposal gets an ordered strip.
+    private var expandedDetail: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(experience.oneLiner)
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if !experience.whyItMatters.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                Text(experience.whyItMatters)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(3)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            HStack(spacing: 6) {
+                Image(systemName: "person.fill")
+                    .font(.system(size: 9, weight: .semibold))
+                Text(scoreLabel)
+                    .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
+            }
+            .foregroundStyle(CT.verifiedGreen)
+            .padding(.horizontal, 9)
+            .padding(.vertical, 4)
+            .background(Capsule().fill(CT.successSoft))
+
+            HStack(spacing: 8) {
+                evidenceChip
+                if let window = experience.bestTimes.first(where: { $0.dayOfWeek == nil && $0.season == nil }) {
+                    bestTimeChip(window)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.leading, 47) // align under the title (disc 36 + spacing 11)
+    }
+
+    /// Human-readable confidence/health language plus the real source count —
+    /// never an unexplained internal "L3" code.
+    private var evidenceChip: some View {
+        Text(String(
+            format: NSLocalizedString("chat.card.evidence", comment: "Confidence health and source count"),
+            experience.confidence.health.localizedDescription,
+            experience.sources.count
+        ))
+        .font(.system(size: 10.5, weight: .medium, design: .monospaced))
+        .foregroundStyle(CT.fgMuted)
+        .padding(.horizontal, 9)
+        .padding(.vertical, 4)
+        .background(Capsule().fill(CT.surfaceSunken))
+    }
+
+    /// The first unrestricted best-time window, e.g. "Best 17:00–19:00". Shown
+    /// only when the Experience carries a window with no weekday/season
+    /// restriction, so the chip never implies a verified general opening time.
+    private func bestTimeChip(_ window: TimeWindow) -> some View {
+        Text(String(
+            format: NSLocalizedString("chat.card.bestTime", comment: "Best time window"),
+            window.startHour,
+            window.endHour
+        ))
+        .font(.system(size: 10.5, weight: .medium, design: .monospaced))
+        .foregroundStyle(CT.sunGoldDeep)
+        .padding(.horizontal, 9)
+        .padding(.vertical, 4)
+        .background(Capsule().fill(CT.sunGoldSoft))
+    }
+
+    /// Mono meta line: "<category> · Solo 7.5" — grounded only in data this card
+    /// already holds (it deliberately has no LocationService dep for distance).
+    private var metaLine: String {
+        let category = experience.category.localizedTitle
+        return "\(category) · \(scoreLabel)"
+    }
+
+    private var scoreLabel: String {
+        String(
+            format: NSLocalizedString("chat.card.solo", comment: "Solo %@"),
+            String(format: "%.1f", experience.soloScore.overall)
+        )
+    }
+
+    private var cardFill: Color {
+        colorScheme == .dark ? Color(.secondarySystemBackground) : CT.surfaceWhite
+    }
+}
+
+/// In-chat card for a route the agent proposed but has NOT saved. Lists the
+/// stops in walk order with an optional per-stop reason, and offers an explicit
+/// "View route" action — only then is the route persisted and opened. The
+/// user, not the agent, commits the route.
+@MainActor
+struct ChatRouteProposalCard: View {
+    let proposal: RouteProposal
+    /// User tapped "View route" — persist + open the route detail.
+    let onAdopt: () -> Void
+    /// User tapped a single stop bead — reveal that place on the map.
+    let onTapStop: (Experience) -> Void
+
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(UserPreferences.self) private var preferences
+    @Environment(\.modelContext) private var modelContext
+    @State private var saveError = false
+    private var saved: Bool { preferences.isRouteFavorited(route.id.rawValue) }
+
+    private var route: Route { proposal.route }
+
+    /// A route the agent just drafted (unsaved) vs. one already walked & proven.
+    /// The handoff splits the tag into DRAFT vs. VERIFIED on exactly this signal.
+    private var isVerified: Bool {
+        route.verification.status == .verified && route.verification.walkedByCount > 0
+    }
+
+    private var isCompiledWorkday: Bool { route.compiledPlan != nil }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            tagRow
+            Text(route.title)
+                .font(.system(size: 15.5, weight: .semibold))
+                .foregroundStyle(.primary)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+            if !route.reasonNow.isNilOrEmpty {
+                reasonNowBanner
+            }
+            if let plan = route.compiledPlan {
+                compiledTimeline(plan)
+            }
+            beadStrip
+            actions
+        }
+        .padding(.horizontal, 14)
+        .padding(.top, 13)
+        .padding(.bottom, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
+                .fill(cardFill)
+        )
+        // ONE quiet card boundary: a warm hairline, no shadow stack under it.
+        // The rationale strip and stop thumbnails sit inside this single
+        // edge instead of each adding their own border/shadow layer.
+        .overlay(
+            RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
+                .strokeBorder(CT.accentBorder, lineWidth: 0.5)
+        )
+        .accessibilityElement(children: .contain)
+        .alert(NSLocalizedString("chat.route.saveFailed", comment: "Route save failure"), isPresented: $saveError) {
+            Button(NSLocalizedString("action.ok", comment: "Dismiss error"), role: .cancel) {}
+        }
+    }
+
+    /// "⚑ DRAFT ROUTE" / "⚑ VERIFIED ROUTE … ✓ N walked" — display-face caps with
+    /// wide tracking, the typographic signature of the handoff route card.
+    private var tagRow: some View {
+        HStack(spacing: 5) {
+            Image(systemName: "flag.fill")
+                .font(.system(size: 9, weight: .bold))
+            Text(NSLocalizedString(
+                isCompiledWorkday
+                    ? "chat.route.tag.compiled"
+                    : (isVerified ? "chat.route.tag.verified" : "chat.route.tag.draft"),
+                comment: "Route card tag"
+            ))
+            .font(.system(size: 9.5, weight: .bold, design: .rounded))
+            .tracking(1.3)
+            Spacer(minLength: 0)
+            if isVerified {
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.system(size: 9, weight: .semibold))
+                    Text(String(
+                        format: NSLocalizedString("chat.route.walked", comment: "%d walked"),
+                        route.verification.walkedByCount
+                    ))
+                    .font(.system(size: 9.5, weight: .medium, design: .monospaced))
+                }
+                .foregroundStyle(CT.verifiedGreen)
+            }
+        }
+        .foregroundStyle(CT.accent)
+    }
+
+    /// The "why now" rationale: one quiet warm strip, plain fill — no border
+    /// or shadow of its own inside the card's single boundary.
+    private var reasonNowBanner: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 11, weight: .semibold))
+            Text(route.reasonNow ?? "")
+                .font(.caption2.weight(.medium))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(CT.sunGoldDeep)
+        .padding(.horizontal, 9)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: Radius.sm, style: .continuous).fill(CT.sunGoldSoft))
+    }
+
+    private func compiledTimeline(_ plan: CompiledWorkdayPlan) -> some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack(spacing: 6) {
+                Image(systemName: "clock.badge.checkmark")
+                    .font(.system(size: 11, weight: .semibold))
+                Text(plan.localDate)
+                    .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
+                Spacer(minLength: 4)
+                Text(NSLocalizedString(
+                    plan.evidenceCoverage == "fresh"
+                        ? "chat.route.evidence.fresh"
+                        : "chat.route.evidence.partial",
+                    comment: "Workday evidence coverage"
+                ))
+                .font(.system(size: 9.5, weight: .semibold))
+            }
+            .foregroundStyle(plan.evidenceCoverage == "fresh" ? CT.verifiedGreen : CT.sunGoldDeep)
+
+            ForEach(Array(plan.stops.prefix(3))) { stop in
+                HStack(alignment: .firstTextBaseline, spacing: 7) {
+                    Text("\(Self.minuteLabel(stop.startMinute))–\(Self.minuteLabel(stop.endMinute))")
+                        .font(.system(size: 10.5, weight: .medium, design: .monospaced))
+                        .foregroundStyle(CT.fgMuted)
+                    Text(stop.title)
+                        .font(.system(size: 11.5, weight: .medium))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                    Spacer(minLength: 0)
+                }
+            }
+            if !plan.fallbacks.isEmpty {
+                Label(
+                    String(
+                        format: NSLocalizedString("chat.route.fallbacks", comment: "%d fallbacks"),
+                        plan.fallbacks.count
+                    ),
+                    systemImage: "arrow.triangle.branch"
+                )
+                .font(.system(size: 10.5, weight: .medium))
+                .foregroundStyle(CT.accent)
+            }
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
+                .fill(CT.surfaceSunken)
+        )
+    }
+
+    /// Color-bead strip: each stop is a small category disc, joined by hairline
+    /// connectors, with a mono "N stops · duration" tail. Tapping a bead reveals
+    /// that stop on the map (the stops stay reachable without a long list).
+    /// The beads are plain category discs — no ring/shadow layer of their own —
+    /// and each keeps a 44pt-tall hit target while the visible disc stays small.
+    private var beadStrip: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            ScrollView(.horizontal) {
+                HStack(spacing: 0) {
+            ForEach(Array(proposal.stops.enumerated()), id: \.element.id) { index, stop in
+                if index > 0 {
+                    Rectangle()
+                        .fill(CT.borderDefault)
+                        .frame(width: 12, height: 1.5)
+                }
+                Button { onTapStop(stop) } label: {
+                    Image(systemName: stop.category.symbol)
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 20, height: 20)
+                        .background(Circle().fill(stop.category.color))
+                        .frame(width: HitTargetMetrics.minimum, height: HitTargetMetrics.minimum)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(PressableButtonStyle())
+                .accessibilityLabel(Text("\(index + 1). \(stop.title)"))
+            }
+                }
+            }
+            .scrollIndicators(.hidden)
+            Text(stopsMeta)
+                .font(.system(size: 10.5, design: .monospaced))
+                .tracking(0.2)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    /// Actions: one clear route CTA ("View route"), one quieter secondary
+    /// save toggle. The callbacks are the real adopt / stop-tap handlers.
+    private var actions: some View {
+        HStack(spacing: 8) {
+            Button {
+                do {
+                    let store = RouteStore(context: modelContext)
+                    if store.get(route.id) == nil { try store.savePersisted(route) }
+                    // The host may dismiss only AFTER the route is durable.
+                    onAdopt()
+                } catch { saveError = true }
+            } label: {
+                Text(NSLocalizedString("chat.route.saveAndView", comment: "Save and view the proposed route"))
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: HitTargetMetrics.minimum)
+                    .background(Capsule().fill(CT.accent))
+            }
+            .buttonStyle(PressableButtonStyle(pressedScale: 0.97))
+            .accessibilityHint(Text(NSLocalizedString("chat.route.adopt.a11y", comment: "Double tap to save this route and open it")))
+
+            Button {
+                do {
+                    // Keep the route itself recoverable before marking the
+                    // persisted local favorite. Never replace a newer route.
+                    let store = RouteStore(context: modelContext)
+                    if store.get(route.id) == nil { try store.savePersisted(route) }
+                    _ = preferences.toggleRouteFavorite(route.id.rawValue)
+                    Haptics.notify(.success)
+                } catch {
+                    saveError = true
+                }
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: saved ? "checkmark" : "heart")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text(NSLocalizedString(
+                        saved ? "chat.route.saved" : "chat.route.save",
+                        comment: "Save route"
+                    ))
+                    .font(.system(size: 13, weight: .medium))
+                }
+                .foregroundStyle(saved ? CT.verifiedGreen : CT.actionTintAdaptive)
+                .padding(.horizontal, 16)
+                .frame(minHeight: HitTargetMetrics.minimum)
+                .background(
+                    Capsule().strokeBorder(
+                        saved ? CT.verifiedGreen.opacity(0.35) : CT.accentBorder,
+                        lineWidth: 1
+                    )
+                )
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(PressableButtonStyle(pressedScale: 0.97))
+            .disabled(saved)
+        }
+    }
+
+    // MARK: - Helpers
+
+    private var stopsMeta: String {
+        String(
+            format: NSLocalizedString("chat.route.stops", comment: "%1$d stops · %2$@"),
+            proposal.stops.count,
+            durationLabel
+        )
+    }
+
+    private var durationLabel: String {
+        route.estimatedDuration >= 60
+            ? String(format: "%dh%02dm", route.estimatedDuration / 60, route.estimatedDuration % 60)
+            : "\(route.estimatedDuration)min"
+    }
+
+    private var cardFill: Color {
+        colorScheme == .dark ? Color(.secondarySystemBackground) : CT.surfaceWhite
+    }
+
+    private static func minuteLabel(_ minute: Int) -> String {
+        String(format: "%02d:%02d", max(0, minute) / 60, max(0, minute) % 60)
+    }
+}
+
+// MARK: - ChatEventCard (City OS v2)
+
+/// In-chat card for a 在地 event the agent surfaced via `find_local_events`.
+/// Reuses `LiveEventCard` so the chat + live-sheet event surfaces are visually
+/// identical; the "在地图上看" button dismisses the chat and jumps to the
+/// event on the map (the agent never seizes the map on its own).
+@MainActor
+struct ChatEventCard: View {
+    let event: CityEvent
+    /// User tapped "在地图上看" — hand the event up to recenter + highlight.
+    let onShowOnMap: (CityEvent) -> Void
+
+    var body: some View {
+        LiveEventCard(
+            event: event,
+            onShowOnMap: event.lat != nil && event.lng != nil
+                ? { onShowOnMap(event) }
+                : nil
+        )
+    }
+}
+
+// MARK: - ChatWebSourceCard (live web search provenance)
+
+/// One tappable source-link row beneath a web-search-grounded answer. Shows a
+/// numbered citation, the page title, and its host — the same shape a reader
+/// expects from a "sources" footnote. Tapping opens the URL.
+///
+/// Kept deliberately compact (single row, host-only) so a stack of 6 sources
+/// reads as a citation list, not six full cards competing with the answer.
+@MainActor
+struct ChatWebSourceCard: View {
+    /// 1-based citation index, matching how the answer may cite "(1)", "(2)".
+    let index: Int
+    let source: WebSearchResult
+    let onTap: () -> Void
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        Button(action: {
+            Haptics.impact(.light)
+            onTap()
+        }) {
+            HStack(alignment: .top, spacing: 10) {
+                Text("\(index)")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(CT.accent)
+                    .frame(width: 18, height: 18)
+                    .background(Circle().fill(CT.accentSoft))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(source.title.isEmpty ? source.host : source.title)
+                        .font(.subheadline)
+                        .foregroundStyle(CT.textPrimaryAdaptive)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                    HStack(spacing: 4) {
+                        Image(systemName: "link")
+                            .font(.system(size: 9, weight: .semibold))
+                        Text(source.host)
+                            .font(.caption2)
+                            .lineLimit(1)
+                    }
+                    .foregroundStyle(CT.textMutedAdaptive)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(CT.fgSubtle)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(colorScheme == .dark ? CT.warmCardDark : CT.surfaceWhite)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(CT.borderAdaptive, lineWidth: 0.5)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(
+            String(
+                format: NSLocalizedString("chat.sources.a11y", comment: "Source N: title, host"),
+                index, source.title.isEmpty ? source.host : source.title, source.host
+            )
+        ))
+    }
+}
+
+private extension Optional where Wrapped == String {
+    var isNilOrEmpty: Bool {
+        switch self {
+        case .none: return true
+        case let .some(value): return value.isEmpty
+        }
+    }
+}

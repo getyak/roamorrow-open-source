@@ -1,0 +1,194 @@
+/**
+ * GET /api/experiences/nearby
+ *
+ * Query params:
+ *   lng     — required, [-180, 180]
+ *   lat     — required, [-90, 90]
+ *   intent  — optional free-text. If provided, we ask the AI ranker to score
+ *             top-3 by intent fit. If omitted, we sort by soloScore.
+ *   radius  — optional meters. Default 1500. Max 10000.
+ *
+ * Response:
+ *   { results: NearbyResult[], degraded?: true }
+ *
+ * `degraded: true` means the AI ranker failed (no key, network error, etc.)
+ * and we fell back to soloScore sorting. The UI keeps working.
+ */
+
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { rankExperiences } from "@solo-compass/ai";
+import {
+  type Experience,
+  distanceMeters,
+  walkingMinutes,
+  healthFromConfidence,
+  type HealthStatus,
+} from "@solo-compass/core";
+import { getEvidenceRepo, getExperiencesRepo } from "@/lib/repos";
+import { DEV_FALLBACK_EXPERIENCES } from "@/lib/dev-fallback";
+import { coverageRefreshJob, planEvidenceRefresh } from "@/lib/evidence-refresh";
+import { scheduleRefreshJobs } from "@/lib/refresh-scheduler";
+import { localHourAt } from "@/lib/local-hour";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const QuerySchema = z.object({
+  lng: z.coerce.number().min(-180).max(180),
+  lat: z.coerce.number().min(-90).max(90),
+  intent: z.string().trim().min(1).max(280).optional(),
+  radius: z.coerce.number().int().min(100).max(10_000).default(1500),
+  timeZone: z.string().max(100).optional(),
+});
+
+export interface NearbyResult {
+  readonly experience: Experience;
+  readonly reason: string;
+  readonly score: number;
+  readonly walkingMinutes: number;
+  readonly health: HealthStatus;
+}
+
+export interface NearbyResponse {
+  readonly results: readonly NearbyResult[];
+  readonly degraded?: true;
+  /** Sample fixtures are distinct from a real-data AI ranking fallback. */
+  readonly source?: "sample" | "database";
+  readonly evidence?: {
+    readonly coverage: "fresh" | "partial" | "legacy";
+    readonly refreshScheduled: boolean;
+  };
+}
+
+const MAX_RESULTS = 30;
+
+function fallbackRank(
+  experiences: readonly Experience[],
+  center: readonly [number, number],
+): NearbyResult[] {
+  return experiences
+    .map((exp) => {
+      const meters = distanceMeters(center, exp.location.coordinates);
+      const walkMin = walkingMinutes(meters);
+      // Composite: soloScore weighted higher, distance mildly penalising.
+      const distancePenalty = Math.min(30, walkMin); // 0–30 cap
+      const score = Math.max(0, exp.soloScore.overall * 10 - distancePenalty);
+      return {
+        experience: exp,
+        reason: exp.soloScore.hint ?? exp.oneLiner,
+        score,
+        walkingMinutes: walkMin,
+        health: healthFromConfidence(exp.confidence),
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, MAX_RESULTS);
+}
+
+export async function GET(
+  request: Request,
+): Promise<NextResponse<NearbyResponse | { error: string }>> {
+  const url = new URL(request.url);
+  const parsed = QuerySchema.safeParse({
+    lng: url.searchParams.get("lng")?.trim() || undefined,
+    lat: url.searchParams.get("lat")?.trim() || undefined,
+    intent: url.searchParams.get("intent") ?? undefined,
+    radius: url.searchParams.get("radius") ?? undefined,
+    timeZone: url.searchParams.get("timeZone") ?? undefined,
+  });
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ") },
+      { status: 400 },
+    );
+  }
+
+  const { lng, lat, intent, radius, timeZone } = parsed.data;
+  const center = [lng, lat] as const;
+
+  let candidates: Experience[];
+  try {
+    const repo = getExperiencesRepo();
+    candidates = await repo.findNearby({ center, radiusMeters: radius, limit: 30 });
+  } catch (err) {
+    // Degrade gracefully when SUPABASE_* env is missing (local dev without
+    // backend). UI keeps working with an empty result set + `degraded` flag.
+    const missingEnv =
+      err instanceof Error && err.message.includes("Invalid server environment configuration");
+    if (missingEnv && process.env.NODE_ENV === "development") {
+      // Local dev without Supabase: serve a small fixture so the UI is testable.
+      // `degraded: true` keeps the "AI paused" label visible so it's obvious this
+      // is fake data.
+      return NextResponse.json({
+        results: fallbackRank(
+          DEV_FALLBACK_EXPERIENCES.filter(
+            (experience) => distanceMeters(center, experience.location.coordinates) <= radius,
+          ),
+          center,
+        ),
+        degraded: true,
+        source: "sample",
+      });
+    }
+    // eslint-disable-next-line no-console
+    console.error("findNearby failed", err);
+    return NextResponse.json({ error: "experience lookup failed" }, { status: 502 });
+  }
+
+  if (candidates.length === 0) {
+    scheduleRefreshJobs([coverageRefreshJob({ center, radiusMeters: radius })]);
+    return NextResponse.json({
+      results: [],
+      evidence: { coverage: "partial", refreshScheduled: true },
+    });
+  }
+
+  const refreshPlan = await planEvidenceRefresh({
+    evidenceRepo: getEvidenceRepo(),
+    experiences: candidates,
+    center,
+    radiusMeters: radius,
+  });
+  scheduleRefreshJobs(refreshPlan.jobs);
+  const evidence = {
+    coverage: refreshPlan.coverage,
+    refreshScheduled: refreshPlan.jobs.length > 0,
+  } as const;
+
+  // No intent → straightforward distance/score sort, no AI call.
+  if (!intent) {
+    return NextResponse.json({ results: fallbackRank(candidates, center), evidence });
+  }
+
+  // Intent provided → ask the ranker to pick the top 3.
+  try {
+    const currentHour = localHourAt(new Date(), timeZone);
+    const ranked = await rankExperiences({
+      userLocation: center,
+      userIntent: intent,
+      availableExperiences: candidates,
+      currentHour,
+    });
+    if (ranked.ranked.length === 0) {
+      return NextResponse.json({ results: fallbackRank(candidates, center), degraded: true });
+    }
+    const results: NearbyResult[] = ranked.ranked.slice(0, MAX_RESULTS).map((r) => ({
+      experience: r.experience,
+      reason: r.reason,
+      score: r.score,
+      walkingMinutes: r.walkingMinutes,
+      health: healthFromConfidence(r.experience.confidence),
+    }));
+    return NextResponse.json({ results, evidence });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error("rankExperiences failed, falling back to soloScore", err);
+    return NextResponse.json({
+      results: fallbackRank(candidates, center),
+      degraded: true,
+      evidence,
+    });
+  }
+}

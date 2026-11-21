@@ -1,0 +1,780 @@
+import SwiftUI
+import TipKit
+#if canImport(UIKit)
+import UIKit
+#endif
+
+/// Top-of-screen pill bar. One tap, clear feedback. The whole bar slides in
+/// over the map; we keep it visually light so the map stays the protagonist.
+public struct FilterBarView: View {
+    let selectedCategory: ExperienceCategory?
+    let isNowSelected: Bool
+    /// Currently-selected custom tag pill (mirrors `MapViewModel.selectedCustomTag`).
+    /// nil when no custom tag is active. US-008.
+    let selectedCustomTag: String?
+    /// True when the "Saved" filter is active (mirrors `MapViewModel.isFavoriteFilter`).
+    let isFavoriteSelected: Bool
+    let onSelectNow: () -> Void
+    let onSelectAll: () -> Void
+    /// Tap handler for the "Saved" pill — shows only favourited experiences.
+    let onSelectFavorite: () -> Void
+    /// Called when the user re-taps an already-active pill to deselect it back to 'All'.
+    let onClear: () -> Void
+    let onSelectCategory: (ExperienceCategory) -> Void
+    /// Tap handler for one of the user-defined `customTags` pills. US-008.
+    let onSelectCustomTag: (String) -> Void
+    /// Driven by the parent when the map camera is moving; triggers fade+shrink.
+    @Binding var isMapPanning: Bool
+    /// Number of experiences currently visible on the map. Used to render the
+    /// count badge on the selected pill. Defaults to 0 for previews/back-compat.
+    let resultCount: Int
+    /// How many visible experiences are currently at their best time.
+    let nowCount: Int
+
+    // MARK: - P2.5 Solo-Agent + taste hooks (#250 / #252)
+    //
+    // Both are optional so every existing caller — including the many
+    // tests + previews that construct FilterBarView without a chat
+    // orchestrator — keeps compiling unchanged. When either callback
+    // is non-nil, the parent has opted in to the new behaviour.
+    /// P2.5 #250: fires the `suggest_now_action` tool via ChatOrchestrator
+    /// instead of just toggling the Now filter. When nil, the Now pill
+    /// keeps its legacy filter-toggle behaviour.
+    let onSoloAgentTap: (() -> Void)?
+    /// P2.5 #252: whether the taste-ranked ordering is currently on.
+    let isTasteRankOn: Bool
+    /// P2.5 #252: flip taste-ranked ordering. When nil, the toggle is
+    /// hidden entirely so callers who haven't opted in aren't confused
+    /// by a control that does nothing.
+    let onTasteRankToggle: ((Bool) -> Void)?
+
+    /// Namespace for the shared gliding selection highlight.
+    @Namespace private var pillHighlight
+
+    /// US-034: width of the scrolling pill content and of the visible viewport.
+    /// When content overflows the viewport we paint a right-edge fade so users
+    /// get a visual hint that more categories are scrollable off-screen.
+    @State private var contentWidth: CGFloat = 0
+    @State private var viewportWidth: CGFloat = 0
+
+    /// User's chosen subset of categories. Injected via SwiftUI environment
+    /// (US-006). Previews/tests that don't supply preferences get a freshly
+    /// constructed `UserPreferences`, which defaults to all 8 categories.
+    @Environment(UserPreferences.self) private var preferences
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var lastResultCount: Int = 0
+    @State private var emptyShake: Int = 0
+
+    /// Opacity for count badges — dims while the map is panning to signal
+    /// the count is stale and will update once the gesture ends.
+    private var countBadgeOpacity: Double { isMapPanning ? 0.35 : 1.0 }
+
+    /// Routes a pill tap to either deselect (toggle-off) or select, with distinct haptics.
+    /// When `isSelected` is true the active pill is tapped again — call `onClear` with a
+    /// light-impact (deselect) haptic. Otherwise call `select` with a selection haptic.
+    private func handleTap(isSelected: Bool, select: () -> Void) {
+        if isSelected {
+            Haptics.impact(.light)
+            onClear()
+        } else {
+            Haptics.selection()
+            select()
+        }
+    }
+
+    /// Pure helper: returns true when a tap on a pill with `isSelected` state should
+    /// resolve to a clear (toggle-off) rather than a selection. Used in unit tests.
+    static func resolvesToClear(isSelected: Bool) -> Bool { isSelected }
+
+    public init(
+        selectedCategory: ExperienceCategory?,
+        isNowSelected: Bool,
+        selectedCustomTag: String? = nil,
+        isFavoriteSelected: Bool = false,
+        nowCount: Int = 0,
+        onSelectNow: @escaping () -> Void,
+        onSelectAll: @escaping () -> Void,
+        onSelectFavorite: @escaping () -> Void = {},
+        onClear: @escaping () -> Void = {},
+        onSelectCategory: @escaping (ExperienceCategory) -> Void,
+        onSelectCustomTag: @escaping (String) -> Void = { _ in },
+        isMapPanning: Binding<Bool> = .constant(false),
+        resultCount: Int = 0,
+        // P2.5 hooks — see property doc comments for semantics.
+        onSoloAgentTap: (() -> Void)? = nil,
+        isTasteRankOn: Bool = false,
+        onTasteRankToggle: ((Bool) -> Void)? = nil
+    ) {
+        self.selectedCategory = selectedCategory
+        self.isNowSelected = isNowSelected
+        self.selectedCustomTag = selectedCustomTag
+        self.isFavoriteSelected = isFavoriteSelected
+        self.nowCount = nowCount
+        self.onSelectNow = onSelectNow
+        self.onSelectAll = onSelectAll
+        self.onSelectFavorite = onSelectFavorite
+        self.onClear = onClear
+        self.onSelectCategory = onSelectCategory
+        self.onSelectCustomTag = onSelectCustomTag
+        self._isMapPanning = isMapPanning
+        self.resultCount = resultCount
+        self.onSoloAgentTap = onSoloAgentTap
+        self.isTasteRankOn = isTasteRankOn
+        self.onTasteRankToggle = onTasteRankToggle
+    }
+
+    /// Stable string ID for the currently selected pill — drives matchedGeometryEffect.
+    private var selectionID: String {
+        if isNowSelected { return "now" }
+        if isFavoriteSelected { return "saved" }
+        if let tag = selectedCustomTag { return "tag-\(tag)" }
+        if let cat = selectedCategory { return cat.rawValue }
+        return "all"
+    }
+
+    /// Iterate `allCases` (not the `Set`) so pill order stays stable and
+    /// matches enum declaration order.
+    private var visibleCategories: [ExperienceCategory] {
+        Self.visiblePills(from: preferences.visibleCategories)
+    }
+
+    /// Pure helper: returns true when a filter is active and the result count
+    /// transitions from a positive value to zero — the signal to fire the
+    /// empty-state shake + warning haptic. Unit-testable without UI state.
+    static func resolvesToEmpty(filterActive: Bool, oldCount: Int, newCount: Int) -> Bool {
+        filterActive && oldCount > 0 && newCount == 0
+    }
+
+    /// Pure function exposed for unit testing — keeps pill ordering tied to
+    /// `ExperienceCategory.allCases` and filters by the user's chosen set.
+    static func visiblePills(from selection: Set<ExperienceCategory>) -> [ExperienceCategory] {
+        ExperienceCategory.allCases.filter { selection.contains($0) }
+    }
+
+    /// US-034: width tolerance (pt) below which we treat content + viewport as
+    /// equal — sub-pixel layout rounding shouldn't trigger a spurious fade.
+    static let overflowTolerance: CGFloat = 1.0
+
+    /// Clamps a count for display in a pill badge to prevent 3-digit values from
+    /// overflowing the single-line pill bar layout.
+    static func compactCount(_ n: Int) -> String { n > 99 ? "99+" : "\(n)" }
+
+    /// Pure, testable overflow predicate driving the right-edge scroll fade.
+    /// Returns true only when the pill content is meaningfully wider than the
+    /// visible viewport (i.e. some chips are off-screen to the right). A zero
+    /// width (not yet laid out) never shows the affordance.
+    static func shouldShowScrollAffordance(contentWidth: CGFloat, viewportWidth: CGFloat) -> Bool {
+        guard contentWidth > 0, viewportWidth > 0 else { return false }
+        return contentWidth - viewportWidth > overflowTolerance
+    }
+
+    /// Instance accessor used by `body` — bridges the measured @State widths to
+    /// the pure predicate above.
+    private var isOverflowing: Bool {
+        Self.shouldShowScrollAffordance(contentWidth: contentWidth, viewportWidth: viewportWidth)
+    }
+
+    public var body: some View {
+        GlassmorphismCapsule(horizontalPadding: 0, verticalPadding: 0) {
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        nowPill(isSelected: isNowSelected, action: onSelectNow)
+                            .id("now")
+                        pill(
+                            id: "all",
+                            label: NSLocalizedString("filter.all", comment: "All"),
+                            isSelected: !isNowSelected && !isFavoriteSelected && selectedCategory == nil && selectedCustomTag == nil,
+                            // Use the shared brown selected-fill (same as Now and
+                            // category chips) so the active 'All' filter carries
+                            // real visual weight. The old Color.primary fill was
+                            // near-invisible on the dark glass bar — the currently
+                            // active filter read as the least prominent chip.
+                            color: Self.selectedFill,
+                            action: onSelectAll
+                        )
+                        .id("all")
+                        favoritePill(isSelected: isFavoriteSelected, action: onSelectFavorite)
+                            .id("saved")
+                        // P2.5 #250: Solo Agent chip — shortcut to
+                        // `suggest_now_action` tool. Hidden when no callback
+                        // is wired (previews / tests without ChatOrchestrator).
+                        if let onTap = onSoloAgentTap {
+                            soloAgentPill(action: onTap)
+                                .id("solo-agent")
+                        }
+                        // P2.5 #252: 我的菜 (my taste) toggle — flips
+                        // TasteProfile-ranked ordering on all results.
+                        if let onToggle = onTasteRankToggle {
+                            tasteRankPill(isOn: isTasteRankOn) { onToggle(!isTasteRankOn) }
+                                .id("taste-rank")
+                        }
+                        ForEach(visibleCategories) { category in
+                            iconPill(
+                                category: category,
+                                isSelected: selectionID == category.rawValue,
+                                action: { onSelectCategory(category) }
+                            )
+                            .id(category.rawValue)
+                        }
+                        // US-041: index as stable id so duplicate custom tags don't
+                        // collapse into a single row (`id: \.self` dedups on value).
+                        ForEach(Array(preferences.customTags.enumerated()), id: \.offset) { _, tag in
+                            customTagPill(
+                                tag: tag,
+                                isSelected: selectionID == "tag-\(tag)",
+                                action: { onSelectCustomTag(tag) }
+                            )
+                            .id("tag-\(tag)")
+                        }
+                    }
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 5)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.75), value: selectionID)
+                }
+                // A horizontal ScrollView places no bound on its own vertical
+                // extent, so inside the top overlay's VStack (filter bar above a
+                // Spacer) it greedily stretched to fill all remaining height. The
+                // GlassmorphismCapsule's `.background(in: Capsule())` then tracked
+                // that full-height frame, rendering the glass as a giant vertical
+                // capsule arching across the map — the dark "arch" scrim that
+                // covered the home screen. Pinning the scroll view to its content's
+                // intrinsic height keeps the bar one pill-row tall.
+                .fixedSize(horizontal: false, vertical: true)
+                .onAppear {
+                    if selectionID == "all" || selectionID == "now" {
+                        proxy.scrollTo("now", anchor: .leading)
+                    } else {
+                        proxy.scrollTo(selectionID, anchor: .center)
+                    }
+                }
+                .onChange(of: selectionID) { _, id in
+                    withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
+                        proxy.scrollTo(id, anchor: .center)
+                    }
+                }
+                // US-034: measure the laid-out pill content width.
+                .background(
+                    GeometryReader { proxy in
+                        Color.clear.preference(key: FilterContentWidthKey.self, value: proxy.size.width)
+                    }
+                )
+            }
+            // US-034: measure the visible viewport width so we can compare it
+            // against the content width and only fade when chips overflow.
+            .background(
+                GeometryReader { proxy in
+                    Color.clear.preference(key: FilterViewportWidthKey.self, value: proxy.size.width)
+                }
+            )
+            .onPreferenceChange(FilterContentWidthKey.self) { contentWidth = $0 }
+            .onPreferenceChange(FilterViewportWidthKey.self) { viewportWidth = $0 }
+            // US-034: right-edge fade. Only masks when content overflows; when
+            // every chip fits, the mask is a solid (fully opaque) rectangle so
+            // nothing is clipped.
+            .mask(scrollAffordanceMask)
+        }
+        .modifier(ShakeEffect(animatableData: CGFloat(emptyShake)))
+        .padding(.horizontal, 16)
+        // TipKit popover — first-time hint after 2 cold launches. TipKit
+        // tracks "shown / dismissed" lifecycle so this fires once per user.
+        // No-ops automatically when no rule matches.
+        .popoverTip(FilterBarTip())
+        .opacity(isMapPanning ? 0.4 : 1.0)
+        .scaleEffect(isMapPanning ? 0.85 : 1.0)
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: isMapPanning)
+        .onTapGesture { isMapPanning = false }
+        // US-050: when the active filter yields no results, announce it so
+        // VoiceOver users know the empty map isn't a frozen UI. Fires both on
+        // first appearance and whenever the count transitions to zero.
+        .onAppear { announceIfEmpty(resultCount) }
+        .onChange(of: resultCount) { _, newCount in announceIfEmpty(newCount) }
+        .onChange(of: resultCount) { old, new in
+            let filterActive = isNowSelected || isFavoriteSelected || selectedCategory != nil || selectedCustomTag != nil
+            if new > old && filterActive && !reduceMotion {
+                #if canImport(UIKit)
+                Haptics.selection()
+                #endif
+            }
+            if Self.resolvesToEmpty(filterActive: filterActive, oldCount: old, newCount: new) {
+                #if canImport(UIKit)
+                Haptics.notify(.warning)
+                #endif
+                if !reduceMotion {
+                    withAnimation(.default) { emptyShake += 1 }
+                }
+            }
+            lastResultCount = new
+        }
+    }
+
+    /// US-050: localized VoiceOver string posted when the filter has no results.
+    static let emptyResultsAnnouncementKey = "a11y.empty.filterResults"
+
+    var localizedEmptyText: String {
+        NSLocalizedString(Self.emptyResultsAnnouncementKey, comment: "Announced when a filter returns no results")
+    }
+
+    /// Posts a VoiceOver announcement when `count` is zero. No-op otherwise so
+    /// non-empty filters don't chatter.
+    private func announceIfEmpty(_ count: Int) {
+        guard count == 0 else { return }
+        #if canImport(UIKit)
+        UIAccessibility.post(notification: .announcement, argument: localizedEmptyText)
+        #endif
+    }
+
+    /// US-034: gradient mask that fades the trailing ~24pt of the strip when
+    /// content overflows; otherwise an opaque rectangle (no visible change).
+    @ViewBuilder
+    private var scrollAffordanceMask: some View {
+        if isOverflowing {
+            LinearGradient(
+                stops: [
+                    .init(color: .black, location: 0),
+                    .init(color: .black, location: 0.88),
+                    .init(color: .black.opacity(0), location: 1.0)
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        } else {
+            Rectangle()
+        }
+    }
+
+    /// Selected-pill fill. US-028: replaced the old #D4A843 gold (which gave
+    /// only ~1.9:1 against the white pill text) with CT.accent (#5D3000). White
+    /// text on this brown clears WCAG AA/AAA at ≥ 7:1.
+    static let selectedFillRGB: (r: Int, g: Int, b: Int) = (0x5D, 0x30, 0x00)
+    /// Selected-pill foreground — white, used for the text/glyph on the fill.
+    static let selectedForegroundRGB: (r: Int, g: Int, b: Int) = (0xFF, 0xFF, 0xFF)
+    private static let selectedFill = Color(
+        red: Double(selectedFillRGB.r) / 255,
+        green: Double(selectedFillRGB.g) / 255,
+        blue: Double(selectedFillRGB.b) / 255
+    )
+
+    private func nowPill(isSelected: Bool, action: @escaping () -> Void) -> some View {
+        let label = NSLocalizedString("filter.now", comment: "Now")
+        let a11yLabel: String = nowCount > 0
+            ? String(format: NSLocalizedString("filter.now.a11y", comment: "Now, n experiences at their best"), nowCount)
+            : label
+
+        return Button {
+            handleTap(isSelected: isSelected, select: action)
+        } label: {
+            HStack(spacing: 5) {
+                Circle()
+                    .fill(isSelected ? Color.white : CT.sunGold)
+                    .frame(width: 6, height: 6)
+
+                Text(label)
+                    .font(.subheadline.weight(.medium))
+
+                if nowCount > 0 {
+                    Text(Self.compactCount(nowCount))
+                        .font(.caption2.monospacedDigit().weight(.semibold))
+                        .contentTransition(reduceMotion ? .identity : .numericText(value: Double(nowCount)))
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .frame(minHeight: 44)
+            .contentShape(Capsule())
+            .foregroundStyle(isSelected ? .white : CT.actionTintAdaptive)
+            .background {
+                if isSelected {
+                    Capsule()
+                        .fill(Self.selectedFill)
+                        .matchedGeometryEffect(id: "filterHighlight", in: pillHighlight)
+                }
+            }
+            .animation(.spring(response: 0.3, dampingFraction: 0.65), value: resultCount)
+        }
+        .buttonStyle(PressableButtonStyle())
+        .accessibilityLabel(Text(a11yLabel))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityValue(isSelected && resultCount > 0 ? Text("\(resultCount) results") : Text(""))
+        .accessibilityHint(isSelected ? Text(NSLocalizedString("filter.pill.clear.hint", comment: "Double tap to clear this filter")) : Text(""))
+
+    }
+
+    private func pill(id: String, label: String, isSelected: Bool, color: Color, action: @escaping () -> Void) -> some View {
+        Button {
+            handleTap(isSelected: isSelected, select: action)
+        } label: {
+            HStack(spacing: 5) {
+                Text(label)
+                    .font(.subheadline.weight(.medium))
+
+                // Inline result count — slimmed to a plain number (no inner
+                // capsule background, no extra padding) so the chip stops
+                // visually swelling on count change and the row reads as one
+                // even cadence rather than "All 5" suddenly twice as wide.
+                if isSelected && resultCount > 0 {
+                    Text(Self.compactCount(resultCount))
+                        .font(.caption2.monospacedDigit().weight(.semibold))
+                        .contentTransition(reduceMotion ? .identity : .numericText(value: Double(resultCount)))
+                        .opacity(countBadgeOpacity * 0.85)
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .frame(minHeight: 44)
+            .contentShape(Capsule())
+            .foregroundStyle(isSelected ? .white : .primary)
+            .background {
+                if isSelected {
+                    Capsule()
+                        .fill(color)
+                        .matchedGeometryEffect(id: "filterHighlight", in: pillHighlight)
+                }
+            }
+            .animation(.spring(response: 0.3, dampingFraction: 0.65), value: resultCount)
+        }
+        .buttonStyle(PressableButtonStyle())
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityValue(isSelected && resultCount > 0 ? Text("\(resultCount) results") : Text(""))
+    }
+
+    /// "Saved" pill — a heart glyph + localized label that filters the map to
+    /// the user's favourited experiences. It toggles (the parent's
+    /// `onSelectFavorite` flips `isFavoriteFilter`), so we always route taps to
+    /// `action` rather than the All-reverting `onClear` path. Selected state uses
+    /// a warm red fill that matches the heart-favourite affordance elsewhere in
+    /// the app; the inline count mirrors the All/Now chips' visual language.
+    private func favoritePill(isSelected: Bool, action: @escaping () -> Void) -> some View {
+        let label = NSLocalizedString("filter.saved", comment: "Saved (favourites filter)")
+        let tint = Self.selectedFill
+        return Button {
+            Haptics.selection()
+            action()
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: isSelected ? "heart.fill" : "heart")
+                    .font(.caption.weight(.semibold))
+
+                Text(label)
+                    .font(.subheadline.weight(.medium))
+
+                if isSelected && resultCount > 0 {
+                    Text(Self.compactCount(resultCount))
+                        .font(.caption2.monospacedDigit().weight(.semibold))
+                        .contentTransition(reduceMotion ? .identity : .numericText(value: Double(resultCount)))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background(Capsule().fill(Color.white.opacity(0.28)))
+                        .opacity(countBadgeOpacity)
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .frame(minHeight: 44)
+            .contentShape(Capsule())
+            // Unselected pills now share a single neutral text color across the
+            // bar (Now/All/Saved/category) so the row reads as one component
+            // instead of a parade of red/orange/green outlines. The category
+            // identity color survives as the inline glyph tint (heart icon).
+            .foregroundStyle(isSelected ? .white : .primary)
+            .background {
+                if isSelected {
+                    Capsule()
+                        .fill(tint)
+                        .matchedGeometryEffect(id: "filterHighlight", in: pillHighlight)
+                }
+            }
+            .animation(.spring(response: 0.3, dampingFraction: 0.65), value: resultCount)
+        }
+        .buttonStyle(PressableButtonStyle())
+        .accessibilityLabel(Text(label))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityValue(isSelected && resultCount > 0 ? Text("\(resultCount) results") : Text(""))
+    }
+
+    /// P2.5 #250 — Solo Agent shortcut pill. Tapping fires
+    /// `suggest_now_action` via the ChatOrchestrator. Uses `sun.max.fill` (a
+    /// verified SF Symbol — see `SFSymbolExistenceTests`) tinted in
+    /// `CT.sunGoldDeep` so it visually reads as the "concierge" affordance,
+    /// distinct from the neutral filter chips beside it.
+    private func soloAgentPill(action: @escaping () -> Void) -> some View {
+        let label = NSLocalizedString("filter.solo.agent", comment: "Solo Agent shortcut")
+        return Button {
+            #if canImport(UIKit)
+            Haptics.impact(.light)
+            #endif
+            action()
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: "sun.max.fill")
+                    .font(.caption.weight(.semibold))
+                Text(label)
+                    .font(.subheadline.weight(.medium))
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .frame(minHeight: 44)
+            .contentShape(Capsule())
+            .foregroundStyle(CT.actionTintAdaptive)
+        }
+        .buttonStyle(PressableButtonStyle())
+        .accessibilityLabel(Text(label))
+        .accessibilityHint(Text(NSLocalizedString("filter.solo.agent.a11y",
+            comment: "Ask Solo Agent for a nearby suggestion")))
+    }
+
+    /// P2.5 #252 — 我的菜 (my taste) toggle. When on, results are re-ordered
+    /// by TasteProfile-embedding match instead of raw Solo-Score. Free-tier
+    /// available (hook for Pro's private curation later).
+    private func tasteRankPill(isOn: Bool, action: @escaping () -> Void) -> some View {
+        let label = NSLocalizedString("filter.taste.rank", comment: "My taste (taste-ranked ordering)")
+        return Button {
+            #if canImport(UIKit)
+            Haptics.selection()
+            #endif
+            action()
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: isOn ? "sparkles" : "sparkle")
+                    .font(.caption.weight(.semibold))
+                Text(label)
+                    .font(.subheadline.weight(.medium))
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .frame(minHeight: 44)
+            .contentShape(Capsule())
+            .foregroundStyle(isOn ? .white : .primary)
+            .background {
+                if isOn {
+                    Capsule()
+                        .fill(CT.accent)
+                }
+            }
+        }
+        .buttonStyle(PressableButtonStyle())
+        .accessibilityLabel(Text(label))
+        .accessibilityAddTraits(isOn ? .isSelected : [])
+    }
+
+    private func iconPill(category: ExperienceCategory, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button {
+            handleTap(isSelected: isSelected, select: action)
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: category.symbol)
+                    .font(.caption.weight(.semibold))
+                    // Keep category identity in the glyph so users still scan
+                    // the row by color, while text + border stay neutral. The
+                    // opacity is held to 0.85 on unselected pills so the row
+                    // reads as quiet color hints rather than five competing
+                    // category beacons — the previous full-saturation chips
+                    // pulled the eye away from the active selection.
+                    .foregroundStyle(isSelected ? .white : category.color.opacity(0.85))
+
+                Text(category.localizedTitle)
+                    .font(.subheadline.weight(.medium))
+
+                if isSelected && resultCount > 0 {
+                    Text(Self.compactCount(resultCount))
+                        .font(.caption2.monospacedDigit().weight(.semibold))
+                        .contentTransition(reduceMotion ? .identity : .numericText(value: Double(resultCount)))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background(Capsule().fill(Color.white.opacity(0.28)))
+                        .opacity(countBadgeOpacity)
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .frame(minHeight: 44)
+            .contentShape(Capsule())
+            // Same unification as favoritePill: unselected = neutral text +
+            // neutral border. Category identity color stays as the inline glyph
+            // tint (the `category.symbol` Image keeps its colored stroke via the
+            // base foregroundStyle, but text and border read as one system.
+            .foregroundStyle(isSelected ? .white : .primary)
+            .background {
+                if isSelected {
+                    Capsule()
+                        .fill(Self.selectedFill)
+                        .matchedGeometryEffect(id: "filterHighlight", in: pillHighlight)
+                }
+            }
+            .animation(.spring(response: 0.3, dampingFraction: 0.65), value: resultCount)
+        }
+        .buttonStyle(PressableButtonStyle())
+        .accessibilityLabel(Text(category.localizedTitle))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityValue(isSelected && resultCount > 0 ? Text("\(resultCount) results") : Text(""))
+        .accessibilityHint(isSelected ? Text(NSLocalizedString("filter.pill.clear.hint", comment: "Double tap to clear this filter")) : Text(""))
+    }
+
+    /// Pill rendered for each entry in `UserPreferences.customTags`. Same
+    /// shape as `iconPill` (36×36 circle, tag.fill glyph, accent color), so
+    /// it visually reads as part of the same filter row. US-008.
+    private func customTagPill(tag: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button {
+            handleTap(isSelected: isSelected, select: action)
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: "tag.fill").font(.caption.weight(.semibold))
+                Text(tag).font(.subheadline.weight(.medium)).lineLimit(1)
+            }
+            .padding(.horizontal, 12)
+            .frame(minHeight: 44)
+            .foregroundStyle(isSelected ? .white : .primary)
+            .background {
+                if isSelected {
+                    Capsule().fill(Self.selectedFill)
+                        .matchedGeometryEffect(id: "filterHighlight", in: pillHighlight)
+                }
+            }
+            .contentShape(Capsule())
+        }
+        .buttonStyle(PressableButtonStyle())
+        .accessibilityLabel(Text(tag))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityHint(isSelected ? Text(NSLocalizedString("filter.pill.clear.hint", comment: "Clear filter")) : Text(""))
+    }
+
+}
+
+// MARK: - ShakeEffect
+
+/// Damped 3-cycle horizontal sine that maps integer counter increments to a
+/// brief left-right head-shake — used by FilterBarView's empty-filter feedback.
+private struct ShakeEffect: GeometryEffect {
+    var animatableData: CGFloat
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        // Each integer bump in animatableData drives one full shake cycle.
+        // The fractional part of animatableData is what SwiftUI animates
+        // between 0→1. We map that to 3 sine oscillations with exponential
+        // damping so the wobble fades naturally without needing a Task delay.
+        let phase = animatableData - floor(animatableData)
+        let amplitude: CGFloat = 6
+        let cycles: CGFloat = 3
+        let damping = 1 - phase          // fades to zero by phase == 1
+        let dx = amplitude * damping * sin(phase * cycles * 2 * .pi)
+        return ProjectionTransform(CGAffineTransform(translationX: dx, y: 0))
+    }
+}
+
+// MARK: - Scroll affordance preference keys (US-034)
+
+/// Width of the scrolling pill HStack content.
+private struct FilterContentWidthKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
+    }
+}
+
+/// Width of the visible ScrollView viewport.
+private struct FilterViewportWidthKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
+    }
+}
+
+// MARK: - PressableButtonStyle moved to Views/Shared/PressableButtonStyle.swift
+// (shared with ChatInputBar to avoid duplication)
+
+#Preview {
+    VStack {
+        FilterBarView(
+            selectedCategory: .coffee,
+            isNowSelected: false,
+            nowCount: 0,
+            onSelectNow: {},
+            onSelectAll: {},
+            onSelectCategory: { _ in }
+        )
+        FilterBarView(
+            selectedCategory: nil,
+            isNowSelected: true,
+            nowCount: 7,
+            onSelectNow: {},
+            onSelectAll: {},
+            onSelectCategory: { _ in }
+        )
+        FilterBarView(
+            selectedCategory: nil,
+            isNowSelected: false,
+            nowCount: 3,
+            onSelectNow: {},
+            onSelectAll: {},
+            onSelectCategory: { _ in }
+        )
+    }
+    .padding(.vertical)
+    .background(CT.surfaceSunken)
+    .environment(UserPreferences())
+}
+
+#Preview("First-save celebration") {
+    struct FirstSaveDemo: View {
+        @State private var isFavoriteSelected = false
+        @State private var favoriteCount = 3
+        var body: some View {
+            VStack(spacing: 16) {
+                FilterBarView(
+                    selectedCategory: nil,
+                    isNowSelected: false,
+                    isFavoriteSelected: isFavoriteSelected,
+                    nowCount: 0,
+                    onSelectNow: {},
+                    onSelectAll: {},
+                    onSelectFavorite: { isFavoriteSelected.toggle() },
+                    onClear: { isFavoriteSelected = false },
+                    onSelectCategory: { _ in },
+                    resultCount: isFavoriteSelected ? favoriteCount : 0
+                )
+                Text(isFavoriteSelected ? "Saved filter active (\(favoriteCount) results)" : "Tap Saved to trigger first-save celebration")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Button("Reset celebration state") {
+                    isFavoriteSelected = false
+                }
+                .buttonStyle(.bordered)
+            }
+            .padding()
+            .background(CT.surfaceSunken)
+            .environment(UserPreferences())
+        }
+    }
+    return FirstSaveDemo()
+}
+
+#Preview("Now count pop demo") {
+    struct NowCountDemo: View {
+        @State private var nowCount = 2
+        var body: some View {
+            VStack(spacing: 16) {
+                FilterBarView(
+                    selectedCategory: nil,
+                    isNowSelected: false,
+                    nowCount: nowCount,
+                    onSelectNow: {},
+                    onSelectAll: {},
+                    onSelectCategory: { _ in }
+                )
+                Button("Add a best-now place (+1)") { nowCount += 1 }
+                    .buttonStyle(.borderedProminent)
+                Button("Remove a best-now place (-1)") { if nowCount > 0 { nowCount -= 1 } }
+                    .buttonStyle(.bordered)
+                Text("nowCount: \(nowCount)")
+                    .font(.caption.monospacedDigit())
+            }
+            .padding()
+            .background(CT.surfaceSunken)
+            .environment(UserPreferences())
+        }
+    }
+    return NowCountDemo()
+}

@@ -1,0 +1,1307 @@
+import CryptoKit
+import Foundation
+import Observation
+
+@MainActor
+@Observable
+final class CompanionHomeStore: AgentExecutionJournal {
+    private(set) var entries: [CompanionHomeEntry] = [] { didSet { if !isLoading { rebuildTimeline() } } }
+    private(set) var timelineProjection = CompanionTimeline.Projection()
+    var composerDraft = "" {
+        didSet {
+            guard !isLoading, oldValue != composerDraft else { return }
+            draftRevision &+= 1
+            persistDraft()
+        }
+    }
+    private(set) var draftAttachments: [CompanionMediaAttachment] = []
+    private(set) var draftQuote: CompanionQuotedMessage?
+    private(set) var conversationID = UUID().uuidString
+    private(set) var nextTurnResearchReference: TravelResearchReference?
+    private(set) var nextTurnPlace: CompanionHomePlaceScope?
+    private(set) var nextTurnArea: CompanionHomeAreaScope?
+    // A viewport checkpoint, not display state. Reading this to initialize a
+    // child view must not subscribe its whole parent to every native scroll row.
+    // Explicit restoration is published through presentationRestoreToken.
+    @ObservationIgnored private(set) var readingState = CompanionConversationReadingState()
+    private(set) var mapSource: CompanionConversationMapSource?
+    private(set) var presentationRestoreToken = 0
+    private(set) var transcribingAudioIDs: Set<UUID> = []
+    private(set) var isWorking = false
+    private(set) var activity: CompanionActivity = .idle
+    private(set) var workingProgress: CompanionHomeAgent.Progress = .thinking
+    private(set) var errorMessage: String?
+    private var storedPeople: [CompanionHomePerson] = []
+    var people: [CompanionHomePerson] {
+        get { storedPeople }
+        set { _ = updatePeople(newValue) }
+    }
+    private(set) var selectedPeopleIDs: Set<String> = []
+    private(set) var commitments: [CompanionHomeCommitment] = []
+    var activeCommitments: [CompanionHomeCommitment] { commitments.filter { $0.status == .active } }
+    private(set) var invites: [CompanionHomeInvite] = [] { didSet { if !isLoading { rebuildTimeline() } } }
+    private(set) var experienceService: ExperienceService?
+
+    private(set) var agentSession = AgentSessionDescriptor(id: UUID().uuidString, scope: "global")
+    @ObservationIgnored private let memory: any AgentMemoryProviding
+
+    @ObservationIgnored private var transcribeAudio: (@MainActor (CompanionMediaAttachment) async throws -> String)?
+    @ObservationIgnored private var agent: (any CompanionHomeResponding)?
+    @ObservationIgnored private var forgetResearch: (() throws -> Void)?
+    @ObservationIgnored private var productionAgent: CompanionHomeAgent?
+    @ObservationIgnored private var searchAreaProvider: (() -> CompanionHomeSearchArea?)?
+    @ObservationIgnored private var activeTask: Task<CompanionHomeAgentResult, Error>?
+    @ObservationIgnored private var activeID: UUID?
+    @ObservationIgnored private var activeAttemptID: UUID?
+    @ObservationIgnored private var isLoading = true
+    @ObservationIgnored private var url: URL
+    @ObservationIgnored private let originalURL: URL
+    @ObservationIgnored private var storageBlocked = false
+    @ObservationIgnored private var stagingToolResult = false
+    @ObservationIgnored private let snapshotWriter: CompanionSnapshotWriter
+    @ObservationIgnored private let historyEncoder: CompanionHistoryEncoder
+    @ObservationIgnored private var durableAttachmentIDs: Set<UUID> = []
+    @ObservationIgnored private var outboxStorageBlocked = false
+    @ObservationIgnored private var outboxEntryID: UUID?
+    @ObservationIgnored private var draftRevision: UInt64 = 0
+    @ObservationIgnored private var draftStorageBlocked = false
+    @ObservationIgnored private var legacySnapshotSignature: String?
+    @ObservationIgnored private var pendingAdmissionID: UUID?
+    @ObservationIgnored private var timelineRevision: UInt64 = 0
+    private var toolJournals: [String: [CompanionHomeToolBatch]] = [:]
+
+    private struct Snapshot: Codable, Sendable {
+        var version = 1
+        var entries: [CompanionHomeEntry]
+        var composerDraft: String
+        var people: [CompanionHomePerson]
+        var selectedPeopleIDs: Set<String>
+        var invites: [CompanionHomeInvite]
+        var commitments: [CompanionHomeCommitment]? = nil
+        var toolJournals: [String: [CompanionHomeToolBatch]]? = nil
+        var draftAttachments: [CompanionMediaAttachment]? = nil
+        var draftQuote: CompanionQuotedMessage? = nil
+        var agentSessionID: String? = nil
+        // Optional additions keep every existing v1 conversation/media record readable.
+        var conversationID: String? = nil
+        var nextTurnResearchReference: TravelResearchReference? = nil
+        var nextTurnPlace: CompanionHomePlaceScope? = nil
+        var nextTurnArea: CompanionHomeAreaScope? = nil
+        var readingState: CompanionConversationReadingState? = nil
+        var mapSource: CompanionConversationMapSource? = nil
+        var draftRevision: UInt64? = nil
+
+        func encoded(using encoder: CompanionHistoryEncoder, generation: CompanionHistoryEncoder.Generation) throws -> Data {
+            var envelope = self
+            envelope.entries = []
+            return try encoder.encode(envelope, entries: entries, generation: generation)
+        }
+
+        var attachmentIDs: Set<UUID> {
+            Set((entries.flatMap { $0.attachments ?? [] } + (draftAttachments ?? []))
+                .filter { $0.data != nil }.map(\.id))
+        }
+    }
+
+    private struct DraftSnapshot: Codable {
+        var version = 1
+        var conversationID: String
+        var agentSessionID: String
+        var revision: UInt64
+        var text: String
+        var legacySnapshotSignature: String?
+    }
+
+    /// A small durable acceptance record precedes clearing the composer. Media
+    /// already saved by stageAttachment is referenced rather than encoded again.
+    private struct OutboxSnapshot: Codable {
+        var version = 1
+        var conversationID: String
+        var agentSessionID: String
+        var legacySnapshotSignature: String?
+        var entry: CompanionHomeEntry?
+        var attachmentReferences: Set<UUID> = []
+        var consumedDraftRevision: UInt64?
+    }
+
+    init(url: URL? = nil, memory: (any AgentMemoryProviding)? = nil,
+         snapshotWriter: CompanionSnapshotWriter? = nil, historyEncoder: CompanionHistoryEncoder? = nil) {
+        self.snapshotWriter = snapshotWriter ?? CompanionSnapshotWriter()
+        self.historyEncoder = historyEncoder ?? CompanionHistoryEncoder()
+        if let memory { self.memory = memory }
+        else if let url { self.memory = DeviceAgentMemoryStore(fileURL: url.appendingPathExtension("memory.json")) }
+        else { self.memory = DeviceAgentMemoryStore.shared }
+        self.url = url ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Roamorrow/CompanionHome/v1.json")
+        self.originalURL = self.url
+        load()
+        loadDraft()
+        loadOutbox()
+        isLoading = false
+        rebuildTimeline()
+    }
+
+    /// Call once from the app's existing service graph. Optional router is the same
+    /// instance owned by the map, so tools resolve actual visible Experience data.
+    func configure(aiService: AIService, experienceService: ExperienceService) {
+        self.experienceService = experienceService
+        let production = CompanionHomeAgent(aiService: aiService, experienceService: experienceService)
+        production.journalStore = self
+        production.memory = memory
+        production.searchArea = searchAreaProvider
+        production.activeCommitments = { [weak self] in self?.activeCommitments ?? [] }
+        productionAgent = production
+        agent = production
+    }
+
+    @discardableResult
+    func setNextTurnResearch(_ reference: TravelResearchReference?) -> Bool {
+        let previous = nextTurnResearchReference; nextTurnResearchReference = reference
+        if !persist() { nextTurnResearchReference = previous; return false }
+        return true
+    }
+
+    func researchAdmission(for inputID: UUID) -> UUID? {
+        activeID == inputID && isWorking ? activeAttemptID : nil
+    }
+
+    func retainResearchCard(_ reference: TravelResearchReference, replyTo inputID: UUID, admission: UUID) async -> Bool {
+        guard activeID == inputID, activeAttemptID == admission, isWorking,
+              let index = entries.firstIndex(where: { $0.id == inputID && $0.role == .user }) else { return false }
+        let neutral = NSLocalizedString("travel.chat.retained", value: "研究任务已保留，可在卡片中查看进展和修改草稿。", comment: "Scoped research summary")
+        if let response = entries.firstIndex(where: { $0.replyToID == inputID }) {
+            entries[response].researchReference = reference
+            entries[response].text = neutral; entries[response].status = .delivered
+        } else {
+            entries.insert(.init(role: .companion, text: neutral, status: .delivered, researchReference: reference, replyToID: inputID), at: index + 1)
+        }
+        return await persistAsynchronously()
+    }
+
+    func configureResearch(responder: @escaping ([CompanionHomeEntry], CompanionHomeSearchArea?) async throws -> TravelResearchReference?, forget: @escaping () throws -> Void) {
+        productionAgent?.researchResponder = responder
+        forgetResearch = forget
+    }
+
+    func configure(toolRouter: VoiceAgentToolRouter) {
+        productionAgent?.toolRouter = toolRouter
+    }
+
+    /// The provider must return only a selected public map/city center, never device GPS.
+    func configure(searchArea: @escaping () -> CompanionHomeSearchArea?) {
+        searchAreaProvider = searchArea
+        productionAgent?.searchArea = searchArea
+        (agent as? CompanionHomeAgent)?.searchArea = searchArea
+    }
+
+    /// Injection seam; does not create a second production credential path.
+    func configure(agent: any CompanionHomeResponding) {
+        self.agent = agent
+        if let companion = agent as? CompanionHomeAgent {
+            companion.searchArea = searchAreaProvider
+            companion.journalStore = self
+            companion.memory = memory
+        }
+    }
+
+    var selectedSearchArea: CompanionHomeSearchArea? { searchAreaProvider?() }
+
+    @discardableResult
+    func setNextTurnExperience(_ experience: Experience?) -> Bool {
+        guard let experience else { return clearNextTurnScope() }
+        let place = CompanionHomePlaceScope(
+            experienceID: experience.id, name: experience.shortName,
+            cityCode: experience.location.cityCode,
+            latitude: experience.coordinate?.latitude, longitude: experience.coordinate?.longitude
+        )
+        guard place.isValid else { return false }
+        let previousPlace = nextTurnPlace
+        let previousArea = nextTurnArea
+        nextTurnPlace = place
+        nextTurnArea = nil
+        guard persist() else {
+            nextTurnPlace = previousPlace; nextTurnArea = previousArea
+            return false
+        }
+        return true
+    }
+
+    @discardableResult
+    func setNextTurnArea(
+        _ area: CompanionHomeSearchArea, query: String? = nil, category: String? = nil,
+        experienceIDs: [String] = [], latitudeDelta: Double? = nil, longitudeDelta: Double? = nil
+    ) -> Bool {
+        var seen: Set<String> = []
+        let scope = CompanionHomeAreaScope(
+            area: area, query: query, category: category,
+            experienceIDs: experienceIDs.filter { seen.insert($0).inserted },
+            latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta
+        )
+        guard scope.isValid else { return false }
+        let previousPlace = nextTurnPlace
+        let previousArea = nextTurnArea
+        nextTurnPlace = nil
+        nextTurnArea = scope
+        guard persist() else {
+            nextTurnPlace = previousPlace; nextTurnArea = previousArea
+            return false
+        }
+        return true
+    }
+
+    @discardableResult
+    func clearNextTurnExperience() -> Bool { clearNextTurnScope() }
+
+    @discardableResult
+    func clearNextTurnScope() -> Bool {
+        let previousPlace = nextTurnPlace
+        let previousArea = nextTurnArea
+        nextTurnPlace = nil
+        nextTurnArea = nil
+        guard persist() else {
+            nextTurnPlace = previousPlace; nextTurnArea = previousArea
+            return false
+        }
+        return true
+    }
+
+    /// Update in memory while scrolling. Flush once on tab/background transitions
+    /// rather than rewriting the complete media snapshot for every visible row.
+    func noteReadingPosition(anchorID: String?, followsLatest: Bool, hasUnread: Bool) {
+        guard followsLatest || validReadingAnchor(anchorID) else { return }
+        let replacement = CompanionConversationReadingState(
+            anchorID: followsLatest ? "stream-bottom" : anchorID,
+            followsLatest: followsLatest, hasUnread: followsLatest ? false : hasUnread
+        )
+        if replacement != readingState { readingState = replacement }
+    }
+
+    @discardableResult
+    func savePresentation() -> Bool { persist() }
+
+    /// Tab transitions capture immediately, then let file encoding yield the UI.
+    func savePresentationAsynchronously() async -> Bool { await persistAsynchronously() }
+
+    func restorePresentation(preferredAnchorID: String? = nil) {
+        if let preferredAnchorID, validReadingAnchor(preferredAnchorID) {
+            readingState.anchorID = preferredAnchorID
+            readingState.followsLatest = preferredAnchorID == "stream-bottom"
+        } else if !validReadingAnchor(readingState.anchorID) {
+            readingState = CompanionConversationReadingState()
+        }
+        presentationRestoreToken &+= 1
+    }
+
+    @discardableResult
+    func captureMapSource(messageID: UUID, experienceIDs: [String]) -> Bool {
+        guard let entry = entries.first(where: { $0.id == messageID }) else { return false }
+        let actualIDs = Set(entry.mapPlaceIDs)
+        var seen: Set<String> = []
+        let requested = experienceIDs.isEmpty ? entry.mapPlaceIDs : experienceIDs
+        let ids = requested.filter { actualIDs.contains($0) && seen.insert($0).inserted }
+        let previous = mapSource
+        mapSource = CompanionConversationMapSource(
+            conversationID: conversationID, messageID: messageID,
+            experienceIDs: ids, readingAnchorID: "message:\(messageID)"
+        )
+        guard persist() else { mapSource = previous; return false }
+        return true
+    }
+
+    @discardableResult
+    func restoreMapSource() -> Bool {
+        guard let source = mapSource, source.conversationID == conversationID,
+              entries.contains(where: { $0.id == source.messageID }) else { return false }
+        // Return to the actual source, even if a legacy record captured a
+        // neighboring visible row. Viewport/keyboard sizes can differ now.
+        restorePresentation(preferredAnchorID: "message:\(source.messageID)")
+        return true
+    }
+
+    @discardableResult
+    func clearMapSource() -> Bool {
+        let previous = mapSource
+        mapSource = nil
+        guard persist() else { mapSource = previous; return false }
+        return true
+    }
+
+    private func validReadingAnchor(_ anchor: String?) -> Bool {
+        guard let anchor else { return false }
+        if anchor == "stream-bottom" { return true }
+        if anchor == "stream-introduction" { return entries.isEmpty && invites.isEmpty }
+        if anchor == "stream-commitments" { return !activeCommitments.isEmpty }
+        if !isLoading { return timelineProjection.eventIDs.contains(anchor) }
+        return entries.contains { "message:\($0.id)" == anchor } || invites.contains { "invite:\($0.id)" == anchor }
+    }
+
+    var canStartRecording: Bool {
+        let bytes = (entries.flatMap { $0.attachments ?? [] } + draftAttachments).reduce(0) { $0 + $1.byteCount }
+        // 120s mono AAC at 64kbps fits within a reserved 2MB. No import runs while recording.
+        return draftAttachments.count < 4 && bytes <= 28 * 1_024 * 1_024
+    }
+
+    @discardableResult
+    func stageAttachment(_ attachment: CompanionMediaAttachment) -> Bool {
+        if draftAttachments.contains(where: { $0.id == attachment.id }) { return persist() }
+        let totalBytes = (entries.flatMap { $0.attachments ?? [] } + draftAttachments).reduce(0) { $0 + $1.byteCount }
+        guard attachment.isValid, draftAttachments.count < 4,
+              totalBytes + attachment.byteCount <= 30 * 1_024 * 1_024 else {
+            errorMessage = companionMediaText("companion.media.limit", "每次最多添加 4 个附件，单个不超过 10 MB。本机附件总量已满时，请先导出。")
+            return false
+        }
+        draftAttachments.append(attachment)
+        // A unique recording has no external original: retain it in memory even if disk is temporarily unavailable.
+        guard persist() else { return false }
+        return true
+    }
+
+    @discardableResult
+    func setAttachmentTranscript(id: UUID, text: String) -> Bool {
+        guard let index = draftAttachments.firstIndex(where: { $0.id == id }) else { return false }
+        let previous = draftAttachments[index]
+        draftAttachments[index].extractedText = String(text.prefix(12_000))
+        guard persist() else { draftAttachments[index] = previous; return false }
+        return true
+    }
+
+    /// Replace one staged voice message only after its editable text is durable.
+    @discardableResult
+    func useVoiceTranscript(id: UUID, text: String) -> Bool {
+        let transcript = String(text.prefix(12_000)).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !transcript.isEmpty, draftAttachments.contains(where: { $0.id == id && $0.kind == .audio }) else { return false }
+        let previousText = composerDraft
+        let previousRevision = draftRevision
+        let previousAttachments = draftAttachments
+        // Commit text and removed audio together. Suppress the lightweight text
+        // sidecar until the full snapshot can represent the same conversion.
+        isLoading = true
+        composerDraft += (composerDraft.isEmpty || composerDraft.hasSuffix("\n") ? "" : "\n") + transcript
+        draftRevision &+= 1
+        draftAttachments.removeAll { $0.id == id }
+        isLoading = false
+        guard persist() else {
+            isLoading = true
+            composerDraft = previousText
+            draftRevision = previousRevision
+            draftAttachments = previousAttachments
+            isLoading = false
+            return false
+        }
+        return true
+    }
+
+    func configureAudioTranscription(_ transcribe: @escaping @MainActor (CompanionMediaAttachment) async throws -> String) {
+        transcribeAudio = transcribe
+    }
+
+    @discardableResult
+    func setMessageTranscript(entryID: UUID, attachmentID: UUID, text: String?) -> Bool {
+        guard let index = entries.firstIndex(where: { $0.id == entryID }),
+              let mediaIndex = entries[index].attachments?.firstIndex(where: { $0.id == attachmentID && $0.kind == .audio }),
+              let previous = entries[index].attachments?[mediaIndex], previous.extractedText?.isEmpty ?? true else { return false }
+        let cleaned = text.map { String($0.prefix(12_000)).trimmingCharacters(in: .whitespacesAndNewlines) }
+        guard cleaned == nil || cleaned?.isEmpty == false else { return false }
+        entries[index].attachments?[mediaIndex].extractedText = cleaned
+        entries[index].attachments?[mediaIndex].transcriptionFailed = cleaned == nil
+        guard persist() else { entries[index].attachments?[mediaIndex] = previous; return false }
+        return true
+    }
+
+    func toggleReaction(entryID: UUID, partIndex: Int = 0, emoji: String = "❤️") {
+        guard (0..<3).contains(partIndex), CompanionReaction.all.contains(emoji),
+              let index = entries.firstIndex(where: { $0.id == entryID }) else { return }
+        let previous = entries[index]
+        let selected = previous.reactions(forPart: partIndex).contains(emoji)
+        var reactions = previous.bubbleReactions ?? []
+        reactions.removeAll { $0.partIndex == partIndex && $0.emoji == emoji }
+        // Preserve the old heart field for older snapshots/readers.
+        if partIndex == 0 && emoji == "❤️" { entries[index].reaction = selected ? nil : "heart" }
+        else if !selected { reactions.append(.init(partIndex: partIndex, emoji: emoji)) }
+        entries[index].bubbleReactions = reactions.isEmpty ? nil : reactions
+        if !persist() { entries[index] = previous }
+    }
+
+    func removeDraftAttachment(id: UUID) {
+        let previous = draftAttachments
+        draftAttachments.removeAll { $0.id == id }
+        if !persist() { draftAttachments = previous }
+    }
+
+    func setDraftQuote(_ quote: CompanionQuotedMessage?) {
+        let previous = draftQuote
+        draftQuote = quote.map { .init(entryID: $0.entryID, role: $0.role, text: String($0.text.prefix(600)), partIndex: $0.partIndex) }
+        if !persist() { draftQuote = previous }
+    }
+
+    func send() async { await submit(text: composerDraft, attachments: draftAttachments, quote: draftQuote, consumesDraft: true) }
+
+    func send(text: String) async {
+        await submit(text: text, attachments: [], quote: nil, consumesDraft: text == composerDraft)
+    }
+
+    private func submit(text: String, attachments: [CompanionMediaAttachment], quote: CompanionQuotedMessage?, consumesDraft: Bool) async {
+        guard !isWorking, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !attachments.isEmpty else { return }
+        guard attachments.allSatisfy(\.isValid) else { return }
+        let entry = CompanionHomeEntry(
+            role: .user, text: text, researchReference: nextTurnResearchReference, placeScope: nextTurnPlace, searchArea: nextTurnArea,
+            attachments: attachments.isEmpty ? nil : attachments, quotedMessage: quote,
+            memoryEpoch: memory.context(for: agentSession).epoch
+        )
+        // New text may arrive before the full history finishes encoding. Keep
+        // that draft independent from the accepted original across a restart.
+        guard saveOutbox(entry, consumedDraftRevision: consumesDraft ? draftRevision &+ 1 : nil) else { return }
+        entries.append(entry)
+        isLoading = true
+        if consumesDraft {
+            composerDraft = ""; draftAttachments = []; draftQuote = nil
+            draftRevision &+= 1
+        }
+        nextTurnResearchReference = nil
+        nextTurnPlace = nil
+        nextTurnArea = nil
+        readingState = CompanionConversationReadingState()
+        isLoading = false
+        let admissionID = UUID()
+        let session = agentSession
+        pendingAdmissionID = admissionID
+        isWorking = true
+        activity = .working(entry.id)
+        let saved = await persistAsynchronously()
+        guard pendingAdmissionID == admissionID, agentSession == session else { return }
+        pendingAdmissionID = nil
+        isWorking = false
+        guard saved else {
+            if let index = entries.firstIndex(where: { $0.id == entry.id }) {
+                // The outbox already owns this original. Never roll it back into
+                // a newer draft or hide it when the larger snapshot fails.
+                entries[index].status = .failed
+            }
+            activity = .failed(entry.id)
+            return
+        }
+        await run(id: entry.id)
+    }
+
+    func retry(id: UUID) async {
+        guard !isWorking, let entry = entries.first(where: { $0.id == id }), entry.role == .user,
+              entry.status == .failed || entry.status == .queued else { return }
+        // A received reply may still be waiting for its final local save. Preserve
+        // that exact response and its tool receipts rather than regenerating it.
+        if entries.contains(where: { $0.replyToID == id && $0.status == .delivered && $0.researchReference == nil }),
+           let index = entries.firstIndex(where: { $0.id == id }) {
+            entries[index].status = .delivered
+            if persist() {
+                errorMessage = nil
+                activity = .completed(id)
+                recordCompletedTurn(id: id, memoryEpoch: entry.memoryEpoch)
+            } else {
+                entries[index].status = .failed
+                activity = .failed(id)
+            }
+            return
+        }
+        await run(id: id)
+    }
+
+    private var pendingVoiceIDs: Set<UUID> {
+        guard transcribeAudio != nil else { return transcribingAudioIDs }
+        let input = activeID.flatMap { id in entries.first { $0.id == id } }
+            ?? (pendingAdmissionID != nil ? entries.last(where: { $0.role == .user && $0.status == .queued }) : nil)
+        let unread = (input?.attachments ?? []).filter { $0.kind == .audio && ($0.extractedText?.isEmpty ?? true) }
+        return transcribingAudioIDs.union(unread.map(\.id))
+    }
+
+    func cancelVoiceTranscription() {
+        if !pendingVoiceIDs.isEmpty { cancel() }
+    }
+
+    func cancel() {
+        let voiceIDs = pendingVoiceIDs
+        for index in entries.indices where !voiceIDs.isEmpty {
+            for mediaIndex in entries[index].attachments?.indices ?? 0..<0 {
+                if let attachment = entries[index].attachments?[mediaIndex], voiceIDs.contains(attachment.id), attachment.extractedText?.isEmpty ?? true {
+                    entries[index].attachments?[mediaIndex].transcriptionFailed = true
+                }
+            }
+        }
+        transcribingAudioIDs.removeAll()
+        if pendingAdmissionID != nil, let index = entries.lastIndex(where: { $0.role == .user && $0.status == .queued }) {
+            entries[index].status = .failed
+        }
+        pendingAdmissionID = nil
+        activeTask?.cancel()
+        activeTask = nil
+        if let id = activeID, let index = entries.firstIndex(where: { $0.id == id }) {
+            entries[index].status = .failed
+        }
+        activeID = nil
+        activeAttemptID = nil
+        isWorking = false
+        activity = .idle
+        persist()
+    }
+
+    /// User-maintained names are local intent candidates, never verified accounts or contacts.
+    /// Direct assignment remains supported for the people sheet's existing binding.
+    @discardableResult
+    func updatePeople(_ people: [CompanionHomePerson], selectedIDs: Set<String>? = nil) -> Bool {
+        let previousPeople = storedPeople
+        let previousSelection = selectedPeopleIDs
+        storedPeople = people
+        selectedPeopleIDs = (selectedIDs ?? selectedPeopleIDs).intersection(Set(people.map(\.id)))
+        guard isLoading || persist() else {
+            storedPeople = previousPeople
+            selectedPeopleIDs = previousSelection
+            return false
+        }
+        return true
+    }
+
+    @discardableResult
+    func selectPeople(_ ids: Set<String>) -> Bool {
+        // Selection expresses intent only; no relationship or location permission is created.
+        let previousSelection = selectedPeopleIDs
+        selectedPeopleIDs = ids.intersection(Set(people.map(\.id)))
+        guard persist() else { selectedPeopleIDs = previousSelection; return false }
+        return true
+    }
+
+    @discardableResult
+    func saveInvite(_ invite: CompanionHomeInvite) async -> Bool {
+        let previousInvites = invites
+        var draft = invite
+        draft.status = .draft
+        draft.durationMinutes = max(1, draft.durationMinutes)
+        if let index = invites.firstIndex(where: { $0.id == draft.id }) {
+            draft.createdAt = invites[index].createdAt
+            invites[index] = draft
+        } else {
+            draft.createdAt = Date()
+            invites.append(draft)
+        }
+        guard persist() else { invites = previousInvites; return false }
+        return true
+    }
+
+    @discardableResult
+    func completeCommitment(id: UUID) -> Bool { changeCommitmentStatus(id: id, status: .done) }
+
+    @discardableResult
+    func cancelCommitment(id: UUID) -> Bool { changeCommitmentStatus(id: id, status: .cancelled) }
+
+    private func changeCommitmentStatus(id: UUID, status: CompanionHomeCommitment.Status) -> Bool {
+        guard let index = commitments.firstIndex(where: { $0.id == id }) else { return false }
+        guard commitments[index].status == .active || commitments[index].status == status else { return false }
+        let previous = commitments
+        commitments[index].status = status
+        commitments[index].updatedAt = Date()
+        guard persist() else { commitments = previous; return false }
+        return true
+    }
+
+    /// One bounded, local function call; no contacts, notification or transport effects.
+    func manageFollowUp(_ request: CompanionHomeFollowUpRequest, originEntryID: UUID) -> CompanionHomeFollowUpResult {
+        let previous = commitments
+        let id: UUID
+        switch request.action {
+        case .create:
+            guard let title = request.title else { return .init(success: false, error: "title_required") }
+            if let existing = commitments.first(where: {
+                $0.originEntryID == originEntryID && $0.title.localizedCaseInsensitiveCompare(title) == .orderedSame
+            }) {
+                return .init(success: true, commitment: existing)
+            }
+            guard commitments.count < 500, activeCommitments.count < 50 else {
+                return .init(success: false, error: "local_item_limit")
+            }
+            let commitment = CompanionHomeCommitment(title: title, note: request.note ?? "", dueAt: request.dueAt, originEntryID: originEntryID)
+            commitments.append(commitment)
+            id = commitment.id
+        case .update:
+            guard let target = request.id, let index = commitments.firstIndex(where: { $0.id == target }),
+                  commitments[index].status == .active else { return .init(success: false, error: "active_id_required") }
+            id = target
+            if let title = request.title { commitments[index].title = title }
+            if let note = request.note { commitments[index].note = note }
+            if request.hasDueAt { commitments[index].dueAt = request.dueAt }
+            commitments[index].updatedAt = Date()
+        case .complete, .cancel:
+            guard let target = request.id else { return .init(success: false, error: "id_required") }
+            let success = request.action == .complete ? completeCommitment(id: target) : cancelCommitment(id: target)
+            return .init(success: success, commitment: success ? commitments.first { $0.id == target } : nil,
+                         error: success ? nil : "not_saved_or_invalid_status")
+        }
+        guard persist() else {
+            commitments = previous
+            return .init(success: false, error: "not_saved")
+        }
+        return .init(success: true, commitment: commitments.first { $0.id == id })
+    }
+
+    func toolJournal(for entryID: UUID) -> [CompanionHomeToolBatch] {
+        toolJournals[entryID.uuidString] ?? []
+    }
+
+    func toolBatches(for turn: AgentTurnIdentity) -> [AgentToolBatch] {
+        guard turn.session == agentSession else { return [] }
+        return toolJournal(for: turn.turnID)
+    }
+
+    func savePlan(_ batch: AgentToolBatch, for turn: AgentTurnIdentity) -> Bool {
+        guard turn.session == agentSession else { return false }
+        return checkpointToolPlan(entryID: turn.turnID, batch: batch)
+    }
+
+    /// Compatibility migration for old planned calls. The original model identity
+    /// is unchanged, and the frozen execution arguments reach disk before dispatch.
+    func resolvePendingToolArguments(callID: String, argumentsJSON: String, for turn: AgentTurnIdentity) -> Bool {
+        guard !Task.isCancelled, turn.session == agentSession,
+              (try? AgentToolCheckpoint.canonicalArguments(argumentsJSON)) != nil,
+              let position = checkpointPosition(entryID: turn.turnID, callID: callID),
+              var call = toolJournals[turn.turnID.uuidString]?[position.0].calls[position.1],
+              call.state == .planned, call.resultJSON == nil,
+              call.implementationVersion == AgentToolCheckpoint.currentImplementationVersion else { return false }
+        if let resolved = call.resolvedArgumentsJSON {
+            return (try? AgentToolCheckpoint.canonicalArguments(resolved))
+                == (try? AgentToolCheckpoint.canonicalArguments(argumentsJSON))
+        }
+        let previous = toolJournals
+        call.resolvedArgumentsJSON = argumentsJSON
+        replaceCheckpoint(call, entryID: turn.turnID)
+        guard persist() else { toolJournals = previous; return false }
+        return true
+    }
+
+    func saveStarted(callID: String, for turn: AgentTurnIdentity) -> Bool {
+        guard !Task.isCancelled, turn.session == agentSession,
+              let position = checkpointPosition(entryID: turn.turnID, callID: callID),
+              var call = toolJournals[turn.turnID.uuidString]?[position.0].calls[position.1] else { return false }
+        guard call.resultJSON == nil, call.state == .planned else { return false }
+        let previous = toolJournals
+        call.state = .started
+        replaceCheckpoint(call, entryID: turn.turnID)
+        guard persist() else { toolJournals = previous; return false }
+        return true
+    }
+
+    func saveResult(_ result: AgentToolCheckpoint, for turn: AgentTurnIdentity) -> Bool {
+        guard turn.session == agentSession else { return false }
+        return checkpointToolResult(entryID: turn.turnID, result: result)
+    }
+
+    /// Compatibility entry point. The executor uses the same atomic journal write.
+    @discardableResult
+    func checkpointToolPlan(entryID: UUID, batch: CompanionHomeToolBatch) -> Bool {
+        guard !Task.isCancelled, entries.contains(where: { $0.id == entryID && $0.role == .user }) else { return false }
+        let previous = toolJournal(for: entryID)
+        let existingCalls = previous.flatMap(\.calls)
+        let allowed: Set<String> = ["manage_follow_up", "search_places", "show_details", "web_search"]
+        guard batch.context == nil || batch.context?.scope == agentSession.scope,
+              !batch.calls.isEmpty, batch.calls.count <= 5,
+              batch.calls.allSatisfy({ $0.implementationVersion == AgentToolCheckpoint.currentImplementationVersion }),
+              (batch.assistantContent?.count ?? 0) <= 2_000,
+              Set(batch.calls.map(\.id)).count == batch.calls.count else { return false }
+        if let existing = previous.first(where: { $0.id == batch.id }) {
+            guard existing.calls.count == batch.calls.count,
+                  existing.assistantContent == batch.assistantContent,
+                  existing.context == batch.context else { return false }
+            return zip(existing.calls, batch.calls).allSatisfy { (try? $0.hasSameIdentity(as: $1)) == true }
+        }
+        guard previous.count < 3, existingCalls.allSatisfy({ $0.resultJSON != nil }),
+              Set((existingCalls + batch.calls).map(\.id)).count <= 5 else { return false }
+        var accepted = batch
+        for index in accepted.calls.indices {
+            let call = accepted.calls[index]
+            guard !call.id.isEmpty, call.id.count <= 128, allowed.contains(call.name),
+                  call.argumentsJSON.utf8.count <= 12_000, call.implementationVersion == 1,
+                  (try? AgentToolCheckpoint.canonicalArguments(call.argumentsJSON)) != nil else { return false }
+            if let existing = existingCalls.first(where: { $0.id == call.id }) {
+                guard (try? existing.hasSameIdentity(as: call)) == true else { return false }
+                accepted.calls[index] = existing
+            } else {
+                guard call.state == .planned, call.resultJSON == nil,
+                      call.sourceTitles.isEmpty, call.placeID == nil, call.placeIDs.isEmpty,
+                      call.effectJSON == nil else { return false }
+            }
+        }
+        toolJournals[entryID.uuidString] = previous + [accepted]
+        guard persist() else { toolJournals[entryID.uuidString] = previous; return false }
+        return true
+    }
+
+    /// An observed result may be saved after cancellation under its original turn.
+    @discardableResult
+    func checkpointToolResult(entryID: UUID, result: CompanionHomeToolCheckpoint) -> Bool {
+        guard let json = result.resultJSON, json.utf8.count <= 64_000,
+              result.sourceTitles.count <= 20, result.sourceTitles.allSatisfy({ $0.count <= 600 }),
+              let position = checkpointPosition(entryID: entryID, callID: result.id),
+              let planned = toolJournals[entryID.uuidString]?[position.0].calls[position.1],
+              (try? planned.hasSameIdentity(as: result)) == true,
+              planned.implementationVersion == AgentToolCheckpoint.currentImplementationVersion,
+              result.implementationVersion == planned.implementationVersion,
+              result.resolvedOrigin == planned.resolvedOrigin,
+              let actualArguments = try? AgentToolCheckpoint.canonicalArguments(result.resolvedArgumentsJSON ?? result.argumentsJSON),
+              let plannedArguments = try? AgentToolCheckpoint.canonicalArguments(planned.resolvedArgumentsJSON ?? planned.argumentsJSON),
+              actualArguments == plannedArguments else { return false }
+        var completed = result
+        // Old callers set resultJSON directly; keep the compatibility API terminal.
+        if completed.state != .uncertain { completed.state = .completed }
+        if planned.resultJSON != nil { return planned == completed }
+        let previous = toolJournals
+        replaceCheckpoint(completed, entryID: entryID)
+        guard persist() else { toolJournals = previous; return false }
+        return true
+    }
+
+    private func replaceCheckpoint(_ result: AgentToolCheckpoint, entryID: UUID) {
+        let key = entryID.uuidString
+        for batchIndex in (toolJournals[key] ?? []).indices {
+            for callIndex in (toolJournals[key]?[batchIndex].calls ?? []).indices
+                where toolJournals[key]?[batchIndex].calls[callIndex].id == result.id {
+                toolJournals[key]?[batchIndex].calls[callIndex] = result
+            }
+        }
+    }
+
+    /// Commitment change and its exact tool result share one atomic snapshot write.
+    /// A failed write restores both, so recovery cannot see an action without its receipt.
+    func executeFollowUpCheckpoint(entryID: UUID, callID: String) -> CompanionHomeToolCheckpoint? {
+        guard !Task.isCancelled, let position = checkpointPosition(entryID: entryID, callID: callID),
+              let planned = toolJournals[entryID.uuidString]?[position.0].calls[position.1],
+              planned.name == "manage_follow_up" else { return nil }
+        if planned.resultJSON != nil { return planned }
+        let previousCommitments = commitments
+        let previousJournals = toolJournals
+        let outcome: CompanionHomeFollowUpResult
+        stagingToolResult = true
+        do {
+            let request = try CompanionHomeFollowUpRequest(argumentsJSON: planned.argumentsJSON)
+            outcome = manageFollowUp(request, originEntryID: entryID)
+        } catch { outcome = .init(success: false, error: "invalid_arguments_ask_for_missing_details") }
+        stagingToolResult = false
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        guard let data = try? encoder.encode(outcome), let json = String(data: data, encoding: .utf8) else {
+            commitments = previousCommitments
+            return nil
+        }
+        var completed = planned
+        completed.resultJSON = json
+        completed.state = .completed
+        replaceCheckpoint(completed, entryID: entryID)
+        guard persist() else {
+            commitments = previousCommitments
+            toolJournals = previousJournals
+            return nil
+        }
+        return completed
+    }
+
+    private func checkpointPosition(entryID: UUID, callID: String) -> (Int, Int)? {
+        for (batchIndex, batch) in toolJournal(for: entryID).enumerated() {
+            if let callIndex = batch.calls.firstIndex(where: { $0.id == callID }) { return (batchIndex, callIndex) }
+        }
+        return nil
+    }
+
+    /// Export only this store's full in-memory state, including unsent text and tool receipts.
+    /// No credentials, service configuration, or unrelated local stores are read.
+    func exportedSnapshotData() throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return try encoder.encode(currentSnapshot())
+    }
+
+    /// Call only after the settings UI receives explicit confirmation to clear local data.
+    /// Replace exact known files with valid empty snapshots; never enumerate directories.
+    @discardableResult
+    func clearLocalData() -> Bool {
+        do { try forgetResearch?() }
+        catch { return false }
+        cancel() // Invalidates both attempt identity and the owned task before touching storage.
+        snapshotWriter.invalidate()
+        historyEncoder.invalidate()
+        let manager = FileManager.default
+        let recoveryURL = originalURL.appendingPathExtension("recovery.json")
+        var targets = [originalURL]
+        if recoveryURL != originalURL && (recoveryURL == url || manager.fileExists(atPath: recoveryURL.path)) {
+            targets.append(recoveryURL)
+        }
+        if !targets.contains(url) { targets.append(url) }
+        let draftTargets = targets.map { $0.appendingPathExtension("draft.json") }
+            .filter { manager.fileExists(atPath: $0.path) }
+        let outboxTargets = targets.map { $0.appendingPathExtension("outbox.json") }
+            .filter { manager.fileExists(atPath: $0.path) }
+        targets.append(contentsOf: draftTargets)
+        targets.append(contentsOf: outboxTargets)
+        var prepared: [(url: URL, bytes: Data?)] = []
+        var attempted: [(url: URL, bytes: Data?)] = []
+        do {
+            let clearedSession = AgentSessionDescriptor(id: UUID().uuidString, scope: "global")
+            let replacementConversationID = UUID().uuidString
+            let empty = Snapshot(entries: [], composerDraft: "", people: [], selectedPeopleIDs: [], invites: [],
+                                 commitments: [], toolJournals: [:], agentSessionID: clearedSession.id,
+                                 conversationID: replacementConversationID, readingState: CompanionConversationReadingState())
+            let data = try JSONEncoder().encode(empty)
+            let emptyDraft = try JSONEncoder().encode(DraftSnapshot(conversationID: replacementConversationID,
+                agentSessionID: clearedSession.id, revision: 0, text: "", legacySnapshotSignature: nil))
+            let emptyOutbox = try JSONEncoder().encode(OutboxSnapshot(conversationID: replacementConversationID,
+                agentSessionID: clearedSession.id, entry: nil))
+            // Read only the exact files we might overwrite so a partial failure can roll back.
+            for target in targets {
+                guard target.isFileURL else { throw CocoaError(.fileWriteUnsupportedScheme) }
+                if manager.fileExists(atPath: target.path) {
+                    let attributes = try manager.attributesOfItem(atPath: target.path)
+                    guard attributes[.type] as? FileAttributeType == .typeRegular else { throw CocoaError(.fileWriteNoPermission) }
+                    prepared.append((target, try Data(contentsOf: target)))
+                } else { prepared.append((target, nil)) }
+            }
+            for backup in prepared {
+                try manager.createDirectory(at: backup.url.deletingLastPathComponent(), withIntermediateDirectories: true)
+                attempted.append(backup)
+                let replacement = draftTargets.contains(backup.url) ? emptyDraft
+                    : outboxTargets.contains(backup.url) ? emptyOutbox : data
+                try replacement.write(to: backup.url, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+            }
+            guard memory.forget(sessionID: agentSession.id) else { throw CocoaError(.fileWriteUnknown) }
+            agentSession = clearedSession
+            isLoading = true
+            entries = []
+            composerDraft = ""
+            draftRevision = 0
+            draftStorageBlocked = false
+            outboxStorageBlocked = false
+            outboxEntryID = nil
+            durableAttachmentIDs = []
+            legacySnapshotSignature = nil
+            storedPeople = []
+            selectedPeopleIDs = []
+            invites = []
+            commitments = []
+            toolJournals = [:]
+            draftAttachments = []
+            draftQuote = nil
+            conversationID = replacementConversationID
+            nextTurnResearchReference = nil
+            nextTurnPlace = nil
+            nextTurnArea = nil
+            readingState = CompanionConversationReadingState()
+            mapSource = nil
+            presentationRestoreToken &+= 1
+            isLoading = false
+            rebuildTimeline()
+            storageBlocked = false
+            url = originalURL
+            errorMessage = nil
+            activity = .idle
+            return true
+        } catch {
+            var rollbackIncomplete = false
+            for backup in attempted.reversed() {
+                do {
+                    if let bytes = backup.bytes {
+                        // Avoid needless writes when the failed atomic operation left bytes intact.
+                        if (try? Data(contentsOf: backup.url)) != bytes {
+                            try bytes.write(to: backup.url, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+                        }
+                    } else if manager.fileExists(atPath: backup.url.path) {
+                        let attributes = try manager.attributesOfItem(atPath: backup.url.path)
+                        guard attributes[.type] as? FileAttributeType == .typeRegular else { throw CocoaError(.fileWriteNoPermission) }
+                        try manager.removeItem(at: backup.url)
+                    }
+                } catch { rollbackIncomplete = true }
+            }
+            errorMessage = rollbackIncomplete
+                ? NSLocalizedString("companion.clear_partial", value: "部分文件未能恢复，清空未完成。当前记录仍在页面中，请先导出并稍后重试。", comment: "Partial clear failure")
+                : NSLocalizedString("companion.clear_failed", value: "未能清空本机记录，内容仍已保留，请稍后重试。", comment: "Clear failure")
+            return false
+        }
+    }
+
+    private func currentSnapshot() -> Snapshot {
+        Snapshot(entries: entries, composerDraft: composerDraft, people: people,
+                 selectedPeopleIDs: selectedPeopleIDs, invites: invites,
+                 commitments: commitments, toolJournals: toolJournals,
+                 draftAttachments: draftAttachments, draftQuote: draftQuote, agentSessionID: agentSession.id,
+                 conversationID: conversationID, nextTurnResearchReference: nextTurnResearchReference, nextTurnPlace: nextTurnPlace,
+                 nextTurnArea: nextTurnArea, readingState: readingState, mapSource: mapSource,
+                 draftRevision: draftRevision)
+    }
+
+    private func rebuildTimeline() {
+        timelineRevision &+= 1
+        timelineProjection = CompanionTimeline.Projection(entries: entries, invites: invites,
+            previous: timelineProjection, revision: timelineRevision)
+    }
+
+    func clearError() { errorMessage = nil }
+
+    private func run(id: UUID) async {
+        guard let index = entries.firstIndex(where: { $0.id == id }) else { return }
+        guard let agent else {
+            entries[index].status = .failed
+            activity = .failed(id)
+            errorMessage = NSLocalizedString("companion.service_unavailable", value: "暂时无法回应，原话已保留，可以稍后重试。", comment: "Companion unavailable")
+            persist()
+            return
+        }
+        let attemptID = UUID()
+        let session = agentSession
+        let memoryEpoch = entries[index].memoryEpoch
+        activeAttemptID = attemptID
+        isWorking = true
+        workingProgress = .thinking
+        activity = .working(id)
+        activeID = id
+        entries[index].status = .working
+        let startedSaved = await persistAsynchronously()
+        guard activeID == id, activeAttemptID == attemptID, agentSession == session else { return }
+        guard startedSaved else {
+            isWorking = false; activeID = nil; activeAttemptID = nil
+            entries[index].status = .failed; activity = .failed(id)
+            return
+        }
+        errorMessage = nil
+        if let production = agent as? CompanionHomeAgent {
+            // The agent snapshots this callback per attempt. A canceled older
+            // request cannot publish progress into a retry or a different turn.
+            production.onProgress = { [weak self] progress in
+                guard let self, self.activeID == id, self.activeAttemptID == attemptID else { return }
+                self.workingProgress = progress
+            }
+        }
+        let task = Task { [weak self] in
+            guard let self else { throw CancellationError() }
+            try Task.checkCancellation()
+            guard self.activeID == id, self.activeAttemptID == attemptID, self.agentSession == session,
+                  let input = self.entries.first(where: { $0.id == id }) else { throw CancellationError() }
+            // The audio is already durable and visible. Read genuine speech before
+            // the model sees this turn; never infer audio contents from metadata.
+            if let transcribe = self.transcribeAudio {
+                for attachment in input.attachments ?? [] where attachment.kind == .audio && (attachment.extractedText?.isEmpty ?? true) {
+                    if let current = self.entries.first(where: { $0.id == id })?.attachments?.first(where: { $0.id == attachment.id }),
+                       current.extractedText?.isEmpty == false { continue }
+                    self.transcribingAudioIDs.insert(attachment.id)
+                    defer { if self.activeAttemptID == attemptID { self.transcribingAudioIDs.remove(attachment.id) } }
+                    do {
+                        let text = try await transcribe(attachment)
+                        try Task.checkCancellation()
+                        guard self.activeID == id, self.activeAttemptID == attemptID, self.agentSession == session else { throw CancellationError() }
+                        let saved = self.setMessageTranscript(entryID: id, attachmentID: attachment.id, text: text)
+                        let alreadySaved = self.entries.first(where: { $0.id == id })?.attachments?.first(where: { $0.id == attachment.id })?.extractedText?.isEmpty == false
+                        guard saved || alreadySaved else { throw CocoaError(.fileWriteUnknown) }
+                    } catch {
+                        guard self.activeID == id, self.activeAttemptID == attemptID, self.agentSession == session else { throw CancellationError() }
+                        if Task.isCancelled || error is CancellationError {
+                            _ = self.setMessageTranscript(entryID: id, attachmentID: attachment.id, text: nil)
+                            throw CancellationError()
+                        }
+                        _ = self.setMessageTranscript(entryID: id, attachmentID: attachment.id, text: nil)
+                        throw error
+                    }
+                }
+            }
+            try Task.checkCancellation()
+            guard self.activeID == id, self.activeAttemptID == attemptID, self.agentSession == session else { throw CancellationError() }
+            // Retry a past input with only the history that preceded it.
+            let context = Array(self.entries.prefix(index + 1))
+            return try await agent.respond(to: context)
+        }
+        activeTask = task
+        var responded = false
+        do {
+            let result = try await withTaskCancellationHandler {
+                try await task.value
+            } onCancel: { task.cancel() }
+            guard activeID == id, activeAttemptID == attemptID, agentSession == session else { return }
+            try Task.checkCancellation()
+            guard !task.isCancelled else { throw CancellationError() }
+            entries[index].status = .delivered
+            if let responseIndex = entries.firstIndex(where: { $0.replyToID == id }) {
+                entries[responseIndex].researchReference = result.researchReference
+                entries[responseIndex].text = result.text
+                entries[responseIndex].sourceTitles = result.sourceTitles
+                entries[responseIndex].placeID = result.placeID
+                entries[responseIndex].placeIDs = result.placeIDs.isEmpty ? nil : result.placeIDs
+                entries[responseIndex].status = .delivered
+            } else {
+                let response = CompanionHomeEntry(role: .companion, text: result.text, status: .delivered,
+                                                  sourceTitles: result.sourceTitles, researchReference: result.researchReference, placeID: result.placeID,
+                                                  placeIDs: result.placeIDs.isEmpty ? nil : result.placeIDs, replyToID: id)
+                entries.insert(response, at: index + 1)
+            }
+            if !readingState.followsLatest { readingState.hasUnread = true }
+            responded = true
+        } catch {
+            guard activeID == id, activeAttemptID == attemptID, agentSession == session else { return }
+            entries[index].status = .failed
+            // Never surface raw network response bodies, credentials, or model diagnostics.
+            if errorMessage == nil {
+                errorMessage = NSLocalizedString("companion.response_failed", value: "这次没有完成，原话已保留，可以重试。", comment: "Companion failed")
+            }
+        }
+        let saved = await persistAsynchronously()
+        guard activeID == id, activeAttemptID == attemptID, agentSession == session else { return }
+        activeTask = nil
+        activeID = nil
+        activeAttemptID = nil
+        isWorking = false
+        if !saved { entries[index].status = .failed }
+        activity = responded && saved ? .completed(id) : .failed(id)
+        if responded && saved { recordCompletedTurn(id: id, memoryEpoch: memoryEpoch) }
+    }
+
+    private func recordCompletedTurn(id: UUID, memoryEpoch: UUID?) {
+        guard let user = entries.first(where: { $0.id == id && $0.role == .user && $0.status == .delivered }),
+              let reply = entries.first(where: { $0.replyToID == id && $0.role == .companion && $0.status == .delivered }) else { return }
+        guard reply.researchReference == nil else { return }
+        // Deliberately exclude attachments, selected people, tool blobs and private account data.
+        _ = memory.recordCompletedTurn(.init(identity: .init(session: agentSession, turnID: id),
+                                             userText: user.text, assistantText: reply.text, memoryEpoch: memoryEpoch))
+    }
+
+    private func load() {
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        do {
+            let data = try Data(contentsOf: url)
+            let snapshot = try JSONDecoder().decode(Snapshot.self, from: data)
+            guard snapshot.version == 1 else { throw CocoaError(.fileReadCorruptFile) }
+            if snapshot.conversationID == nil || snapshot.agentSessionID == nil {
+                legacySnapshotSignature = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+            }
+            if let sessionID = snapshot.agentSessionID {
+                guard UUID(uuidString: sessionID) != nil else { throw CocoaError(.fileReadCorruptFile) }
+                agentSession = .init(id: sessionID, scope: "global")
+            }
+            entries = snapshot.entries.map { entry in
+                var restored = entry
+                if restored.status == .working { restored.status = .failed }
+                restored.placeScope = restored.placeScope.flatMap { $0.isValid ? $0 : nil }
+                restored.searchArea = restored.placeScope == nil ? restored.searchArea.flatMap { $0.isValid ? $0 : nil } : nil
+                return restored
+            }
+            commitments = snapshot.commitments ?? []
+            toolJournals = snapshot.toolJournals ?? [:]
+            draftAttachments = snapshot.draftAttachments ?? []
+            draftQuote = snapshot.draftQuote
+            composerDraft = snapshot.composerDraft
+            draftRevision = snapshot.draftRevision ?? 0
+            invites = snapshot.invites.map { value in var draft = value; draft.status = .draft; return draft }
+            if let storedID = snapshot.conversationID, !storedID.isEmpty, storedID.count <= 200 {
+                conversationID = storedID
+            }
+            nextTurnResearchReference = snapshot.nextTurnResearchReference
+            nextTurnPlace = snapshot.nextTurnPlace.flatMap { $0.isValid ? $0 : nil }
+            nextTurnArea = nextTurnPlace == nil ? snapshot.nextTurnArea.flatMap { $0.isValid ? $0 : nil } : nil
+            readingState = snapshot.readingState ?? CompanionConversationReadingState()
+            if !validReadingAnchor(readingState.anchorID) { readingState = CompanionConversationReadingState() }
+            mapSource = snapshot.mapSource.flatMap { source in
+                guard source.conversationID == conversationID,
+                      let entry = entries.first(where: { $0.id == source.messageID }) else { return nil }
+                var restored = source
+                let actualIDs = Set(entry.mapPlaceIDs)
+                var seen: Set<String> = []
+                restored.experienceIDs = source.experienceIDs.filter { actualIDs.contains($0) && seen.insert($0).inserted }
+                return restored
+            }
+            people = snapshot.people
+            selectedPeopleIDs = snapshot.selectedPeopleIDs.intersection(Set(people.map(\.id)))
+            durableAttachmentIDs = snapshot.attachmentIDs
+        } catch {
+            // Preserve the original bytes at the original URL. Save new work to a distinct
+            // recovery namespace; never silently replace a damaged or future-version store.
+            if url.lastPathComponent.hasSuffix(".recovery.json") {
+                storageBlocked = true
+            } else {
+                url = url.appendingPathExtension("recovery.json")
+                if FileManager.default.fileExists(atPath: url.path) { load() }
+            }
+            errorMessage = NSLocalizedString("companion.storage_recovery", value: "旧记录暂时无法读取，原文件已保留。新内容将另行保存。", comment: "Recovery")
+        }
+    }
+
+    @discardableResult
+    private func persist() -> Bool {
+        guard !isLoading, !stagingToolResult else { return true }
+        guard !storageBlocked else {
+            errorMessage = NSLocalizedString("companion.storage_failed", value: "暂时无法保存到本机，请保留当前页面后重试。", comment: "Storage failure")
+            return false
+        }
+        do {
+            let ticket = snapshotWriter.reserve()
+            let snapshot = currentSnapshot()
+            let data = try snapshot.encoded(using: historyEncoder, generation: historyEncoder.captureGeneration())
+            guard try snapshotWriter.write(data, to: url, ticket: ticket) != .invalidated else { return false }
+            snapshotDidCommit(snapshot, ticket: ticket)
+            storageBlocked = false
+            return true
+        } catch {
+            errorMessage = NSLocalizedString("companion.storage_failed", value: "暂时无法保存到本机，请保留当前页面后重试。", comment: "Storage failure")
+            return false
+        }
+    }
+
+    private func persistAsynchronously() async -> Bool {
+        guard !isLoading, !stagingToolResult else { return true }
+        guard !storageBlocked else { return false }
+        let ticket = snapshotWriter.reserve()
+        let snapshot = currentSnapshot()
+        let encodingGeneration = historyEncoder.captureGeneration()
+        let target = url
+        let session = agentSession
+        do {
+            let encoder = historyEncoder
+            let outcome = try await snapshotWriter.writeAsync(snapshot, to: target, ticket: ticket) {
+                try $0.encoded(using: encoder, generation: encodingGeneration)
+            }
+            guard session == agentSession, target == url, outcome != .invalidated else { return false }
+            snapshotDidCommit(snapshot, ticket: ticket)
+            return true
+        } catch {
+            if session == agentSession, target == url {
+                errorMessage = NSLocalizedString("companion.storage_failed", value: "暂时无法保存到本机，请保留当前页面后重试。", comment: "Storage failure")
+            }
+            return false
+        }
+    }
+
+    private func snapshotDidCommit(_ snapshot: Snapshot, ticket: CompanionSnapshotWriter.Ticket) {
+        guard snapshotWriter.isCurrent(ticket) else { return }
+        durableAttachmentIDs = snapshot.attachmentIDs
+        guard let id = outboxEntryID, snapshot.entries.contains(where: { $0.id == id }) else { return }
+        let target = url.appendingPathExtension("outbox.json")
+        // Cleanup failure is safe: replay deduplicates by the original entry ID.
+        do {
+            if FileManager.default.fileExists(atPath: target.path) { try FileManager.default.removeItem(at: target) }
+            outboxEntryID = nil
+        } catch { /* Retain the exact durable acceptance record for the next save. */ }
+    }
+
+    private func saveOutbox(_ entry: CompanionHomeEntry, consumedDraftRevision: UInt64?) -> Bool {
+        guard !storageBlocked, !outboxStorageBlocked else {
+            errorMessage = NSLocalizedString("companion.storage_failed", value: "暂时无法保存到本机，请保留当前页面后重试。", comment: "Storage failure")
+            return false
+        }
+        // Never overwrite an earlier accepted original that only the outbox owns.
+        if outboxEntryID != nil, (!persist() || outboxEntryID != nil) { return false }
+        var pending = entry
+        var references: Set<UUID> = []
+        if var attachments = pending.attachments {
+            for index in attachments.indices where durableAttachmentIDs.contains(attachments[index].id) {
+                references.insert(attachments[index].id)
+                attachments[index].data = nil
+            }
+            pending.attachments = attachments
+        }
+        let snapshot = OutboxSnapshot(conversationID: conversationID, agentSessionID: agentSession.id,
+            legacySnapshotSignature: legacySnapshotSignature, entry: pending,
+            attachmentReferences: references, consumedDraftRevision: consumedDraftRevision)
+        do {
+            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try JSONEncoder().encode(snapshot).write(to: url.appendingPathExtension("outbox.json"),
+                options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+            outboxEntryID = entry.id
+            return true
+        } catch {
+            errorMessage = NSLocalizedString("companion.storage_failed", value: "暂时无法保存到本机，请保留当前页面后重试。", comment: "Storage failure")
+            return false
+        }
+    }
+
+    private func loadOutbox() {
+        let target = url.appendingPathExtension("outbox.json")
+        guard FileManager.default.fileExists(atPath: target.path) else { return }
+        do {
+            let pending = try JSONDecoder().decode(OutboxSnapshot.self, from: Data(contentsOf: target))
+            guard pending.version == 1, UUID(uuidString: pending.agentSessionID) != nil,
+                  !pending.conversationID.isEmpty, pending.conversationID.count <= 200 else {
+                throw CocoaError(.fileReadCorruptFile)
+            }
+            let matchesLegacy = legacySnapshotSignature != nil && pending.legacySnapshotSignature == legacySnapshotSignature
+            if !FileManager.default.fileExists(atPath: url.path) || matchesLegacy {
+                conversationID = pending.conversationID
+                agentSession = .init(id: pending.agentSessionID, scope: "global")
+            }
+            guard pending.conversationID == conversationID, pending.agentSessionID == agentSession.id,
+                  var entry = pending.entry else { return }
+            guard entry.role == .user else { throw CocoaError(.fileReadCorruptFile) }
+            outboxEntryID = entry.id
+            guard !entries.contains(where: { $0.id == entry.id }) else { return }
+            let available = entries.flatMap { $0.attachments ?? [] } + draftAttachments
+            if var attachments = entry.attachments {
+                guard pending.attachmentReferences.isSubset(of: Set(attachments.map(\.id))) else {
+                    throw CocoaError(.fileReadCorruptFile)
+                }
+                for index in attachments.indices where pending.attachmentReferences.contains(attachments[index].id) {
+                    guard let source = available.first(where: { $0.id == attachments[index].id }), let data = source.data else {
+                        throw CocoaError(.fileReadCorruptFile)
+                    }
+                    attachments[index].data = data
+                }
+                guard attachments.allSatisfy(\.isValid) else { throw CocoaError(.fileReadCorruptFile) }
+                entry.attachments = attachments
+            } else if !pending.attachmentReferences.isEmpty { throw CocoaError(.fileReadCorruptFile) }
+            entry.status = .failed // Recovery never dispatches a model/tool automatically.
+            entries.append(entry)
+            if let consumedRevision = pending.consumedDraftRevision {
+                if draftRevision < consumedRevision { composerDraft = ""; draftRevision = consumedRevision }
+                let consumedIDs = Set((entry.attachments ?? []).map(\.id))
+                draftAttachments.removeAll { consumedIDs.contains($0.id) }
+                if draftQuote == entry.quotedMessage { draftQuote = nil }
+            }
+            if nextTurnResearchReference == entry.researchReference { nextTurnResearchReference = nil }
+            if nextTurnPlace == entry.placeScope { nextTurnPlace = nil }
+            if nextTurnArea == entry.searchArea { nextTurnArea = nil }
+        } catch {
+            outboxStorageBlocked = true
+            outboxEntryID = nil
+            errorMessage = NSLocalizedString("companion.storage_recovery", value: "旧记录暂时无法读取，原文件已保留。新内容将另行保存。", comment: "Recovery")
+        }
+    }
+
+    private func persistDraft() {
+        guard !storageBlocked, !draftStorageBlocked else { return }
+        do {
+            let draft = DraftSnapshot(conversationID: conversationID, agentSessionID: agentSession.id,
+                revision: draftRevision, text: composerDraft, legacySnapshotSignature: legacySnapshotSignature)
+            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try JSONEncoder().encode(draft).write(to: url.appendingPathExtension("draft.json"),
+                options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+        } catch {
+            errorMessage = NSLocalizedString("companion.storage_failed", value: "暂时无法保存到本机，请保留当前页面后重试。", comment: "Storage failure")
+        }
+    }
+
+    private func loadDraft() {
+        let target = url.appendingPathExtension("draft.json")
+        guard FileManager.default.fileExists(atPath: target.path) else { return }
+        do {
+            let draft = try JSONDecoder().decode(DraftSnapshot.self, from: Data(contentsOf: target))
+            guard draft.version == 1, UUID(uuidString: draft.agentSessionID) != nil,
+                  !draft.conversationID.isEmpty, draft.conversationID.count <= 200 else {
+                throw CocoaError(.fileReadCorruptFile)
+            }
+            let matchesLegacy = legacySnapshotSignature != nil && draft.legacySnapshotSignature == legacySnapshotSignature
+            if !FileManager.default.fileExists(atPath: url.path) || matchesLegacy {
+                conversationID = draft.conversationID
+                agentSession = .init(id: draft.agentSessionID, scope: "global")
+                composerDraft = draft.text
+                draftRevision = draft.revision
+            } else if draft.conversationID == conversationID, draft.agentSessionID == agentSession.id,
+                      draft.revision > draftRevision {
+                composerDraft = draft.text
+                draftRevision = draft.revision
+            }
+        } catch {
+            // Preserve unknown bytes; a deliberate full save can still retain
+            // the visible draft without overwriting the unreadable sidecar.
+            draftStorageBlocked = true
+            errorMessage = NSLocalizedString("companion.storage_recovery", value: "旧记录暂时无法读取，原文件已保留。新内容将另行保存。", comment: "Recovery")
+        }
+    }
+}
+
+private func companionMediaText(_ key: String, _ fallback: String) -> String {
+    NSLocalizedString(key, value: fallback, comment: "Conversation media")
+}

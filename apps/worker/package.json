@@ -1,0 +1,25 @@
+{
+  "name": "@solo-compass/worker",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Durable evidence refresh worker for Roamorrow",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@solo-compass/data": "workspace:*",
+    "@solo-compass/sources-core": "workspace:*",
+    "@solo-compass/sources-osm": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "5.1.0"
+  }
+}

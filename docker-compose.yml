@@ -1,0 +1,24 @@
+services:
+  db:
+    build:
+      context: .
+      dockerfile: infra/postgres/Dockerfile
+    image: solo-compass-postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: solo
+      POSTGRES_PASSWORD: solo
+      POSTGRES_DB: solocompass
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./apps/api/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U solo -d solocompass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:

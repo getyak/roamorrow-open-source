@@ -1,0 +1,8 @@
+/* Public display name and permission copy. Technical app identity stays unchanged. */
+"CFBundleDisplayName" = "Roamorrow";
+"NSLocationWhenInUseUsageDescription" = "Roamorrow uses your location to show experiences near you on the map.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Roamorrow uses background location to record your routes and stops when you turn on Footprints, and to notify you near saved experiences.";
+"NSSpeechRecognitionUsageDescription" = "Roamorrow uses speech recognition when you request dictation or transcription.";
+"NSMicrophoneUsageDescription" = "Roamorrow uses the microphone to record voice messages you choose to send or for voice input.";
+"NSCameraUsageDescription" = "Roamorrow uses the camera to take photos you choose to attach to a conversation or a place.";
+"NSPhotoLibraryUsageDescription" = "Roamorrow can add favorite photos to your Footprints and lets you choose photos to attach to conversations and places.";

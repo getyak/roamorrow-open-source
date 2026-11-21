@@ -1,0 +1,232 @@
+import Foundation
+import SwiftData
+
+/// SwiftData representation of a `Route`.
+///
+/// Strategy mirrors `ItineraryRecord`: scalar fields stored natively;
+/// array fields (`experienceIds`, `tags`, and the verification's `walkedBy`)
+/// stored as JSON-encoded `Data` blobs. The `RouteVerification` struct is
+/// flattened into scalar columns (`verificationStatus`, `walkedByCount`,
+/// `walkedByBlob`) so the verification status is queryable without decoding
+/// a blob. `RouteCompanion` is still a placeholder in US-013, so it is
+/// stored as an optional JSON blob to forward-compat without a schema bump.
+@Model
+public final class RouteRecord {
+    @Attribute(.unique) public var id: String
+
+    public var title: String
+    public var summary: String
+    public var cityCode: String
+    public var region: String
+    public var estimatedDuration: Int
+    public var distanceMeters: Int
+    /// Raw value of `Pace`.
+    public var pace: String
+    /// Raw value of `RouteSource`.
+    public var source: String
+    public var authorId: String?
+    public var bestStartHour: Double?
+    public var bestNow: Bool
+    /// Short human reason shown as the "此刻理由" banner in now-context.
+    public var reasonNow: String?
+    /// Raw value of `VerificationStatus`.
+    public var verificationStatus: String
+    public var walkedByCount: Int
+
+    /// JSON-encoded `[String]`.
+    public var experienceIdsBlob: Data
+    /// JSON-encoded `[String]`.
+    public var walkedByBlob: Data
+    /// JSON-encoded `[String]`.
+    public var tagsBlob: Data
+    /// JSON-encoded `RouteCompanion?` — nil when no companion attached.
+    public var companionBlob: Data?
+    /// JSON-encoded `CompiledWorkdayPlan?`. Optional so pre-v1.11 rows gain
+    /// NULL through a lightweight migration and continue decoding unchanged.
+    public var compiledPlanBlob: Data?
+
+    // Beta-P0-A: active-route progress (Schema V1.7). Optional so existing
+    // rows migrate without rewrite. iOS-local only; not synced to backend
+    // because the Route schema upstream has no equivalent fields.
+    public var activeStartedAt: Date?
+    public var currentStopIndex: Int?
+    /// JSON-encoded `[String]` — Experience IDs the user has marked done
+    /// inside this in-progress route. nil for routes that were never
+    /// started or were already completed.
+    public var completedStopIdsBlob: Data?
+
+    public init(
+        id: String,
+        title: String,
+        summary: String,
+        cityCode: String,
+        region: String,
+        estimatedDuration: Int,
+        distanceMeters: Int,
+        pace: String,
+        source: String,
+        authorId: String?,
+        bestStartHour: Double?,
+        bestNow: Bool,
+        reasonNow: String?,
+        verificationStatus: String,
+        walkedByCount: Int,
+        experienceIdsBlob: Data,
+        walkedByBlob: Data,
+        tagsBlob: Data,
+        companionBlob: Data?,
+        compiledPlanBlob: Data? = nil,
+        activeStartedAt: Date? = nil,
+        currentStopIndex: Int? = nil,
+        completedStopIdsBlob: Data? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.summary = summary
+        self.cityCode = cityCode
+        self.region = region
+        self.estimatedDuration = estimatedDuration
+        self.distanceMeters = distanceMeters
+        self.pace = pace
+        self.source = source
+        self.authorId = authorId
+        self.bestStartHour = bestStartHour
+        self.bestNow = bestNow
+        self.reasonNow = reasonNow
+        self.verificationStatus = verificationStatus
+        self.walkedByCount = walkedByCount
+        self.experienceIdsBlob = experienceIdsBlob
+        self.walkedByBlob = walkedByBlob
+        self.tagsBlob = tagsBlob
+        self.companionBlob = companionBlob
+        self.compiledPlanBlob = compiledPlanBlob
+        self.activeStartedAt = activeStartedAt
+        self.currentStopIndex = currentStopIndex
+        self.completedStopIdsBlob = completedStopIdsBlob
+    }
+}
+
+// MARK: - Two-way mapping
+
+extension RouteRecord {
+    public static func fromValue(_ route: Route) -> RouteRecord {
+        let encoder = JSONEncoder()
+        let experienceIdsBlob: Data
+        let walkedByBlob: Data
+        let tagsBlob: Data
+        let companionBlob: Data?
+        let compiledPlanBlob: Data?
+        do {
+            experienceIdsBlob = try encoder.encode(route.experienceIds)
+            walkedByBlob = try encoder.encode(route.verification.walkedBy)
+            tagsBlob = try encoder.encode(route.tags)
+            if let companion = route.companion {
+                companionBlob = try encoder.encode(companion)
+            } else {
+                companionBlob = nil
+            }
+            if let compiledPlan = route.compiledPlan {
+                compiledPlanBlob = try encoder.encode(compiledPlan)
+            } else {
+                compiledPlanBlob = nil
+            }
+        } catch {
+            fatalError("Failed to encode Route \(route.id.rawValue) for persistence: \(error)")
+        }
+        return RouteRecord(
+            id: route.id.rawValue,
+            title: route.title,
+            summary: route.summary,
+            cityCode: route.cityCode,
+            region: route.region,
+            estimatedDuration: route.estimatedDuration,
+            distanceMeters: route.distanceMeters,
+            pace: route.pace.rawValue,
+            source: route.source.rawValue,
+            authorId: route.authorId,
+            bestStartHour: route.bestStartHour,
+            bestNow: route.bestNow,
+            reasonNow: route.reasonNow,
+            verificationStatus: route.verification.status.rawValue,
+            walkedByCount: route.verification.walkedByCount,
+            experienceIdsBlob: experienceIdsBlob,
+            walkedByBlob: walkedByBlob,
+            tagsBlob: tagsBlob,
+            companionBlob: companionBlob,
+            compiledPlanBlob: compiledPlanBlob
+        )
+    }
+
+    public var asValue: Route {
+        // Schema-evolution safety: malformed blobs degrade to empty
+        // arrays / nil companion and surface a Sentry breadcrumb rather
+        // than crashing the route store on read.
+        let decoder = JSONDecoder()
+        let experienceIds = decodeOrLog([String].self, from: experienceIdsBlob, field: "experienceIds")
+        let walkedBy = decodeOrLog([String].self, from: walkedByBlob, field: "walkedBy")
+        let tags = decodeOrLog([String].self, from: tagsBlob, field: "tags")
+        let companion: RouteCompanion? = {
+            guard let blob = companionBlob else { return nil }
+            if let value = try? decoder.decode(RouteCompanion.self, from: blob) {
+                return value
+            }
+            PersistenceLog.recordDecodeFailure(
+                PersistenceCodecError(
+                    context: "RouteRecord.asValue.companion",
+                    recordId: id,
+                    underlying: NSError(
+                        domain: "PersistenceCodec",
+                        code: -4,
+                        userInfo: [NSLocalizedDescriptionKey: "companion decode failed; using nil"]
+                    )
+                )
+            )
+            return nil
+        }()
+        let compiledPlan: CompiledWorkdayPlan? = {
+            guard let blob = compiledPlanBlob else { return nil }
+            if let value = try? decoder.decode(CompiledWorkdayPlan.self, from: blob) {
+                return value
+            }
+            PersistenceLog.recordDecodeFailure(
+                PersistenceCodecError(
+                    context: "RouteRecord.asValue.compiledPlan",
+                    recordId: id,
+                    underlying: NSError(
+                        domain: "PersistenceCodec",
+                        code: -5,
+                        userInfo: [NSLocalizedDescriptionKey: "compiled plan decode failed; using nil"]
+                    )
+                )
+            )
+            return nil
+        }()
+        let paceValue = Pace(rawValue: pace) ?? .standard
+        let sourceValue = RouteSource(rawValue: source) ?? .editorial
+        let statusValue = VerificationStatus(rawValue: verificationStatus) ?? .proposed
+        return Route(
+            id: RouteId(rawValue: id),
+            title: title,
+            summary: summary,
+            experienceIds: experienceIds,
+            cityCode: cityCode,
+            region: region,
+            estimatedDuration: estimatedDuration,
+            distanceMeters: distanceMeters,
+            pace: paceValue,
+            tags: tags,
+            source: sourceValue,
+            authorId: authorId,
+            bestStartHour: bestStartHour,
+            bestNow: bestNow,
+            reasonNow: reasonNow,
+            verification: RouteVerification(
+                status: statusValue,
+                walkedByCount: walkedByCount,
+                walkedBy: walkedBy
+            ),
+            companion: companion,
+            compiledPlan: compiledPlan
+        )
+    }
+}

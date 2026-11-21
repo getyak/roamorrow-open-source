@@ -1,0 +1,17 @@
+{
+  "name": "@solo-compass/routing",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Deterministic time-window and fallback route planning for Roamorrow",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vitest": "5.1.0"
+  }
+}

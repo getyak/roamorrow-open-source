@@ -1,0 +1,188 @@
+import SwiftUI
+
+/// City OS v3 · 离店一键印证 (design handoff v2/detail.jsx VerifySheet):
+/// three binary questions answerable in 30 seconds, feeding the Recall
+/// contribution loop. Submit stays disabled until all three are answered —
+/// a half-filled verification is worse than none.
+struct VerifySheet: View {
+    /// The traveler's three answers, index 0 = the first (positive) option.
+    struct Answers: Equatable {
+        var stillThere: Int?
+        var soloComfort: Int?
+        var crowd: Int?
+
+        var isComplete: Bool {
+            stillThere != nil && soloComfort != nil && crowd != nil
+        }
+    }
+
+    let placeName: String
+    let onSubmit: (Answers) throws -> Void
+    let onDismiss: () -> Void
+
+    @State private var answers = Answers()
+    @State private var saveError: String?
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        // Scrollable content + a large detent option: at large Dynamic Type the
+        // questions and submit must stay reachable (I18). Answers live in
+        // `@State`, so scrolling and detent changes never lose them.
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                header
+                question(
+                    text: NSLocalizedString("cityos.verify.q.exists", comment: "它还在、还开着吗？"),
+                    options: [
+                        NSLocalizedString("cityos.verify.q.exists.yes", comment: "还在 ✓"),
+                        NSLocalizedString("cityos.verify.q.exists.no", comment: "变了 / 关了"),
+                    ],
+                    selection: $answers.stillThere
+                )
+                question(
+                    text: NSLocalizedString("cityos.verify.q.solo", comment: "一个人去，自在吗？"),
+                    options: [
+                        NSLocalizedString("cityos.verify.q.solo.yes", comment: "很自在"),
+                        NSLocalizedString("cityos.verify.q.solo.no", comment: "有点尴尬"),
+                    ],
+                    selection: $answers.soloComfort
+                )
+                question(
+                    text: NSLocalizedString("cityos.verify.q.crowd", comment: "你去的时候人多吗？"),
+                    options: [
+                        NSLocalizedString("cityos.verify.q.crowd.few", comment: "人少"),
+                        NSLocalizedString("cityos.verify.q.crowd.many", comment: "挺挤"),
+                    ],
+                    selection: $answers.crowd
+                )
+                if let saveError {
+                    Text(saveError).font(.subheadline).foregroundStyle(CT.savedRed)
+                }
+                submitButton
+            }
+            .padding(20)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(sheetBackground.ignoresSafeArea())
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+    }
+
+    private var header: some View {
+        // The submit stays gated on all-three-answered, but a traveler who
+        // opens this and decides not to answer must have a *visible* exit — not
+        // just the drag indicator. An explicit close button keeps the flow from
+        // being a dead-end (HIG: never trap the user) while preserving the
+        // "half-filled verification is worse than none" gate on Submit itself.
+        HStack(alignment: .top, spacing: 8) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(NSLocalizedString("cityos.verify.title", comment: "30 秒，帮下一个独行者"))
+                    .ctDisplay(18, .bold)
+                    .foregroundStyle(primaryText)
+                Text(String(
+                    format: NSLocalizedString(
+                        "cityos.verify.subtitle",
+                        comment: "%@ —— 三下点完，你的印证会直接进入这个点的信心分"
+                    ),
+                    placeName
+                ))
+                .ctBody(12.5)
+                .foregroundStyle(CT.fgMuted)
+                .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 8)
+            Button {
+                Haptics.selection()
+                onDismiss()
+            } label: {
+                // 30pt visual close, 44pt transparent hit target (I18).
+                Image(systemName: "xmark")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(CT.fgMuted)
+                    .frame(width: 30, height: 30)
+                    .background(Circle().fill(optionFill))
+                    .frame(width: HitTargetMetrics.minimum, height: HitTargetMetrics.minimum)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(PressableButtonStyle())
+            .accessibilityLabel(Text(NSLocalizedString("common.close", comment: "Close")))
+        }
+    }
+
+    private func question(text: String, options: [String], selection: Binding<Int?>) -> some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Text(text)
+                .ctBody(13.5, .semibold)
+                .foregroundStyle(primaryText)
+            HStack(spacing: 8) {
+                ForEach(options.indices, id: \.self) { index in
+                    optionPill(
+                        label: options[index],
+                        isSelected: selection.wrappedValue == index
+                    ) {
+                        Haptics.impact(.light)
+                        selection.wrappedValue = index
+                    }
+                }
+            }
+        }
+    }
+
+    private func optionPill(label: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .ctBody(13, .medium)
+                .foregroundStyle(isSelected ? CT.accent : CT.fgMuted)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, minHeight: HitTargetMetrics.minimum)
+                .padding(.vertical, 9)
+                .background(
+                    Capsule().fill(isSelected ? CT.accentSoft : optionFill)
+                )
+                .overlay(
+                    Capsule().strokeBorder(
+                        isSelected ? CT.accent : borderColor,
+                        lineWidth: isSelected ? 1.2 : 0.5
+                    )
+                )
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(PressableButtonStyle())
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+        .accessibilityValue(Text(isSelected ? NSLocalizedString("common.selected", comment: "Selected") : ""))
+    }
+
+    private var submitButton: some View {
+        Button {
+            saveError = nil
+            do {
+                try onSubmit(answers)
+                Haptics.notify(.success)
+                onDismiss()
+            } catch {
+                saveError = NSLocalizedString("notes.save.failed", value: "Couldn’t save. Your answers are still here. Please retry.", comment: "Verification persistence failure")
+                Haptics.notify(.error)
+            }
+        } label: {
+            Text(NSLocalizedString("cityos.verify.submit", comment: "提交印证"))
+                .ctBody(14.5, .semibold)
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Capsule().fill(answers.isComplete ? CT.accent : CT.fgSubtle))
+        }
+        .buttonStyle(PressableButtonStyle(pressedScale: 0.98))
+        .disabled(!answers.isComplete)
+        .padding(.top, 4)
+        .animation(.easeInOut(duration: 0.2), value: answers.isComplete)
+    }
+
+    // MARK: - Colors
+
+    private var sheetBackground: Color { colorScheme == .dark ? CT.warmSheetDark : CT.surfaceSunken }
+    private var optionFill: Color { colorScheme == .dark ? CT.warmCardDark : CT.surfaceWhite }
+    private var borderColor: Color { colorScheme == .dark ? CT.warmBorderDark : CT.borderSubtle }
+    private var primaryText: Color { colorScheme == .dark ? CT.fgPrimaryDark : CT.fgPrimary }
+}

@@ -1,0 +1,53 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import type { NearbyResponse } from "@/app/api/experiences/nearby/route";
+
+export interface UseNearbyParams {
+  /** [longitude, latitude] — quantised to keep the cache key stable while panning. */
+  readonly center: readonly [number, number] | null;
+  readonly intent?: string;
+  readonly radius?: number;
+  /** The viewed place's IANA timezone, when known; never assume the viewer's timezone. */
+  readonly timeZone?: string;
+}
+
+/**
+ * Quantise lng/lat to ~50m so micro-pans don't spam the API. Refetches
+ * happen at the call-site by re-keying when the user pans >500m.
+ */
+function quantise(coord: number): number {
+  return Math.round(coord * 2000) / 2000; // ~55m at the equator
+}
+
+async function fetchNearby(
+  center: readonly [number, number],
+  intent: string | undefined,
+  radius: number,
+  signal: AbortSignal,
+  timeZone?: string,
+): Promise<NearbyResponse> {
+  const params = new URLSearchParams({
+    lng: String(center[0]),
+    lat: String(center[1]),
+    radius: String(radius),
+  });
+  if (intent) params.set("intent", intent);
+  if (timeZone) params.set("timeZone", timeZone);
+  const res = await fetch(`/api/experiences/nearby?${params.toString()}`, { signal });
+  if (!res.ok) {
+    throw new Error(`nearby ${res.status}: ${await res.text().catch(() => "")}`);
+  }
+  return (await res.json()) as NearbyResponse;
+}
+
+export function useNearby({ center, intent, radius = 1500, timeZone }: UseNearbyParams) {
+  const key = center ? [quantise(center[0]), quantise(center[1])] : null;
+
+  return useQuery<NearbyResponse>({
+    queryKey: ["nearby", key, intent ?? "", radius, timeZone ?? ""],
+    queryFn: ({ signal }) =>
+      fetchNearby(center as [number, number], intent, radius, signal, timeZone),
+    enabled: !!center,
+  });
+}

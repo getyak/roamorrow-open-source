@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>favorites.count</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@count@</string>
+        <key>count</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>other</key>
+            <string>已收藏 %d 个</string>
+        </dict>
+    </dict>
+    <key>nowscore.sunset.before_min</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@min@</string>
+        <key>min</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>other</key>
+            <string>日落 %d 分钟后</string>
+        </dict>
+    </dict>
+    <key>nowscore.sunset.blue_hour</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@min@ · 蓝调时刻</string>
+        <key>min</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>other</key>
+            <string>日落 %d 分钟后</string>
+        </dict>
+    </dict>
+    <key>nowscore.sunset.after_min</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@min@</string>
+        <key>min</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>other</key>
+            <string>日落已过 %d 分钟</string>
+        </dict>
+    </dict>
+</dict>
+</plist>

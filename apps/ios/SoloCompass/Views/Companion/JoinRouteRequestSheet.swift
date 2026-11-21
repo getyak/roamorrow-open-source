@@ -1,0 +1,329 @@
+import SwiftUI
+import SwiftData
+
+// MARK: - PaceMatch
+
+/// Relative pace preference when joining a route.
+enum PaceMatch: String, CaseIterable {
+    case slower   // 慢于宿主
+    case matching // 匹配
+    case faster   // 快于宿主
+
+    var label: String {
+        switch self {
+        case .slower:   return NSLocalizedString("join.pace.slower", comment: "慢于宿主")
+        case .matching: return NSLocalizedString("join.pace.matching", comment: "匹配")
+        case .faster:   return NSLocalizedString("join.pace.faster", comment: "快于宿主")
+        }
+    }
+}
+
+// MARK: - JoinRouteRequestSheet
+
+/// Pure validation for a join request form. Decoupled from the view so it can
+/// be unit-tested without rendering SwiftUI.
+///
+/// US-031: a missing pace selection or an empty message field each produce an
+/// inline error keyed `join.error.<field>.missing`. The submit button stays
+/// disabled until both fields validate.
+enum JoinRequestField: String {
+    case pace
+    case message
+
+    /// Localized inline hint shown below the field when it is invalid.
+    var missingHint: String {
+        NSLocalizedString("join.error.\(rawValue).missing", comment: "Inline validation hint for the \(rawValue) field")
+    }
+}
+
+struct JoinRequestValidation {
+    /// Minimum self-introduction length required to submit.
+    static let minMessageLength = 10
+
+    /// `true` when no pace has been chosen.
+    static func isPaceMissing(_ pace: PaceMatch?) -> Bool {
+        pace == nil
+    }
+
+    /// `true` when the message is empty after trimming whitespace.
+    static func isMessageMissing(_ message: String) -> Bool {
+        message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// `true` only when both fields validate (pace chosen and message long
+    /// enough AFTER trimming — ten spaces are not an introduction).
+    static func canSubmit(pace: PaceMatch?, message: String) -> Bool {
+        pace != nil
+            && message.trimmingCharacters(in: .whitespacesAndNewlines).count >= minMessageLength
+    }
+
+    /// Length used for the live counter and validation — trimmed so padding
+    /// whitespace cannot fake progress toward the minimum.
+    static func validatedLength(_ message: String) -> Int {
+        message.trimmingCharacters(in: .whitespacesAndNewlines).count
+    }
+}
+
+/// Sheet for submitting a join request to a route.
+///
+/// Acceptance criteria (US-031):
+/// - Pinned RouteCard at top (non-scrolling).
+/// - Pace-match segmented picker (慢于宿主 / 匹配 / 快于宿主).
+/// - Message TextEditor (placeholder '向主理人介绍自己...').
+/// - Missing pace or empty message renders a red inline hint below that field.
+/// - Submit disabled until both fields validate.
+/// - On submit: calls RouteCompanionRemote.sendJoinRequest.
+/// - Dismisses on success with a light haptic.
+struct JoinRouteRequestSheet: View {
+    let route: Route
+    private let remoteProvider: @MainActor () -> any RouteCompanionRemote
+
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var selectedPace: PaceMatch? = nil
+    @State private var message = ""
+    @State private var isSubmitting = false
+    /// Failure status kept inline so the user can retry without losing the
+    /// pace choice or the introduction they wrote (I19).
+    @State private var submitErrorMessage: String?
+
+    init(
+        route: Route,
+        remoteProvider: (@MainActor () -> any RouteCompanionRemote)? = nil
+    ) {
+        self.route = route
+        self.remoteProvider = remoteProvider ?? { @MainActor in
+            makeRouteCompanionRemote(context: ModelContext(SoloCompassModelContainer.shared))
+        }
+    }
+
+    private var isSubmitEnabled: Bool {
+        JoinRequestValidation.canSubmit(pace: selectedPace, message: message) && !isSubmitting
+    }
+
+    /// Whether the pace field should show its inline missing-error hint.
+    private var showsPaceError: Bool {
+        JoinRequestValidation.isPaceMissing(selectedPace)
+    }
+
+    /// Whether the message field should show its inline missing-error hint.
+    private var showsMessageError: Bool {
+        JoinRequestValidation.isMessageMissing(message)
+    }
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                pinnedRouteCard
+                Divider()
+                formContent
+            }
+            .navigationTitle(NSLocalizedString("join.sheet.title", comment: "申请加入"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(NSLocalizedString("common.cancel", comment: "Cancel")) {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Pinned route card
+
+    private var pinnedRouteCard: some View {
+        RouteCard(route: route)
+            .background(Color(.secondarySystemGroupedBackground))
+    }
+
+    // MARK: - Scrollable form
+
+    private var formContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                pacePicker
+                messageEditor
+                submitButton
+                if let submitErrorMessage {
+                    Text(submitErrorMessage)
+                        .font(.caption)
+                        .foregroundStyle(CT.savedRed)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityAddTraits(.isStaticText)
+                }
+            }
+            .padding(20)
+        }
+        .background(Color(.systemGroupedBackground))
+    }
+
+    // MARK: - Pace picker
+
+    private var pacePicker: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(NSLocalizedString("join.pace.label", comment: "配速匹配"))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+
+            Picker(
+                NSLocalizedString("join.pace.label", comment: "配速匹配"),
+                selection: $selectedPace
+            ) {
+                Text(NSLocalizedString("join.pace.placeholder", comment: "请选择")).tag(Optional<PaceMatch>.none)
+                ForEach(PaceMatch.allCases, id: \.self) { pace in
+                    Text(pace.label).tag(Optional(pace))
+                }
+            }
+            .pickerStyle(.segmented)
+
+            if showsPaceError {
+                inlineError(JoinRequestField.pace.missingHint)
+            }
+        }
+    }
+
+    // MARK: - Message editor
+
+    private var messageEditor: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(NSLocalizedString("join.message.label", comment: "自我介绍"))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $message)
+                    .frame(minHeight: 120)
+                    .padding(8)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+                if message.isEmpty {
+                    Text(NSLocalizedString("join.message.placeholder", comment: "向主理人介绍自己..."))
+                        .foregroundStyle(Color(.placeholderText))
+                        .padding(.top, 16)
+                        .padding(.leading, 13)
+                        .allowsHitTesting(false)
+                }
+            }
+
+            Text("\(JoinRequestValidation.validatedLength(message)) / 10+")
+                .font(.caption)
+                .foregroundStyle(JoinRequestValidation.validatedLength(message) < 10 ? Color(.secondaryLabel) : CT.verifiedGreen)
+
+            if showsMessageError {
+                inlineError(JoinRequestField.message.missingHint)
+            }
+        }
+    }
+
+    // MARK: - Inline error hint
+
+    /// A red, accessibility-flagged inline hint shown below an invalid field.
+    private func inlineError(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(CT.savedRed)
+            .accessibilityAddTraits(.isStaticText)
+            .transition(.opacity)
+    }
+
+    // MARK: - Submit button
+
+    private var submitButton: some View {
+        Button(action: submit) {
+            Text(NSLocalizedString("join.submit", comment: "提交申请"))
+                .font(.system(size: 16, weight: .semibold))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(submitBackground)
+                .foregroundStyle(isSubmitEnabled ? Color(.systemBackground) : Color(.tertiaryLabel))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+        .disabled(!isSubmitEnabled)
+        .accessibilityLabel(NSLocalizedString("join.submit", comment: "提交申请"))
+    }
+
+    @ViewBuilder
+    private var submitBackground: some View {
+        if isSubmitEnabled {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(CT.accent)
+        } else {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color(.systemGray4))
+        }
+    }
+
+    // MARK: - Submit action
+
+    @MainActor
+    private func submit() {
+        guard let pace = selectedPace, JoinRequestValidation.canSubmit(pace: pace, message: message) else { return }
+        // Synchronous re-entry guard: a double tap can't start two requests.
+        guard !isSubmitting else { return }
+        isSubmitting = true
+        submitErrorMessage = nil
+
+        Task { @MainActor in
+            defer { isSubmitting = false }
+            let remote = remoteProvider()
+            do {
+                try await remote.sendJoinRequest(
+                    routeId: route.id,
+                    message: message.trimmingCharacters(in: .whitespacesAndNewlines),
+                    pace: pace.rawValue
+                )
+                // ONLY a real success closes the sheet (I19).
+                Haptics.impact(.light)
+                dismiss()
+            } catch is NotImplementedError {
+                // Backend not wired yet: say so plainly and keep the draft.
+                // Never close as if the request had been sent.
+                submitErrorMessage = NSLocalizedString(
+                    "join.submit.unavailable",
+                    comment: "Joining routes isn't available yet — your draft is kept"
+                )
+            } catch {
+                // Keep pace + message so the traveler can retry (I19).
+                submitErrorMessage = String(
+                    format: NSLocalizedString(
+                        "join.submit.failed",
+                        comment: "Request not sent — your draft is kept. %@"
+                    ),
+                    error.localizedDescription
+                )
+            }
+        }
+    }
+}
+
+// MARK: - Preview
+
+#Preview("JoinRouteRequestSheet") {
+    let companion = RouteCompanion(
+        status: .open,
+        hostId: "maya",
+        departureWindow: DepartureWindow(startDate: "2026-06-10", to: "2026-06-12", time: "morning"),
+        departureLabel: "Jun 10–12 · morning",
+        maxMembers: 4,
+        confirmedMembers: [],
+        joinRequests: [],
+        hostMessage: "Looking for easy-going folks who enjoy slow mornings."
+    )
+    let route = Route(
+        id: RouteId(rawValue: "r_preview"),
+        title: "Mekong Sunset Walk",
+        summary: "Dawn at the river.",
+        experienceIds: ["e1", "e2"],
+        cityCode: "VTE",
+        region: "Riverfront",
+        estimatedDuration: 90,
+        distanceMeters: 1200,
+        pace: .relaxed,
+        tags: ["nature"],
+        source: .editorial,
+        companion: companion
+    )
+    JoinRouteRequestSheet(route: route)
+}

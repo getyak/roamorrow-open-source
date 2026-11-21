@@ -1,0 +1,473 @@
+import Foundation
+import StoreKit
+import Observation
+import os
+import SwiftData
+
+/// StoreKit 2 wrapper. The single source of truth for "is this user
+/// Pro?" is `Transaction.currentEntitlements`. Everything else
+/// (Keychain cache, refreshEntitlement) is plumbing to make that
+/// answer fast and correct under bad network conditions.
+///
+/// Pro features (Explore Here AI synthesis, voice intent, AI
+/// explanations) are gated by `entitlement.isActive` (Epic D US-024).
+/// Free users still get OSM-only skeleton mode.
+@MainActor
+@Observable
+public final class SubscriptionService {
+
+    // MARK: - Logging
+
+    @ObservationIgnored
+    private let logger = Logger(subsystem: "com.solocompass", category: "SubscriptionService")
+
+    // MARK: - Product IDs
+
+    public static let monthlyProductID = "com.solocompass.pro.monthly"
+    public static let yearlyProductID = "com.solocompass.pro.yearly"
+    public static let allProductIDs: [String] = [monthlyProductID, yearlyProductID]
+
+    // P2/P3 consumable IAP product IDs — sourced from todo.md appendix
+    // "v1.0 IAP product ID 总表". Reverse-domain naming aligns with
+    // `com.solocompass.pro.monthly/yearly`. Real product registration in
+    // App Store Connect is out of code scope; these constants let the
+    // tool router + paywall UI reference them by name today so future
+    // wiring drops in without a rename dance.
+    public static let blindboxSingleProductID = "com.solocompass.consumable.blindbox.single"   // #234 — $1.99
+    public static let sosSingleProductID      = "com.solocompass.consumable.sos.single"        // #214/#350 — $2.99
+    public static let unwalkedSingleProductID = "com.solocompass.consumable.unwalked.single"   // #215/#351 — $4.99
+    public static let omenRerollProductID     = "com.solocompass.consumable.omen.reroll"       // #304 — $0.99
+    public static let ostRerollProductID      = "com.solocompass.consumable.ost.reroll"        // #313 — $0.99
+    public static let bragVideoProductID      = "com.solocompass.consumable.brag.video"        // #323 — $1.99
+    public static let allConsumableProductIDs: [String] = [
+        blindboxSingleProductID,
+        sosSingleProductID,
+        unwalkedSingleProductID,
+        omenRerollProductID,
+        ostRerollProductID,
+        bragVideoProductID,
+    ]
+    /// Superset used by `Product.products(for:)` — merges subscriptions +
+    /// consumables so the whole catalog resolves in one StoreKit call.
+    public static var allCatalogProductIDs: [String] {
+        allProductIDs + allConsumableProductIDs
+    }
+
+    // MARK: - Admin / tester email allow-list
+    //
+    // Emails listed here unlock Pro without going through StoreKit. Use for
+    // internal testers and the project owner — never bake in real user
+    // emails. Matching is case-insensitive and whitespace-tolerant.
+    public static let adminEmails: Set<String> = [
+        "3293172751nss@gmail.com",
+        "xiong3293172751@outlook.com"
+    ]
+
+    /// Case-insensitive, whitespace-tolerant membership check against
+    /// `adminEmails`. Pure — no side effects.
+    public static func isAdminEmail(_ email: String) -> Bool {
+        let normalized = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return adminEmails.contains(where: { $0.lowercased() == normalized })
+    }
+
+    // MARK: - Entitlement
+
+    /// The traveler's current access level, from free through Pro trial to full Pro.
+    public enum Entitlement: String, CaseIterable, Sendable {
+        case free
+        case proTrial
+        case pro
+        case proExpired
+
+        public var isActive: Bool {
+            self == .pro || self == .proTrial
+        }
+    }
+
+    // MARK: - State
+
+    public private(set) var products: [Product] = []
+    public private(set) var entitlement: Entitlement
+    public private(set) var isLoading: Bool = false
+    public private(set) var lastError: String?
+
+    /// True once the tester email unlock has succeeded at least once on this
+    /// device. Persisted in UserDefaults (not Keychain — it's a UI-gating flag,
+    /// not an entitlement) so the Developer Options entry in Settings stays
+    /// visible across relaunches without re-entering the tester email. Distinct
+    /// from `entitlement == .pro`: a StoreKit purchase grants Pro but must NOT
+    /// reveal the developer panel; only the allow-listed tester unlock does.
+    public private(set) var developerModeUnlocked: Bool {
+        didSet { UserDefaults.standard.set(developerModeUnlocked, forKey: Self.developerModeDefaultsKey) }
+    }
+    static let developerModeDefaultsKey = "com.solocompass.developerModeUnlocked"
+
+    /// True once an allow-listed tester/admin email has unlocked Pro on this
+    /// device. Persisted in UserDefaults so the unlock survives relaunch.
+    ///
+    /// This is the linchpin that keeps the unlock sticky: the admin unlock
+    /// bypasses StoreKit, so there is no `Transaction` backing it. Without this
+    /// flag, `refreshEntitlement()` — called on every launch — would walk
+    /// `Transaction.currentEntitlements`, find nothing, resolve `.free`, and
+    /// clobber the persisted `.pro`, forcing the tester to re-enter their email
+    /// after every relaunch. `refreshEntitlement()` checks this flag and refuses
+    /// to downgrade an admin-unlocked device.
+    ///
+    /// Distinct from `developerModeUnlocked`: locking the Developer Options
+    /// panel (`lockDeveloperMode()`) hides the dev UI but must NOT revoke the
+    /// earned Pro entitlement, so this flag stays set through that.
+    public private(set) var adminUnlockActive: Bool {
+        didSet { UserDefaults.standard.set(adminUnlockActive, forKey: Self.adminUnlockDefaultsKey) }
+    }
+    static let adminUnlockDefaultsKey = "com.solocompass.adminUnlockActive"
+
+    /// Renewal / trial-end date of the currently-active StoreKit transaction.
+    /// `nil` when there is no active transaction (free / proExpired) or when
+    /// running under the DEBUG force-Pro override. The Paywall and MeSheet
+    /// entitlement banner read this to render the "trial ends Mar 12" /
+    /// "X days remaining" copy the App Store fine-print legally requires
+    /// once a user is mid-trial.
+    public private(set) var currentExpirationDate: Date?
+
+    /// Days remaining in the current Introductory Offer trial, rounded up so
+    /// the user never sees "0 days" while the trial is still active. `nil`
+    /// when not in a trial period (so call-sites can short-circuit the UI).
+    public var trialDaysRemaining: Int? {
+        guard entitlement == .proTrial, let exp = currentExpirationDate else { return nil }
+        let s = exp.timeIntervalSinceNow
+        return s > 0 ? Int(ceil(s / 86_400)) : 0
+    }
+
+    /// Returns true when the App Store reports this Apple ID is still eligible
+    /// for the product's Introductory Offer (i.e. has not previously redeemed
+    /// the free month on this or any product in the subscription group). The
+    /// paywall hides the "1-month free" badge when this returns false, so we
+    /// never advertise a trial the user can't actually claim.
+    ///
+    /// Returns true on lookup failure — the paywall already gracefully
+    /// degrades and StoreKit will reject the introductory price at purchase
+    /// time, so an optimistic display is safer than hiding the badge for a
+    /// network blip.
+    public func isEligibleForIntroOffer(_ product: Product) async -> Bool {
+        guard let subscription = product.subscription else { return false }
+        return await subscription.isEligibleForIntroOffer
+    }
+
+    // MARK: - Init
+
+    private static let keychainAccount = "entitlement"
+    nonisolated(unsafe) private var transactionListenerTask: Task<Void, Never>?
+
+    public init() {
+        // Seed entitlement from Keychain so the UI can render Pro state
+        // immediately on launch — before the StoreKit refresh comes back.
+        if let cached = KeychainStore.read(account: Self.keychainAccount),
+           let value = Entitlement(rawValue: cached) {
+            self.entitlement = value
+        } else {
+            self.entitlement = .free
+        }
+
+        // Restore the tester/developer unlock flag so the Developer Options
+        // entry survives relaunch once a tester email has unlocked the device.
+        self.developerModeUnlocked = UserDefaults.standard.bool(forKey: Self.developerModeDefaultsKey)
+
+        // Restore the admin-unlock flag so refreshEntitlement() below (and on
+        // future launches) won't downgrade a tester-unlocked device to .free.
+        self.adminUnlockActive = UserDefaults.standard.bool(forKey: Self.adminUnlockDefaultsKey)
+
+        // Spin up the transaction listener BEFORE the first product/
+        // entitlement fetch, so we never miss a renewal that arrives
+        // mid-launch.
+        startTransactionListener()
+
+        #if DEBUG
+        // Debug builds default to Pro so the simulator can exercise the
+        // AI-gated surfaces (Explore, AI Insight, voice) without a StoreKit
+        // sandbox. Set FF_DEBUG_FORCE_PRO=0 to test the free/paywall path.
+        // Stripped entirely from Release builds by the #if DEBUG guard.
+        // Sets the in-memory field directly (not setEntitlement) so we don't
+        // persist a fake Pro state to Keychain.
+        let env = ProcessInfo.processInfo.environment["FF_DEBUG_FORCE_PRO"]
+        if env != "0" && env?.lowercased() != "false" {
+            self.entitlement = .pro
+        }
+        #endif
+    }
+
+    deinit {
+        transactionListenerTask?.cancel()
+    }
+
+    // MARK: - Public API
+
+    /// Fetch product catalog from StoreKit. Idempotent — calling twice
+    /// is fine. Sets `isLoading` so the paywall can show a spinner.
+    public func loadProducts() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            let fetched = try await Product.products(for: Self.allProductIDs)
+            // Sort: yearly first (we want it as the "Best value" card on top).
+            self.products = fetched.sorted { lhs, _ in
+                lhs.id == Self.yearlyProductID
+            }
+            self.lastError = nil
+        } catch {
+            self.lastError = error.localizedDescription
+            logger.error("product load failed: \(String(describing: error), privacy: .public)")
+        }
+    }
+
+    /// Walk Transaction.currentEntitlements and pick the strongest
+    /// entitlement. Updates `entitlement` and writes through to Keychain.
+    public func refreshEntitlement() async {
+        #if DEBUG
+        // Honour the debug Pro override (set in init from FF_DEBUG_FORCE_PRO).
+        // Without this, the StoreKit walk below resolves .free on a simulator
+        // with no sandbox subscription and overwrites the forced .pro — which
+        // silently routes Explore through the free/skeleton path.
+        let env = ProcessInfo.processInfo.environment["FF_DEBUG_FORCE_PRO"]
+        if env != "0" && env?.lowercased() != "false" {
+            if entitlement != .pro { setEntitlement(.pro) }
+            return
+        }
+        #endif
+        // Tester/admin email unlock bypasses StoreKit and has no backing
+        // Transaction. Honour the persisted unlock so the currentEntitlements
+        // walk below (which sees nothing) can't reset an unlocked device to
+        // .free on every launch. Restore/purchase still layer real StoreKit
+        // entitlements on top for genuine subscribers.
+        if adminUnlockActive {
+            if entitlement != .pro { setEntitlement(.pro) }
+            return
+        }
+        var resolved: Entitlement = .free
+        var latestTransaction: Transaction?
+        var resolvedExpiration: Date?
+        for await result in Transaction.currentEntitlements {
+            guard case .verified(let txn) = result else { continue }
+            guard Self.allProductIDs.contains(txn.productID) else { continue }
+            latestTransaction = txn
+            // If revoked or refunded, skip — never count as Pro.
+            if txn.revocationDate != nil { continue }
+            // Expired transactions count as proExpired only if we don't
+            // see an active one in the same loop.
+            if let expires = txn.expirationDate, expires < Date() {
+                if resolved == .free { resolved = .proExpired }
+                continue
+            }
+            // Active. Trial vs paid distinction. The .offer accessor
+            // landed in iOS 17.2; on 17.0/17.1 we fall back to the
+            // legacy isUpgraded heuristic (offerType == .introductory
+            // implies first paid period within trial window).
+            if #available(iOS 17.2, *) {
+                if let offerType = txn.offer?.type, offerType == .introductory {
+                    resolved = .proTrial
+                    resolvedExpiration = txn.expirationDate
+                } else {
+                    resolved = .pro
+                    resolvedExpiration = txn.expirationDate
+                    break
+                }
+            } else {
+                // Best-effort: offerType lives at txn.offerType on 17.0/17.1.
+                if txn.offerType == .introductory {
+                    resolved = .proTrial
+                    resolvedExpiration = txn.expirationDate
+                } else {
+                    resolved = .pro
+                    resolvedExpiration = txn.expirationDate
+                    break
+                }
+            }
+        }
+        let prior = entitlement
+        // Always update expiration alongside entitlement so the banner /
+        // paywall can't show stale "5 days left" copy after a renewal.
+        currentExpirationDate = resolvedExpiration
+        setEntitlement(resolved)
+        // Epic E US-032: emit a subscription_events row when the
+        // resolved entitlement changes. Routed through the SyncService
+        // outbox so it survives offline boots; FF-off path is a no-op.
+        if prior != resolved, let txn = latestTransaction {
+            emitSubscriptionEvent(prior: prior, current: resolved, transaction: txn)
+        }
+    }
+
+    /// Initiate a purchase. Returns true on successful verification +
+    /// activation. Caller (paywall) should then dismiss + retry the
+    /// gated action via its closure.
+    @discardableResult
+    public func purchase(_ product: Product) async -> Bool {
+        do {
+            let result = try await product.purchase()
+            switch result {
+            case .success(let verification):
+                if case .verified(let txn) = verification {
+                    await txn.finish()
+                    await refreshEntitlement()
+                    return entitlement.isActive
+                }
+                return false
+            case .userCancelled, .pending:
+                return false
+            @unknown default:
+                return false
+            }
+        } catch {
+            lastError = error.localizedDescription
+            return false
+        }
+    }
+
+    /// Trigger StoreKit's resync for "Restore purchases". The
+    /// transaction listener will pick up any granted entitlement;
+    /// we also call refresh directly to ensure the view sees the
+    /// new state synchronously after this returns.
+    public func restorePurchases() async -> Bool {
+        lastError = nil
+        do {
+            try await AppStore.sync()
+            await refreshEntitlement()
+            return entitlement.isActive
+        } catch {
+            lastError = error.localizedDescription
+            return false
+        }
+    }
+
+    /// Tester / admin escape hatch: if `email` is on the allow-list, flip
+    /// entitlement to `.pro` and persist via Keychain so the unlock
+    /// survives relaunch. Returns true when the unlock applied.
+    ///
+    /// This bypasses StoreKit on purpose — internal testers shouldn't need
+    /// a sandbox Apple ID, and the project owner needs a Gmail-based entry
+    /// point that Sign in with Apple can't provide.
+    @discardableResult
+    public func unlockWithAdminEmail(_ email: String) -> Bool {
+        guard Self.isAdminEmail(email) else { return false }
+        // Mark the device admin-unlocked BEFORE flipping the entitlement so the
+        // sticky flag is persisted first. This is what makes the unlock survive
+        // relaunch: refreshEntitlement() reads it and refuses to downgrade to
+        // .free when there's no backing StoreKit transaction.
+        adminUnlockActive = true
+        setEntitlement(.pro)
+        // Reveal the Developer Options panel in Settings from now on. Persisted
+        // so the tester doesn't have to re-enter the email after every relaunch.
+        developerModeUnlocked = true
+        return true
+    }
+
+    /// Hide the Developer Options panel again (tester tapped "Lock developer
+    /// options"). Leaves the Pro entitlement untouched — locking the panel is
+    /// purely a UI concern and must not revoke an unlock the tester already
+    /// earned.
+    public func lockDeveloperMode() {
+        developerModeUnlocked = false
+    }
+
+    // MARK: - Dependency injection (tests override these)
+
+    /// Overridable in tests to capture enqueued records without touching
+    /// the production singleton or a real SwiftData store.
+    var syncService: SyncService = .shared
+    var syncModelContext: ModelContext = ModelContext(SoloCompassModelContainer.shared)
+    var deviceIDProvider: () -> String = { DeviceIdentityService.shared.deviceID }
+
+    // MARK: - Internal
+
+    private func startTransactionListener() {
+        transactionListenerTask = Task.detached { [weak self] in
+            for await update in Transaction.updates {
+                guard case .verified = update else { continue }
+                await self?.refreshEntitlement()
+            }
+        }
+    }
+
+    private func setEntitlement(_ new: Entitlement) {
+        guard new != entitlement else { return }
+        entitlement = new
+        KeychainStore.write(account: Self.keychainAccount, value: new.rawValue)
+    }
+
+    /// Test-only: set entitlement directly (bypasses StoreKit) and write
+    /// through to Keychain. Use sparingly — production paths must go
+    /// through `refreshEntitlement()`.
+    public func _setEntitlementForTesting(_ value: Entitlement) {
+        setEntitlement(value)
+    }
+
+    // MARK: - Subscription event emission (Epic E US-032)
+
+    private func emitSubscriptionEvent(
+        prior: Entitlement,
+        current: Entitlement,
+        transaction: Transaction
+    ) {
+        let eventType: String
+        switch (prior, current) {
+        case (.free, .proTrial), (.free, .pro), (.proExpired, .proTrial), (.proExpired, .pro):
+            eventType = "subscribed"
+        case (.pro, .proExpired), (.proTrial, .proExpired):
+            eventType = "expired"
+        case (_, _) where transaction.revocationDate != nil:
+            eventType = "revoked"
+        default:
+            eventType = "upgraded"
+        }
+        _emitSubscriptionEventFields(
+            eventType: eventType,
+            productID: transaction.productID,
+            originalPurchaseDate: transaction.originalPurchaseDate,
+            expiresDate: transaction.expirationDate,
+            isInTrialPeriod: current == .proTrial
+        )
+    }
+
+    /// Package-internal entry point for testing: enqueues a subscription_events
+    /// row without requiring a real StoreKit Transaction. When FF_BACKEND_SYNC
+    /// is false, the call is a silent no-op.
+    func _emitSubscriptionEventFields(
+        eventType: String,
+        productID: String,
+        originalPurchaseDate: Date?,
+        expiresDate: Date?,
+        isInTrialPeriod: Bool
+    ) {
+        // When the backend sync feature flag is off, drop the event silently.
+        guard FeatureFlags.backendSync else { return }
+
+        let payload = SubscriptionEventPayload(
+            user_id: SupabaseClient.shared.currentSession?.userId,
+            event_type: eventType,
+            product_id: productID,
+            original_purchase_date: originalPurchaseDate,
+            expires_date: expiresDate,
+            is_in_trial_period: isInTrialPeriod,
+            device_id: deviceIDProvider()
+        )
+        // No PII (no email, no Apple ID). user_id is anonymous Supabase
+        // UUID; device_id is the random per-device anon UUID.
+        syncService.enqueue(
+            tableName: "subscription_events",
+            operation: "upsert",
+            payload: payload,
+            context: syncModelContext
+        )
+        logger.info("emitted subscription_events row: event_type=\(eventType, privacy: .public) product_id=\(productID, privacy: .public) is_in_trial=\(isInTrialPeriod, privacy: .public) device_id=\(self.deviceIDProvider(), privacy: .private)")
+    }
+}
+
+/// Wire payload for subscription_events. snake_case so PostgREST maps
+/// directly to the column names.
+struct SubscriptionEventPayload: Encodable {
+    let user_id: String?
+    let event_type: String
+    let product_id: String
+    let original_purchase_date: Date?
+    let expires_date: Date?
+    let is_in_trial_period: Bool
+    let device_id: String
+}
